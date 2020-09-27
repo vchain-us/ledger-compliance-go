@@ -1,0 +1,124 @@
+package grpcclient
+
+import (
+	"fmt"
+	"os"
+	"sync"
+	"time"
+
+	"context"
+
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/vchain-us/ledger-compliance-go/schema"
+	"google.golang.org/grpc/keepalive"
+
+	"github.com/codenotary/immudb/pkg/client/cache"
+	"github.com/codenotary/immudb/pkg/client/timestamp"
+	"github.com/codenotary/immudb/pkg/logger"
+	"google.golang.org/grpc"
+
+	immuschema "github.com/codenotary/immudb/pkg/api/schema"
+	immuclient "github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/client/rootservice"
+)
+
+// ImmuClient ...
+type LcClientIf interface {
+	Set(ctx context.Context, key []byte, value []byte) (*immuschema.Index, error)
+	Get(ctx context.Context, key []byte) (*immuschema.StructuredItem, error)
+	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
+	SafeGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuclient.VerifiedItem, error)
+}
+
+type LcClient struct {
+	Dir              string
+	Host             string
+	Port             int
+	ApiKey           string
+	DialOptions      []grpc.DialOption
+	Logger           logger.Logger
+	ClientConn       *grpc.ClientConn
+	ServiceClient    schema.LcServiceClient
+	RootService      rootservice.RootService
+	TimestampService immuclient.TimestampService
+	sync.RWMutex
+}
+
+func NewLcClient(setters ...LcClientOption) *LcClient {
+	dt, _ := timestamp.NewTdefault()
+
+	// Default Options
+	cli := &LcClient{
+		Dir:              "",
+		Host:             "localhost",
+		Port:             3324,
+		ApiKey:           "notProvided",
+		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
+		TimestampService: immuclient.NewTimestampService(dt),
+	}
+
+	cli.DialOptions = []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                20 * time.Second,
+			Timeout:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
+	}
+
+	for _, setter := range setters {
+		setter(cli)
+	}
+	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
+		cli.ConnectionCheckerInterceptor(),
+		cli.ApiKeySetterInterceptor())))
+
+	return cli
+}
+
+func (c *LcClient) Connect() (err error) {
+	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
+	if err != nil {
+		c.Logger.Errorf("fail to dial: %v", err)
+		return err
+	}
+
+	c.ServiceClient = schema.NewLcServiceClient(c.ClientConn)
+
+	uuidPrv := NewLcUUIDProvider(c.ServiceClient)
+	rootPrv := NewLcRootProvider(c.ServiceClient)
+	c.RootService, err = rootservice.NewRootService(cache.NewFileCache(c.Dir), c.Logger, rootPrv, uuidPrv)
+	if err != nil {
+		c.Logger.Errorf("fail to instantiate root service: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (c *LcClient) Disonnect() (err error) {
+	c.ServiceClient = nil
+	return c.ClientConn.Close()
+}
+
+func (c *LcClient) NewSKV(key []byte, value []byte) *immuschema.StructuredKeyValue {
+	return &immuschema.StructuredKeyValue{
+		Key: key,
+		Value: &immuschema.Content{
+			Timestamp: uint64(c.TimestampService.GetTime().Unix()),
+			Payload:   value,
+		},
+	}
+}
+
+func (c *LcClient) verifyAndSetRoot(result *immuschema.Proof, root *immuschema.Root) (bool, error) {
+	verified := result.Verify(result.Leaf, *root)
+	var err error
+	if verified {
+		toCache := immuschema.NewRoot()
+		toCache.SetIndex(result.Index)
+		toCache.SetRoot(result.Root)
+		err = c.RootService.SetRoot(toCache, c.ApiKey)
+	}
+	return verified, err
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "schema.proto";
+import "google/protobuf/empty.proto";
+
+package lc.schema;
+
+option go_package = "github.com/vchain-us/ledger-compliance/server/schema";
+
+service LcService {
+	rpc Set (immudb.schema.KeyValue) returns (immudb.schema.Index){};
+	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
+	rpc SafeSet(immudb.schema.SafeSetOptions) returns (immudb.schema.Proof){}
+	rpc SafeGet(immudb.schema.SafeGetOptions) returns (immudb.schema.SafeItem){};
+	rpc CurrentRoot(google.protobuf.Empty) returns (immudb.schema.Root) {};
+	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
+}
