@@ -20,7 +20,7 @@ coverage.txt
 
 # Local .env files
 .env.*.local
-
+.root*
 # MacOS-specific files
 .DS_Store
 ._.DS_Store
