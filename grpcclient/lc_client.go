@@ -51,6 +51,7 @@ type LcClient struct {
 	Host             string
 	Port             int
 	ApiKey           string
+	PluginType       string
 	DialOptions      []grpc.DialOption
 	Logger           logger.Logger
 	ClientConn       *grpc.ClientConn
@@ -69,6 +70,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Host:             "localhost",
 		Port:             3324,
 		ApiKey:           "notProvided",
+		PluginType:       "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 	}
@@ -87,7 +89,8 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	}
 	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
 		cli.ConnectionCheckerInterceptor(),
-		cli.ApiKeySetterInterceptor())))
+		cli.ApiKeySetterInterceptor(),
+		cli.PluginTypeSetterInterceptor())))
 
 	return cli
 }

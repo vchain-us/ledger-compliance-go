@@ -85,3 +85,9 @@ func TimestampService(timestampService immuclient.TimestampService) LcClientOpti
 		args.TimestampService = timestampService
 	}
 }
+
+func PluginType(pluginType string) LcClientOption {
+	return func(args *LcClient) {
+		args.PluginType = pluginType
+	}
+}
