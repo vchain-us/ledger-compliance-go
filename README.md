@@ -14,7 +14,6 @@
 - [Introduction](#introduction)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Supported Versions](#supported-versions)
 - [Quickstart](#quickstart)
 - [Step by step guide](#step-by-step-guide)
     * [Creating a Client](#creating-a-client)
@@ -24,9 +23,10 @@
 
 ## Introduction
 
-ledger compliance GO sdk implements a [grpc] ledger compliance client.
-Latest validated ledger state may be keep in the local filesystem when using default `Cache` implementation,
-please read [immudb research paper] for details of how immutability is ensured by [immudb].
+Ledger compliance GO sdk implements a [grpc] ledger compliance client.
+Backed by [immudb](https://github.com/codenotary/immudb) it uses several common part that are implemented in the immudb go sdk, but simplifying it more.
+Latest validated ledger state may be keep in the local filesystem when using default [cache](https://github.com/codenotary/immudb/blob/master/pkg/client/cache/file_cache.go) implementation,
+Please read [immudb research paper] for details of how immutability is ensured by [immudb].
 
 [grpc]: https://grpc.io/
 [immudb research paper]: https://immudb.io/
@@ -39,19 +39,18 @@ please read [immudb research paper] for details of how immutability is ensured b
 go get github.com/vchain-us/ledger-compliance-go
 ```
 
-## Supported Versions
-
 ## Quickstart
 
 Example can be found in the  [example folder](/examples)
 
 ## Step by step guide
 
+To obtain a valid apikey please register on ledger compliance frontend, create a new ledger and retrieve the apikey after following creation wizard.
+
 ### Creating a Client
 
 The following code snippets shows how to create a client.
 
-Using default configuration:
 ```go
 client := sdk.NewLcClient(sdk.ApiKey("myApiKey"), sdk.Host("localhost"), sdk.Port(3324))
 err := client.Connect()
@@ -67,7 +66,7 @@ if err!=nil{
 
 ### Traditional read and write
 
-immudb provides read and write operations that behave as a traditional
+Ledger compliance provides read and write operations that behave as a traditional
 key-value store i.e. no cryptographic verification is done. This operations
 may be used when validations can be post-poned:
 
@@ -84,7 +83,7 @@ if err!=nil{
 
 ### Verified or Safe read and write
 
-The sdk provides built-in cryptographic verification for any entry. The client
+Ledger compliance provides built-in cryptographic verification for any entry. The client
 implements the mathematical validations while the application uses as a traditional
 read or write operation:
 
