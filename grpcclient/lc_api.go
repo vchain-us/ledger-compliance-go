@@ -20,11 +20,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"time"
+
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
-	"time"
 )
 
 // Set ...

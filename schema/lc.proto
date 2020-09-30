@@ -18,6 +18,28 @@ message ReportOptions{
 	immudb.schema.Signature signature = 2;
 }
 
+message DataValue {
+    string name = 1;
+    string type = 2;
+    bytes value = 3;
+}
+
+message Data {
+    string key = 1;
+    int64 msgID = 2;
+    string dbName = 3;
+    string tableName = 4;
+    string operation = 5;
+    bytes data = 6;
+}
+
+message Response {
+    int32 status = 1;
+    string msg = 2;
+	int64 msgID = 3;
+}
+
+
 service LcService {
 	rpc Set (immudb.schema.KeyValue) returns (immudb.schema.Index){};
 	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
@@ -27,4 +49,5 @@ service LcService {
 	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
 	rpc History(immudb.schema.Key) returns (immudb.schema.ItemList){};
 	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
+	rpc SendData (stream Data) returns (stream Response);
 }
