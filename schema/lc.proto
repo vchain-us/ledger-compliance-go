@@ -7,6 +7,17 @@ package lc.schema;
 
 option go_package = "github.com/vchain-us/ledger-compliance/server/schema";
 
+message TamperReport {
+	uint64 index = 1;
+	bytes key = 2;
+	bytes root = 3;
+}
+
+message ReportOptions{
+	TamperReport payload = 1;
+	immudb.schema.Signature signature = 2;
+}
+
 service LcService {
 	rpc Set (immudb.schema.KeyValue) returns (immudb.schema.Index){};
 	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
@@ -14,4 +25,5 @@ service LcService {
 	rpc SafeGet(immudb.schema.SafeGetOptions) returns (immudb.schema.SafeItem){};
 	rpc CurrentRoot(google.protobuf.Empty) returns (immudb.schema.Root) {};
 	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
+	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
 }

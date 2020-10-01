@@ -25,6 +25,7 @@ type LcServiceClient interface {
 	SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error)
 	CurrentRoot(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.Root, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
+	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type lcServiceClient struct {
@@ -89,6 +90,15 @@ func (c *lcServiceClient) Health(ctx context.Context, in *empty.Empty, opts ...g
 	return out, nil
 }
 
+func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ReportTamper", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LcServiceServer is the server API for LcService service.
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
@@ -99,6 +109,7 @@ type LcServiceServer interface {
 	SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error)
 	CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
+	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -123,6 +134,9 @@ func (*UnimplementedLcServiceServer) CurrentRoot(context.Context, *empty.Empty) 
 }
 func (*UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
+}
+func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
 }
 func (*UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
 
@@ -238,6 +252,24 @@ func _LcService_Health_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_ReportTamper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ReportTamper(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ReportTamper",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ReportTamper(ctx, req.(*ReportOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _LcService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lc.schema.LcService",
 	HandlerType: (*LcServiceServer)(nil),
@@ -265,6 +297,10 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Health",
 			Handler:    _LcService_Health_Handler,
+		},
+		{
+			MethodName: "ReportTamper",
+			Handler:    _LcService_ReportTamper_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
