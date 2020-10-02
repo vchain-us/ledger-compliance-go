@@ -44,6 +44,8 @@ type LcClientIf interface {
 	Get(ctx context.Context, key []byte) (*immuschema.StructuredItem, error)
 	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
 	SafeGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuclient.VerifiedItem, error)
+
+	Connect() (err error)
 }
 
 type LcClient struct {
@@ -51,7 +53,6 @@ type LcClient struct {
 	Host             string
 	Port             int
 	ApiKey           string
-	PluginType       string
 	DialOptions      []grpc.DialOption
 	Logger           logger.Logger
 	ClientConn       *grpc.ClientConn
@@ -70,7 +71,6 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Host:             "localhost",
 		Port:             3324,
 		ApiKey:           "notProvided",
-		PluginType:       "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 	}
@@ -89,8 +89,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	}
 	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
 		cli.ConnectionCheckerInterceptor(),
-		cli.ApiKeySetterInterceptor(),
-		cli.PluginTypeSetterInterceptor())))
+		cli.ApiKeySetterInterceptor())))
 
 	return cli
 }
