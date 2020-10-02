@@ -30,6 +30,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/codenotary/immudb v0.0.0-20200927082347-0c8e8ad49566 h1:xwqcPMju+HBDw9xgi5V4MCQBFi3MSBETmiwjWAL/CV8=
 github.com/codenotary/immudb v0.0.0-20200927082347-0c8e8ad49566/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
+github.com/codenotary/immudb v0.0.0-20201001145429-8f0320a2cbab h1:iLvJ8c+JmTzaLQHO+y8FAI7mVB8Cgb/9W/JeJFoTbtQ=
+github.com/codenotary/immudb v0.0.0-20201001145429-8f0320a2cbab/go.mod h1:eplq5VZWdNCP4pRZTGVE9ellhnfd37SXAEeUfeEtw+U=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656 h1:Rp8hZs7t0fNLlfLj9PzEmW/W7X+nSp0vpu5CB0ba0jM=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656/go.mod h1:RkIGSuQ3nHZbE0rH21aYxyqlrI/2eICNOOIanDbzZPg=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=

@@ -11,4 +11,4 @@ require (
 	google.golang.org/protobuf v1.23.0
 )
 
-replace github.com/codenotary/immudb v0.8.0 => github.com/codenotary/immudb v0.0.0-20200927082347-0c8e8ad49566
+replace github.com/codenotary/immudb v0.8.0 => github.com/codenotary/immudb v0.0.0-20201001145429-8f0320a2cbab
