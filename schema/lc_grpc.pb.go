@@ -25,6 +25,7 @@ type LcServiceClient interface {
 	SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error)
 	CurrentRoot(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.Root, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
+	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -90,6 +91,15 @@ func (c *lcServiceClient) Health(ctx context.Context, in *empty.Empty, opts ...g
 	return out, nil
 }
 
+func (c *lcServiceClient) History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error) {
+	out := new(schema.ItemList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ReportTamper", in, out, opts...)
@@ -109,6 +119,7 @@ type LcServiceServer interface {
 	SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error)
 	CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
+	History(context.Context, *schema.Key) (*schema.ItemList, error)
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	mustEmbedUnimplementedLcServiceServer()
 }
@@ -134,6 +145,9 @@ func (*UnimplementedLcServiceServer) CurrentRoot(context.Context, *empty.Empty) 
 }
 func (*UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
+}
+func (*UnimplementedLcServiceServer) History(context.Context, *schema.Key) (*schema.ItemList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
 }
 func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
@@ -252,6 +266,24 @@ func _LcService_Health_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_History_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Key)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).History(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/History",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).History(ctx, req.(*schema.Key))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LcService_ReportTamper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReportOptions)
 	if err := dec(in); err != nil {
@@ -297,6 +329,10 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Health",
 			Handler:    _LcService_Health_Handler,
+		},
+		{
+			MethodName: "History",
+			Handler:    _LcService_History_Handler,
 		},
 		{
 			MethodName: "ReportTamper",
