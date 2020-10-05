@@ -36,7 +36,9 @@ message Data {
 message Response {
     int32 status = 1;
     string msg = 2;
-	int64 msgID = 3;
+    int64 msgID = 3;
+    immudb.schema.Proof proof = 4;
+    immudb.schema.Root root = 5;
 }
 
 
