@@ -27,6 +27,7 @@ type LcServiceClient interface {
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
 	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
+	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 }
 
 type lcServiceClient struct {
@@ -109,6 +110,37 @@ func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, o
 	return out, nil
 }
 
+func (c *lcServiceClient) SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_LcService_serviceDesc.Streams[0], "/lc.schema.LcService/SendData", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceSendDataClient{stream}
+	return x, nil
+}
+
+type LcService_SendDataClient interface {
+	Send(*Data) error
+	Recv() (*Response, error)
+	grpc.ClientStream
+}
+
+type lcServiceSendDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceSendDataClient) Send(m *Data) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *lcServiceSendDataClient) Recv() (*Response, error) {
+	m := new(Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LcServiceServer is the server API for LcService service.
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
@@ -121,6 +153,7 @@ type LcServiceServer interface {
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
 	History(context.Context, *schema.Key) (*schema.ItemList, error)
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
+	SendData(LcService_SendDataServer) error
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -151,6 +184,9 @@ func (*UnimplementedLcServiceServer) History(context.Context, *schema.Key) (*sch
 }
 func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
+}
+func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
 func (*UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
 
@@ -302,6 +338,32 @@ func _LcService_ReportTamper_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_SendData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LcServiceServer).SendData(&lcServiceSendDataServer{stream})
+}
+
+type LcService_SendDataServer interface {
+	Send(*Response) error
+	Recv() (*Data, error)
+	grpc.ServerStream
+}
+
+type lcServiceSendDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceSendDataServer) Send(m *Response) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *lcServiceSendDataServer) Recv() (*Data, error) {
+	m := new(Data)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _LcService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lc.schema.LcService",
 	HandlerType: (*LcServiceServer)(nil),
@@ -339,6 +401,13 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_ReportTamper_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SendData",
+			Handler:       _LcService_SendData_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "lc.proto",
 }
