@@ -43,13 +43,22 @@ message Response {
 
 
 service LcService {
+	// immudb primitives
+	// setters and getters
 	rpc Set (immudb.schema.KeyValue) returns (immudb.schema.Index){};
 	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
 	rpc SafeSet(immudb.schema.SafeSetOptions) returns (immudb.schema.Proof){}
 	rpc SafeGet(immudb.schema.SafeGetOptions) returns (immudb.schema.SafeItem){};
+	// scanners
+	rpc Scan(immudb.schema.ScanOptions) returns (immudb.schema.ItemList){};
+	rpc History(immudb.schema.Key) returns (immudb.schema.ItemList){};
+	rpc ZAdd (immudb.schema.ZAddOptions) returns (immudb.schema.Index){};
+	rpc SafeZAdd (immudb.schema.SafeZAddOptions) returns (immudb.schema.Proof){};
+	rpc ZScan (immudb.schema.ZScanOptions) returns (immudb.schema.ItemList){};
+	// mixed
 	rpc CurrentRoot(google.protobuf.Empty) returns (immudb.schema.Root) {};
 	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
-	rpc History(immudb.schema.Key) returns (immudb.schema.ItemList){};
+	// ledger compliance extensions
 	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
 	rpc SendData (stream Data) returns (stream Response);
 }
