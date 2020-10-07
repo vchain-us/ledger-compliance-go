@@ -19,13 +19,22 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LcServiceClient interface {
+	// immudb primitives
+	// setters and getters
 	Set(ctx context.Context, in *schema.KeyValue, opts ...grpc.CallOption) (*schema.Index, error)
 	Get(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.Item, error)
 	SafeSet(ctx context.Context, in *schema.SafeSetOptions, opts ...grpc.CallOption) (*schema.Proof, error)
 	SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error)
+	// scanners
+	Scan(ctx context.Context, in *schema.ScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
+	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
+	ZAdd(ctx context.Context, in *schema.ZAddOptions, opts ...grpc.CallOption) (*schema.Index, error)
+	SafeZAdd(ctx context.Context, in *schema.SafeZAddOptions, opts ...grpc.CallOption) (*schema.Proof, error)
+	ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
+	// mixed
 	CurrentRoot(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.Root, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
-	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
+	// ledger compliance extensions
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 }
@@ -74,6 +83,51 @@ func (c *lcServiceClient) SafeGet(ctx context.Context, in *schema.SafeGetOptions
 	return out, nil
 }
 
+func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error) {
+	out := new(schema.ItemList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Scan", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error) {
+	out := new(schema.ItemList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) ZAdd(ctx context.Context, in *schema.ZAddOptions, opts ...grpc.CallOption) (*schema.Index, error) {
+	out := new(schema.Index)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZAdd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) SafeZAdd(ctx context.Context, in *schema.SafeZAddOptions, opts ...grpc.CallOption) (*schema.Proof, error) {
+	out := new(schema.Proof)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SafeZAdd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error) {
+	out := new(schema.ItemList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScan", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *lcServiceClient) CurrentRoot(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.Root, error) {
 	out := new(schema.Root)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentRoot", in, out, opts...)
@@ -86,15 +140,6 @@ func (c *lcServiceClient) CurrentRoot(ctx context.Context, in *empty.Empty, opts
 func (c *lcServiceClient) Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error) {
 	out := new(schema.HealthResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Health", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error) {
-	out := new(schema.ItemList)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,13 +190,22 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
 type LcServiceServer interface {
+	// immudb primitives
+	// setters and getters
 	Set(context.Context, *schema.KeyValue) (*schema.Index, error)
 	Get(context.Context, *schema.Key) (*schema.Item, error)
 	SafeSet(context.Context, *schema.SafeSetOptions) (*schema.Proof, error)
 	SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error)
+	// scanners
+	Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error)
+	History(context.Context, *schema.Key) (*schema.ItemList, error)
+	ZAdd(context.Context, *schema.ZAddOptions) (*schema.Index, error)
+	SafeZAdd(context.Context, *schema.SafeZAddOptions) (*schema.Proof, error)
+	ZScan(context.Context, *schema.ZScanOptions) (*schema.ItemList, error)
+	// mixed
 	CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
-	History(context.Context, *schema.Key) (*schema.ItemList, error)
+	// ledger compliance extensions
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	SendData(LcService_SendDataServer) error
 	mustEmbedUnimplementedLcServiceServer()
@@ -173,14 +227,26 @@ func (*UnimplementedLcServiceServer) SafeSet(context.Context, *schema.SafeSetOpt
 func (*UnimplementedLcServiceServer) SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SafeGet not implemented")
 }
+func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
+}
+func (*UnimplementedLcServiceServer) History(context.Context, *schema.Key) (*schema.ItemList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
+}
+func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddOptions) (*schema.Index, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ZAdd not implemented")
+}
+func (*UnimplementedLcServiceServer) SafeZAdd(context.Context, *schema.SafeZAddOptions) (*schema.Proof, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SafeZAdd not implemented")
+}
+func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanOptions) (*schema.ItemList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
+}
 func (*UnimplementedLcServiceServer) CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentRoot not implemented")
 }
 func (*UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
-}
-func (*UnimplementedLcServiceServer) History(context.Context, *schema.Key) (*schema.ItemList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
 }
 func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
@@ -266,6 +332,96 @@ func _LcService_SafeGet_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_Scan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.ScanOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Scan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Scan",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Scan(ctx, req.(*schema.ScanOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_History_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Key)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).History(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/History",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).History(ctx, req.(*schema.Key))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_ZAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.ZAddOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ZAdd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ZAdd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ZAdd(ctx, req.(*schema.ZAddOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_SafeZAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.SafeZAddOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).SafeZAdd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/SafeZAdd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).SafeZAdd(ctx, req.(*schema.SafeZAddOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_ZScan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.ZScanOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ZScan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ZScan",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ZScan(ctx, req.(*schema.ZScanOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LcService_CurrentRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
@@ -298,24 +454,6 @@ func _LcService_Health_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).Health(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_History_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.Key)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).History(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/History",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).History(ctx, req.(*schema.Key))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -385,16 +523,32 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_SafeGet_Handler,
 		},
 		{
+			MethodName: "Scan",
+			Handler:    _LcService_Scan_Handler,
+		},
+		{
+			MethodName: "History",
+			Handler:    _LcService_History_Handler,
+		},
+		{
+			MethodName: "ZAdd",
+			Handler:    _LcService_ZAdd_Handler,
+		},
+		{
+			MethodName: "SafeZAdd",
+			Handler:    _LcService_SafeZAdd_Handler,
+		},
+		{
+			MethodName: "ZScan",
+			Handler:    _LcService_ZScan_Handler,
+		},
+		{
 			MethodName: "CurrentRoot",
 			Handler:    _LcService_CurrentRoot_Handler,
 		},
 		{
 			MethodName: "Health",
 			Handler:    _LcService_Health_Handler,
-		},
-		{
-			MethodName: "History",
-			Handler:    _LcService_History_Handler,
 		},
 		{
 			MethodName: "ReportTamper",

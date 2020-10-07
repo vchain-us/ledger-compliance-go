@@ -43,7 +43,12 @@ type LcClientIf interface {
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.Index, error)
 	Get(ctx context.Context, key []byte) (*immuschema.StructuredItem, error)
 	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
-	SafeGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuclient.VerifiedItem, error)
+	SafeGet(ctx context.Context, key []byte) (*immuclient.VerifiedItem, error)
+	Scan(ctx context.Context, prefix []byte) (*immuschema.StructuredItemList, error)
+	History(ctx context.Context, key []byte) (sl *immuschema.StructuredItemList, err error)
+	ZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuschema.Index, error)
+	SafeZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuclient.VerifiedIndex, error)
+	ZScan(ctx context.Context, set []byte) (*immuschema.StructuredItemList, error)
 
 	Connect() (err error)
 }
@@ -114,7 +119,7 @@ func (c *LcClient) Connect() (err error) {
 	return nil
 }
 
-func (c *LcClient) Disonnect() (err error) {
+func (c *LcClient) Disconnect() (err error) {
 	c.ServiceClient = nil
 	return c.ClientConn.Close()
 }
