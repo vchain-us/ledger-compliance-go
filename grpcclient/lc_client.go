@@ -68,7 +68,7 @@ type LcClient struct {
 }
 
 func NewLcClient(setters ...LcClientOption) *LcClient {
-	dt, _ := timestamp.NewTdefault()
+	dt, _ := timestamp.NewDefaultTimestamp()
 
 	// Default Options
 	cli := &LcClient{
