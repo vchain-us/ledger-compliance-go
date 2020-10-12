@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	client := sdk.NewLcClient(sdk.ApiKey("xigzeuliczrfvpatbkonanmdxiehdhkenyjp"), sdk.Host("localhost"), sdk.Port(3324))
+	client := sdk.NewLcClient(sdk.ApiKey("mjggmltbbjhldfgzqfnxudxukhvhsoycupmv"), sdk.Host("localhost"), sdk.Port(3324))
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)

@@ -17,6 +17,9 @@ limitations under the License.
 package grpcclient
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -58,6 +61,7 @@ type LcClient struct {
 	Host             string
 	Port             int
 	ApiKey           string
+	signerId         string
 	DialOptions      []grpc.DialOption
 	Logger           logger.Logger
 	ClientConn       *grpc.ClientConn
@@ -75,7 +79,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Dir:              "",
 		Host:             "localhost",
 		Port:             3324,
-		ApiKey:           "notProvided",
+		ApiKey:           "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 	}
@@ -100,6 +104,9 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 }
 
 func (c *LcClient) Connect() (err error) {
+	if c.ApiKey == "" {
+		return errors.New("api key not provided")
+	}
 	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
 	if err != nil {
 		c.Logger.Errorf("fail to dial: %v", err)
@@ -116,6 +123,9 @@ func (c *LcClient) Connect() (err error) {
 		return err
 	}
 
+	hasher := sha256.New()
+	hasher.Write([]byte(c.ApiKey))
+	c.signerId = base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 	return nil
 }
 
