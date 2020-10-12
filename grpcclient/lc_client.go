@@ -57,10 +57,12 @@ type LcClientIf interface {
 }
 
 type LcClient struct {
-	Dir              string
-	Host             string
-	Port             int
-	ApiKey           string
+	Dir          string
+	Host         string
+	Port         int
+	ApiKey       string
+	PluginPrefix string
+
 	signerId         string
 	DialOptions      []grpc.DialOption
 	Logger           logger.Logger
