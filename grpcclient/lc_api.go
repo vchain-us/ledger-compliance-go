@@ -20,17 +20,16 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/codenotary/immudb/pkg/store"
-	"time"
-
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
+	"github.com/codenotary/immudb/pkg/store"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )
 
 // Set ...
 func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immuschema.Index, error) {
+	key = c.addLedgerPrefix(key)
 	skv := c.NewSKV(key, value)
 	kv, err := skv.ToKV()
 	if err != nil {
@@ -42,7 +41,8 @@ func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immusche
 // Get ...
 func (c *LcClient) Get(ctx context.Context, key []byte) (si *immuschema.StructuredItem, err error) {
 	var item *immuschema.Item
-	if item, err = c.ServiceClient.Get(ctx, &immuschema.Key{Key: key}); err != nil {
+	key = c.addLedgerPrefix(key)
+	if item, err = c.ServiceClient.Get(ctx, &immuschema.Key{Key: c.stripLedgerPrefix(key)}); err != nil {
 		return nil, err
 	}
 	return item.ToSItem()
@@ -50,10 +50,9 @@ func (c *LcClient) Get(ctx context.Context, key []byte) (si *immuschema.Structur
 
 // SafeSet ...
 func (c *LcClient) SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error) {
-	start := time.Now()
 	c.Lock()
 	defer c.Unlock()
-
+	key = c.addLedgerPrefix(key)
 	root, err := c.RootService.GetRoot(ctx, c.ApiKey)
 	if err != nil {
 		return nil, err
@@ -107,8 +106,6 @@ func (c *LcClient) SafeSet(ctx context.Context, key []byte, value []byte) (*immu
 		return nil, err
 	}
 
-	c.Logger.Debugf("safeset finished in %s", time.Since(start))
-
 	return &immuclient.VerifiedIndex{
 			Index:    result.Index,
 			Verified: verified,
@@ -120,6 +117,8 @@ func (c *LcClient) SafeSet(ctx context.Context, key []byte, value []byte) (*immu
 func (c *LcClient) SafeGet(ctx context.Context, key []byte) (vi *immuclient.VerifiedItem, err error) {
 	c.Lock()
 	defer c.Unlock()
+
+	key = c.addLedgerPrefix(key)
 
 	root, err := c.RootService.GetRoot(ctx, c.ApiKey)
 	if err != nil {
@@ -159,7 +158,7 @@ func (c *LcClient) SafeGet(ctx context.Context, key []byte) (vi *immuclient.Veri
 		return nil, err
 	}
 	return &immuclient.VerifiedItem{
-			Key:      sitem.Item.GetKey(),
+			Key:      c.stripLedgerPrefix(sitem.Item.GetKey()),
 			Value:    sitem.Item.Value.Payload,
 			Index:    sitem.Item.GetIndex(),
 			Time:     sitem.Item.Value.Timestamp,
@@ -170,11 +169,13 @@ func (c *LcClient) SafeGet(ctx context.Context, key []byte) (vi *immuclient.Veri
 
 // Scan ...
 func (c *LcClient) Scan(ctx context.Context, prefix []byte) (*immuschema.StructuredItemList, error) {
+	prefix = c.addLedgerPrefix(prefix)
 	list, err := c.ServiceClient.Scan(ctx, &immuschema.ScanOptions{Prefix: prefix})
 	if err != nil {
 		return nil, err
 	}
-	return list.ToSItemList()
+	l, err := list.ToSItemList()
+	return c.stripLedgerPrefixList(l), err
 }
 
 // ZScan ...
@@ -183,11 +184,13 @@ func (c *LcClient) ZScan(ctx context.Context, set []byte) (*immuschema.Structure
 	if err != nil {
 		return nil, err
 	}
-	return list.ToSItemList()
+	l, err := list.ToSItemList()
+	return c.stripLedgerPrefixList(l), err
 }
 
 // History ...
 func (c *LcClient) History(ctx context.Context, key []byte) (sl *immuschema.StructuredItemList, err error) {
+	key = c.addLedgerPrefix(key)
 	list, err := c.ServiceClient.History(ctx, &immuschema.Key{
 		Key: key,
 	})
@@ -198,11 +201,12 @@ func (c *LcClient) History(ctx context.Context, key []byte) (sl *immuschema.Stru
 	if err != nil {
 		return nil, err
 	}
-	return sl, err
+	return c.stripLedgerPrefixList(sl), err
 }
 
 // ZAdd ...
 func (c *LcClient) ZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuschema.Index, error) {
+	key = c.addLedgerPrefix(key)
 	result, err := c.ServiceClient.ZAdd(ctx, &immuschema.ZAddOptions{
 		Set:   set,
 		Score: score,
