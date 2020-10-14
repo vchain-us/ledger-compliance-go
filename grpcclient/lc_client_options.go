@@ -50,12 +50,6 @@ func ApiKey(apiKey string) LcClientOption {
 	}
 }
 
-func PluginPrefix(pluginPrefix string) LcClientOption {
-	return func(args *LcClient) {
-		args.PluginPrefix = pluginPrefix
-	}
-}
-
 func DialOptions(dopts []grpc.DialOption) LcClientOption {
 	return func(args *LcClient) {
 		args.DialOptions = dopts
