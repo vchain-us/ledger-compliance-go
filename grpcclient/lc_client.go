@@ -17,8 +17,6 @@ limitations under the License.
 package grpcclient
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -57,13 +55,10 @@ type LcClientIf interface {
 }
 
 type LcClient struct {
-	Dir          string
-	Host         string
-	Port         int
-	ApiKey       string
-	PluginPrefix string
-
-	signerId         string
+	Dir              string
+	Host             string
+	Port             int
+	ApiKey           string
 	DialOptions      []grpc.DialOption
 	Logger           logger.Logger
 	ClientConn       *grpc.ClientConn
@@ -125,9 +120,6 @@ func (c *LcClient) Connect() (err error) {
 		return err
 	}
 
-	hasher := sha256.New()
-	hasher.Write([]byte(c.ApiKey))
-	c.signerId = base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 	return nil
 }
 
