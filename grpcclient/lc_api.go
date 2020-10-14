@@ -46,6 +46,26 @@ func (c *LcClient) Get(ctx context.Context, key []byte) (si *immuschema.Structur
 	return item.ToSItem()
 }
 
+// SetBatch ...
+func (c *LcClient) SetBatch(ctx context.Context, in *immuschema.KVList) (*immuschema.Index, error) {
+	slist := c.NewSKVList(in)
+	kvl, err := slist.ToKVList()
+	if err != nil {
+		return nil, err
+	}
+	result, err := c.ServiceClient.SetBatch(ctx, kvl)
+	return result, err
+}
+
+// GetBatch ...
+func (c *LcClient) GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error) {
+	list, err := c.ServiceClient.GetBatch(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return list.ToSItemList()
+}
+
 // SafeSet ...
 func (c *LcClient) SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error) {
 	c.Lock()

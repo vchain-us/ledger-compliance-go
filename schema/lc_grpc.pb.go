@@ -25,6 +25,9 @@ type LcServiceClient interface {
 	Get(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.Item, error)
 	SafeSet(ctx context.Context, in *schema.SafeSetOptions, opts ...grpc.CallOption) (*schema.Proof, error)
 	SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error)
+	// batch
+	SetBatch(ctx context.Context, in *schema.KVList, opts ...grpc.CallOption) (*schema.Index, error)
+	GetBatch(ctx context.Context, in *schema.KeyList, opts ...grpc.CallOption) (*schema.ItemList, error)
 	// scanners
 	Scan(ctx context.Context, in *schema.ScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
 	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
@@ -77,6 +80,24 @@ func (c *lcServiceClient) SafeSet(ctx context.Context, in *schema.SafeSetOptions
 func (c *lcServiceClient) SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error) {
 	out := new(schema.SafeItem)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SafeGet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) SetBatch(ctx context.Context, in *schema.KVList, opts ...grpc.CallOption) (*schema.Index, error) {
+	out := new(schema.Index)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetBatch", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) GetBatch(ctx context.Context, in *schema.KeyList, opts ...grpc.CallOption) (*schema.ItemList, error) {
+	out := new(schema.ItemList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/GetBatch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +217,9 @@ type LcServiceServer interface {
 	Get(context.Context, *schema.Key) (*schema.Item, error)
 	SafeSet(context.Context, *schema.SafeSetOptions) (*schema.Proof, error)
 	SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error)
+	// batch
+	SetBatch(context.Context, *schema.KVList) (*schema.Index, error)
+	GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error)
 	// scanners
 	Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error)
 	History(context.Context, *schema.Key) (*schema.ItemList, error)
@@ -226,6 +250,12 @@ func (*UnimplementedLcServiceServer) SafeSet(context.Context, *schema.SafeSetOpt
 }
 func (*UnimplementedLcServiceServer) SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SafeGet not implemented")
+}
+func (*UnimplementedLcServiceServer) SetBatch(context.Context, *schema.KVList) (*schema.Index, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetBatch not implemented")
+}
+func (*UnimplementedLcServiceServer) GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBatch not implemented")
 }
 func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
@@ -328,6 +358,42 @@ func _LcService_SafeGet_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).SafeGet(ctx, req.(*schema.SafeGetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_SetBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.KVList)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).SetBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/SetBatch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).SetBatch(ctx, req.(*schema.KVList))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_GetBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.KeyList)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).GetBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/GetBatch",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).GetBatch(ctx, req.(*schema.KeyList))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -521,6 +587,14 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SafeGet",
 			Handler:    _LcService_SafeGet_Handler,
+		},
+		{
+			MethodName: "SetBatch",
+			Handler:    _LcService_SetBatch_Handler,
+		},
+		{
+			MethodName: "GetBatch",
+			Handler:    _LcService_GetBatch_Handler,
 		},
 		{
 			MethodName: "Scan",
