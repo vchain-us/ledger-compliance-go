@@ -45,6 +45,8 @@ type LcClientIf interface {
 	Get(ctx context.Context, key []byte) (*immuschema.StructuredItem, error)
 	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
 	SafeGet(ctx context.Context, key []byte) (*immuclient.VerifiedItem, error)
+	SetBatch(ctx context.Context, in *immuschema.KVList) (*immuschema.Index, error)
+	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
 	Scan(ctx context.Context, prefix []byte) (*immuschema.StructuredItemList, error)
 	History(ctx context.Context, key []byte) (sl *immuschema.StructuredItemList, err error)
 	ZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuschema.Index, error)
@@ -148,4 +150,18 @@ func (c *LcClient) verifyAndSetRoot(result *immuschema.Proof, root *immuschema.R
 		err = c.RootService.SetRoot(toCache, c.ApiKey)
 	}
 	return verified, err
+}
+
+func (c *LcClient) NewSKVList(list *immuschema.KVList) *immuschema.SKVList {
+	slist := &immuschema.SKVList{}
+	for _, kv := range list.KVs {
+		slist.SKVs = append(slist.SKVs, &immuschema.StructuredKeyValue{
+			Key: kv.Key,
+			Value: &immuschema.Content{
+				Timestamp: uint64(c.TimestampService.GetTime().Unix()),
+				Payload:   kv.Value,
+			},
+		})
+	}
+	return slist
 }

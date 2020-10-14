@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 	"log"
 )
@@ -29,14 +30,45 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	index, err := client.SafeSet(context.Background(), []byte(`key`), []byte(`val`))
+
+	skv := &immuschema.KVList{
+		KVs: []*immuschema.KeyValue{
+			{
+				Key:   []byte("key1"),
+				Value: []byte("val1"),
+			},
+			{
+				Key:   []byte("key2"),
+				Value: []byte("val3"),
+			},
+			{
+				Key:   []byte("key3"),
+				Value: []byte("val3"),
+			},
+		},
+	}
+	_, err = client.SetBatch(context.Background(), skv)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("index:\t\t%v\nverified:\t%t\n\n", index.Index, index.Verified)
-	item, err := client.SafeGet(context.Background(), []byte(`key`))
+
+	keys := &immuschema.KeyList{
+		Keys: []*immuschema.Key{
+			{
+				Key: []byte("key1"),
+			},
+			{
+				Key: []byte("key2"),
+			},
+			{
+				Key: []byte("key3"),
+			},
+		},
+	}
+	list, err := client.GetBatch(context.Background(), keys)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("My item:\nkey:\t\t%s\nval:\t\t%s\nindex:\t\t%d\ntimestamp:\t%v\nverified:\t%t\n", item.Key, item.Value, item.Index, item.Time, item.Verified)
+
+	fmt.Printf("%v\n", list)
 }
