@@ -218,17 +218,18 @@ func (c *LcClient) History(ctx context.Context, key []byte) (sl *immuschema.Stru
 }
 
 // ZAdd ...
-func (c *LcClient) ZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuschema.Index, error) {
+func (c *LcClient) ZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuschema.Index, error) {
 	result, err := c.ServiceClient.ZAdd(ctx, &immuschema.ZAddOptions{
 		Set:   set,
 		Score: score,
 		Key:   key,
+		Index: index,
 	})
 	return result, err
 }
 
 // SafeZAdd ...
-func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuclient.VerifiedIndex, error) {
+func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuclient.VerifiedIndex, error) {
 	c.Lock()
 	defer c.Unlock()
 	root, err := c.RootService.GetRoot(ctx, c.ApiKey)
@@ -241,6 +242,7 @@ func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key 
 			Set:   set,
 			Score: score,
 			Key:   key,
+			Index: index,
 		},
 		RootIndex: &immuschema.Index{
 			Index: root.GetIndex(),
