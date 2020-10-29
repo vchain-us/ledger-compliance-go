@@ -49,9 +49,13 @@ type LcClientIf interface {
 	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
 	Scan(ctx context.Context, prefix []byte) (*immuschema.StructuredItemList, error)
 	History(ctx context.Context, key []byte) (sl *immuschema.StructuredItemList, err error)
-	ZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuschema.Index, error)
-	SafeZAdd(ctx context.Context, set []byte, score float64, key []byte) (*immuclient.VerifiedIndex, error)
+	ZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuschema.Index, error)
+	SafeZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuclient.VerifiedIndex, error)
 	ZScan(ctx context.Context, set []byte) (*immuschema.StructuredItemList, error)
+
+	ZScanExt(ctx context.Context, set []byte) (*schema.StructuredItemExtList, error)
+	HistoryExt(ctx context.Context, key []byte) (sl *schema.StructuredItemExtList, err error)
+	SafeGetExt(ctx context.Context, key []byte) (*schema.VerifiedItemExt, error)
 
 	Connect() (err error)
 }

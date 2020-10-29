@@ -24,6 +24,7 @@ import (
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/store"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
 )
 
@@ -285,4 +286,77 @@ func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key 
 			Verified: verified,
 		},
 		nil
+}
+
+func (c *LcClient) ZScanExt(ctx context.Context, set []byte) (*schema.StructuredItemExtList, error) {
+	list, err := c.ServiceClient.ZScanExt(ctx, &immuschema.ZScanOptions{Set: set})
+	if err != nil {
+		return nil, err
+	}
+	return list.ToSItemExtList()
+}
+
+func (c *LcClient) HistoryExt(ctx context.Context, key []byte) (*schema.StructuredItemExtList, error) {
+	list, err := c.ServiceClient.HistoryExt(ctx, &immuschema.Key{
+		Key: key,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return list.ToSItemExtList()
+}
+
+func (c *LcClient) SafeGetExt(ctx context.Context, key []byte) (*schema.VerifiedItemExt, error) {
+	c.Lock()
+	defer c.Unlock()
+
+	root, err := c.RootService.GetRoot(ctx, c.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	sgOpts := &immuschema.SafeGetOptions{
+		Key: key,
+		RootIndex: &immuschema.Index{
+			Index: root.GetIndex(),
+		},
+	}
+
+	safeItemExt, err := c.ServiceClient.SafeGetExt(ctx, sgOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	h, err := safeItemExt.Item.Hash()
+	if err != nil {
+		return nil, err
+	}
+	verified := safeItemExt.Item.Proof.Verify(h, *root)
+	if verified {
+		// saving a fresh root
+		tocache := immuschema.NewRoot()
+		tocache.SetIndex(safeItemExt.Item.Proof.At)
+		tocache.SetRoot(safeItemExt.Item.Proof.Root)
+		err = c.RootService.SetRoot(tocache, c.ApiKey)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	sitem, err := safeItemExt.Item.ToSafeSItem()
+	if err != nil {
+		return nil, err
+	}
+
+	return &schema.VerifiedItemExt{
+		Item: &immuclient.VerifiedItem{
+			Key:      sitem.Item.GetKey(),
+			Value:    sitem.Item.Value.Payload,
+			Index:    sitem.Item.GetIndex(),
+			Time:     sitem.Item.Value.Timestamp,
+			Verified: verified,
+		},
+		Timestamp: safeItemExt.Timestamp,
+	}, nil
+
 }
