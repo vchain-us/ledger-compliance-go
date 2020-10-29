@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "schema.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 package lc.schema;
 
@@ -41,17 +42,30 @@ message Response {
     immudb.schema.Root root = 5;
 }
 
+message SafeItemExt {
+	immudb.schema.SafeItem item  = 1;
+	google.protobuf.Timestamp timestamp = 2;
+}
+
+message ItemExt {
+	immudb.schema.Item item = 1;
+	google.protobuf.Timestamp timestamp = 2;
+}
+
+message ItemExtList {
+	repeated ItemExt items = 1;
+}
 
 service LcService {
 	// immudb primitives
 	// setters and getters
 	rpc Set (immudb.schema.KeyValue) returns (immudb.schema.Index){};
 	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
-	rpc SafeSet(immudb.schema.SafeSetOptions) returns (immudb.schema.Proof){}
+	rpc SafeSet(immudb.schema.SafeSetOptions) returns (immudb.schema.Proof){};
 	rpc SafeGet(immudb.schema.SafeGetOptions) returns (immudb.schema.SafeItem){};
 	// batch
-	rpc SetBatch (immudb.schema.KVList) returns (immudb.schema.Index){}
-	rpc GetBatch (immudb.schema.KeyList) returns (immudb.schema.ItemList){}
+	rpc SetBatch (immudb.schema.KVList) returns (immudb.schema.Index){};
+	rpc GetBatch (immudb.schema.KeyList) returns (immudb.schema.ItemList){};
 	// scanners
 	rpc Scan(immudb.schema.ScanOptions) returns (immudb.schema.ItemList){};
 	rpc History(immudb.schema.Key) returns (immudb.schema.ItemList){};
@@ -64,4 +78,9 @@ service LcService {
 	// ledger compliance extensions
 	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
 	rpc SendData (stream Data) returns (stream Response);
+	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
+	rpc SafeGetExt(immudb.schema.SafeGetOptions) returns (SafeItemExt){};
+	rpc ZScanExt (immudb.schema.ZScanOptions) returns (ItemExtList){};
+	rpc HistoryExt(immudb.schema.Key) returns (ItemExtList){};
+
 }

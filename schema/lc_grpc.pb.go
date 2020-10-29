@@ -40,6 +40,10 @@ type LcServiceClient interface {
 	// ledger compliance extensions
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
+	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
+	SafeGetExt(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*SafeItemExt, error)
+	ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ItemExtList, error)
+	HistoryExt(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*ItemExtList, error)
 }
 
 type lcServiceClient struct {
@@ -207,6 +211,33 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 	return m, nil
 }
 
+func (c *lcServiceClient) SafeGetExt(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*SafeItemExt, error) {
+	out := new(SafeItemExt)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SafeGetExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ItemExtList, error) {
+	out := new(ItemExtList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScanExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*ItemExtList, error) {
+	out := new(ItemExtList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/HistoryExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LcServiceServer is the server API for LcService service.
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
@@ -232,6 +263,10 @@ type LcServiceServer interface {
 	// ledger compliance extensions
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	SendData(LcService_SendDataServer) error
+	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
+	SafeGetExt(context.Context, *schema.SafeGetOptions) (*SafeItemExt, error)
+	ZScanExt(context.Context, *schema.ZScanOptions) (*ItemExtList, error)
+	HistoryExt(context.Context, *schema.Key) (*ItemExtList, error)
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -283,6 +318,15 @@ func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOption
 }
 func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
+}
+func (*UnimplementedLcServiceServer) SafeGetExt(context.Context, *schema.SafeGetOptions) (*SafeItemExt, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SafeGetExt not implemented")
+}
+func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanOptions) (*ItemExtList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ZScanExt not implemented")
+}
+func (*UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.Key) (*ItemExtList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HistoryExt not implemented")
 }
 func (*UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
 
@@ -568,6 +612,60 @@ func (x *lcServiceSendDataServer) Recv() (*Data, error) {
 	return m, nil
 }
 
+func _LcService_SafeGetExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.SafeGetOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).SafeGetExt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/SafeGetExt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).SafeGetExt(ctx, req.(*schema.SafeGetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_ZScanExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.ZScanOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ZScanExt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ZScanExt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ZScanExt(ctx, req.(*schema.ZScanOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Key)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).HistoryExt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/HistoryExt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).HistoryExt(ctx, req.(*schema.Key))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _LcService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lc.schema.LcService",
 	HandlerType: (*LcServiceServer)(nil),
@@ -627,6 +725,18 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportTamper",
 			Handler:    _LcService_ReportTamper_Handler,
+		},
+		{
+			MethodName: "SafeGetExt",
+			Handler:    _LcService_SafeGetExt_Handler,
+		},
+		{
+			MethodName: "ZScanExt",
+			Handler:    _LcService_ZScanExt_Handler,
+		},
+		{
+			MethodName: "HistoryExt",
+			Handler:    _LcService_HistoryExt_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
