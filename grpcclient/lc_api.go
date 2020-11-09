@@ -184,8 +184,8 @@ func (c *LcClient) SafeGet(ctx context.Context, key []byte) (vi *immuclient.Veri
 }
 
 // Scan ...
-func (c *LcClient) Scan(ctx context.Context, prefix []byte) (*immuschema.StructuredItemList, error) {
-	list, err := c.ServiceClient.Scan(ctx, &immuschema.ScanOptions{Prefix: prefix})
+func (c *LcClient) Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error) {
+	list, err := c.ServiceClient.Scan(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -194,20 +194,18 @@ func (c *LcClient) Scan(ctx context.Context, prefix []byte) (*immuschema.Structu
 }
 
 // ZScan ...
-func (c *LcClient) ZScan(ctx context.Context, set []byte) (*immuschema.StructuredItemList, error) {
-	list, err := c.ServiceClient.ZScan(ctx, &immuschema.ZScanOptions{Set: set})
+func (c *LcClient) ZScan(ctx context.Context, options *immuschema.ZScanOptions) (*immuschema.ZStructuredItemList, error) {
+	list, err := c.ServiceClient.ZScan(ctx, options)
 	if err != nil {
 		return nil, err
 	}
-	l, err := list.ToSItemList()
+	l, err := list.ToZSItemList()
 	return l, err
 }
 
 // History ...
-func (c *LcClient) History(ctx context.Context, key []byte) (sl *immuschema.StructuredItemList, err error) {
-	list, err := c.ServiceClient.History(ctx, &immuschema.Key{
-		Key: key,
-	})
+func (c *LcClient) History(ctx context.Context, options *immuschema.HistoryOptions) (sl *immuschema.StructuredItemList, err error) {
+	list, err := c.ServiceClient.History(ctx, options)
 	if err != nil {
 		return nil, err
 	}
@@ -219,18 +217,13 @@ func (c *LcClient) History(ctx context.Context, key []byte) (sl *immuschema.Stru
 }
 
 // ZAdd ...
-func (c *LcClient) ZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuschema.Index, error) {
-	result, err := c.ServiceClient.ZAdd(ctx, &immuschema.ZAddOptions{
-		Set:   set,
-		Score: score,
-		Key:   key,
-		Index: index,
-	})
+func (c *LcClient) ZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuschema.Index, error) {
+	result, err := c.ServiceClient.ZAdd(ctx, options)
 	return result, err
 }
 
 // SafeZAdd ...
-func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key []byte, index *immuschema.Index) (*immuclient.VerifiedIndex, error) {
+func (c *LcClient) SafeZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuclient.VerifiedIndex, error) {
 	c.Lock()
 	defer c.Unlock()
 	root, err := c.RootService.GetRoot(ctx, c.ApiKey)
@@ -239,12 +232,7 @@ func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key 
 	}
 
 	opts := &immuschema.SafeZAddOptions{
-		Zopts: &immuschema.ZAddOptions{
-			Set:   set,
-			Score: score,
-			Key:   key,
-			Index: index,
-		},
+		Zopts: options,
 		RootIndex: &immuschema.Index{
 			Index: root.GetIndex(),
 		},
@@ -260,16 +248,13 @@ func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key 
 		return nil, err
 	}
 
-	key2, err := store.SetKey(key, set, score)
-	if err != nil {
-		return nil, err
-	}
+	key2 := store.BuildSetKey(options.Key, options.Set, options.Score.Score)
 
 	// This guard ensures that result.Leaf is equal to the item's hash computed
 	// from request values. From now on, result.Leaf can be trusted.
 	item := immuschema.Item{
 		Key:   key2,
-		Value: key,
+		Value: store.WrapZIndexReference(options.Key, options.Index),
 		Index: result.Index,
 	}
 	if !bytes.Equal(item.Hash(), result.Leaf) {
@@ -288,18 +273,16 @@ func (c *LcClient) SafeZAdd(ctx context.Context, set []byte, score float64, key 
 		nil
 }
 
-func (c *LcClient) ZScanExt(ctx context.Context, set []byte) (*schema.StructuredItemExtList, error) {
-	list, err := c.ServiceClient.ZScanExt(ctx, &immuschema.ZScanOptions{Set: set})
+func (c *LcClient) ZScanExt(ctx context.Context, options *immuschema.ZScanOptions) (*schema.ZStructuredItemExtList, error) {
+	list, err := c.ServiceClient.ZScanExt(ctx, options)
 	if err != nil {
 		return nil, err
 	}
-	return list.ToSItemExtList()
+	return list.ToZSItemExtList()
 }
 
-func (c *LcClient) HistoryExt(ctx context.Context, key []byte) (*schema.StructuredItemExtList, error) {
-	list, err := c.ServiceClient.HistoryExt(ctx, &immuschema.Key{
-		Key: key,
-	})
+func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryOptions) (*schema.StructuredItemExtList, error) {
+	list, err := c.ServiceClient.HistoryExt(ctx, options)
 	if err != nil {
 		return nil, err
 	}

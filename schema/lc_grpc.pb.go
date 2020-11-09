@@ -30,10 +30,10 @@ type LcServiceClient interface {
 	GetBatch(ctx context.Context, in *schema.KeyList, opts ...grpc.CallOption) (*schema.ItemList, error)
 	// scanners
 	Scan(ctx context.Context, in *schema.ScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
-	History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error)
+	History(ctx context.Context, in *schema.HistoryOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
 	ZAdd(ctx context.Context, in *schema.ZAddOptions, opts ...grpc.CallOption) (*schema.Index, error)
 	SafeZAdd(ctx context.Context, in *schema.SafeZAddOptions, opts ...grpc.CallOption) (*schema.Proof, error)
-	ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
+	ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ZItemList, error)
 	// mixed
 	CurrentRoot(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.Root, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
@@ -42,8 +42,8 @@ type LcServiceClient interface {
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	SafeGetExt(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*SafeItemExt, error)
-	ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ItemExtList, error)
-	HistoryExt(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*ItemExtList, error)
+	ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ZItemExtList, error)
+	HistoryExt(ctx context.Context, in *schema.HistoryOptions, opts ...grpc.CallOption) (*ItemExtList, error)
 }
 
 type lcServiceClient struct {
@@ -117,7 +117,7 @@ func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanOptions, opts
 	return out, nil
 }
 
-func (c *lcServiceClient) History(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.ItemList, error) {
+func (c *lcServiceClient) History(ctx context.Context, in *schema.HistoryOptions, opts ...grpc.CallOption) (*schema.ItemList, error) {
 	out := new(schema.ItemList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
 	if err != nil {
@@ -144,8 +144,8 @@ func (c *lcServiceClient) SafeZAdd(ctx context.Context, in *schema.SafeZAddOptio
 	return out, nil
 }
 
-func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error) {
-	out := new(schema.ItemList)
+func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*schema.ZItemList, error) {
+	out := new(schema.ZItemList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScan", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -220,8 +220,8 @@ func (c *lcServiceClient) SafeGetExt(ctx context.Context, in *schema.SafeGetOpti
 	return out, nil
 }
 
-func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ItemExtList, error) {
-	out := new(ItemExtList)
+func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanOptions, opts ...grpc.CallOption) (*ZItemExtList, error) {
+	out := new(ZItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScanExt", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanOptions,
 	return out, nil
 }
 
-func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*ItemExtList, error) {
+func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryOptions, opts ...grpc.CallOption) (*ItemExtList, error) {
 	out := new(ItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/HistoryExt", in, out, opts...)
 	if err != nil {
@@ -253,10 +253,10 @@ type LcServiceServer interface {
 	GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error)
 	// scanners
 	Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error)
-	History(context.Context, *schema.Key) (*schema.ItemList, error)
+	History(context.Context, *schema.HistoryOptions) (*schema.ItemList, error)
 	ZAdd(context.Context, *schema.ZAddOptions) (*schema.Index, error)
 	SafeZAdd(context.Context, *schema.SafeZAddOptions) (*schema.Proof, error)
-	ZScan(context.Context, *schema.ZScanOptions) (*schema.ItemList, error)
+	ZScan(context.Context, *schema.ZScanOptions) (*schema.ZItemList, error)
 	// mixed
 	CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
@@ -265,8 +265,8 @@ type LcServiceServer interface {
 	SendData(LcService_SendDataServer) error
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	SafeGetExt(context.Context, *schema.SafeGetOptions) (*SafeItemExt, error)
-	ZScanExt(context.Context, *schema.ZScanOptions) (*ItemExtList, error)
-	HistoryExt(context.Context, *schema.Key) (*ItemExtList, error)
+	ZScanExt(context.Context, *schema.ZScanOptions) (*ZItemExtList, error)
+	HistoryExt(context.Context, *schema.HistoryOptions) (*ItemExtList, error)
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -295,7 +295,7 @@ func (*UnimplementedLcServiceServer) GetBatch(context.Context, *schema.KeyList) 
 func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
 }
-func (*UnimplementedLcServiceServer) History(context.Context, *schema.Key) (*schema.ItemList, error) {
+func (*UnimplementedLcServiceServer) History(context.Context, *schema.HistoryOptions) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
 }
 func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddOptions) (*schema.Index, error) {
@@ -304,7 +304,7 @@ func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddOptions) 
 func (*UnimplementedLcServiceServer) SafeZAdd(context.Context, *schema.SafeZAddOptions) (*schema.Proof, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SafeZAdd not implemented")
 }
-func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanOptions) (*schema.ItemList, error) {
+func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanOptions) (*schema.ZItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
 }
 func (*UnimplementedLcServiceServer) CurrentRoot(context.Context, *empty.Empty) (*schema.Root, error) {
@@ -322,10 +322,10 @@ func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 func (*UnimplementedLcServiceServer) SafeGetExt(context.Context, *schema.SafeGetOptions) (*SafeItemExt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SafeGetExt not implemented")
 }
-func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanOptions) (*ItemExtList, error) {
+func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanOptions) (*ZItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScanExt not implemented")
 }
-func (*UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.Key) (*ItemExtList, error) {
+func (*UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryOptions) (*ItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HistoryExt not implemented")
 }
 func (*UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
@@ -461,7 +461,7 @@ func _LcService_Scan_Handler(srv interface{}, ctx context.Context, dec func(inte
 }
 
 func _LcService_History_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.Key)
+	in := new(schema.HistoryOptions)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -473,7 +473,7 @@ func _LcService_History_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/lc.schema.LcService/History",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).History(ctx, req.(*schema.Key))
+		return srv.(LcServiceServer).History(ctx, req.(*schema.HistoryOptions))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -649,7 +649,7 @@ func _LcService_ZScanExt_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.Key)
+	in := new(schema.HistoryOptions)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -661,7 +661,7 @@ func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/lc.schema.LcService/HistoryExt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).HistoryExt(ctx, req.(*schema.Key))
+		return srv.(LcServiceServer).HistoryExt(ctx, req.(*schema.HistoryOptions))
 	}
 	return interceptor(ctx, in, info, handler)
 }

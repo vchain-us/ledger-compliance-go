@@ -15,6 +15,15 @@ type StructuredItemExt struct {
 	Timestamp *timestamp.Timestamp       `json:"timestamp,omitempty"`
 }
 
+type ZStructuredItemExtList struct {
+	Items []*ZStructuredItemExt `json:"items,omitempty"`
+}
+
+type ZStructuredItemExt struct {
+	Item      *immuschema.ZStructuredItem `json:"item,omitempty"`
+	Timestamp *timestamp.Timestamp        `json:"timestamp,omitempty"`
+}
+
 type VerifiedItemExt struct {
 	Item      *client.VerifiedItem `json:"item,omitempty"`
 	Timestamp *timestamp.Timestamp `json:"timestamp,omitempty"`
@@ -30,6 +39,27 @@ func (list *ItemExtList) ToSItemExtList() (*StructuredItemExtList, error) {
 		itemExt := &StructuredItemExt{
 			Item:      i,
 			Timestamp: item.Timestamp,
+		}
+		slist.Items = append(slist.Items, itemExt)
+	}
+	return slist, nil
+}
+
+func (zlist *ZItemExtList) ToZSItemExtList() (*ZStructuredItemExtList, error) {
+	slist := &ZStructuredItemExtList{}
+	for _, zitem := range zlist.Items {
+		i, err := zitem.Item.Item.ToSItem()
+		if err != nil {
+			return nil, err
+		}
+		itemExt := &ZStructuredItemExt{
+			Item: &immuschema.ZStructuredItem{
+				Item:          i,
+				Score:         zitem.Item.Score,
+				CurrentOffset: zitem.Item.CurrentOffset,
+				Index:         zitem.Item.Index,
+			},
+			Timestamp: zitem.Timestamp,
 		}
 		slist.Items = append(slist.Items, itemExt)
 	}
