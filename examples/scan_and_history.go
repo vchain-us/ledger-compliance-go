@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 	"log"
 )
@@ -46,12 +47,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	list, err := client.Scan(context.Background(), []byte(`aa`))
+	list, err := client.Scan(context.Background(), &immuschema.ScanOptions{Prefix: []byte(`aa`)})
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("%v\n", list)
-	list, err = client.History(context.Background(), []byte(`abb`))
+	list, err = client.History(context.Background(), &immuschema.HistoryOptions{Key: []byte(`abb`)})
 	if err != nil {
 		log.Fatal(err)
 	}

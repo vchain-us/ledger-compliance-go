@@ -42,22 +42,44 @@ func main() {
 		log.Fatal(err)
 	}
 
-	id, err := client.SafeZAdd(context.Background(), []byte(`mySortedSet`), 5, []byte(`key1`))
+	id, err := client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
+		Set: []byte(`mySortedSet`),
+		Score: &immuschema.Score{
+			Score: 5,
+		},
+		Key: []byte(`key1`),
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	println(id.Verified)
-	id, err = client.SafeZAdd(context.Background(), []byte(`mySortedSet`), 99, []byte(`key3`))
+	id, err = client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
+		Set: []byte(`mySortedSet`),
+		Score: &immuschema.Score{
+			Score: 99,
+		},
+		Key: []byte(`key3`),
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	println(id.Verified)
-	id, err = client.SafeZAdd(context.Background(), []byte(`mySortedSet`), 1, []byte(`key2`))
+	id, err = client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
+		Set: []byte(`mySortedSet`),
+		Score: &immuschema.Score{
+			Score: 1,
+		},
+		Key: []byte(`key2`),
+	})
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	println(id.Verified)
-	list, err := client.ZScan(context.Background(), []byte(`mySortedSet`))
+	list, err := client.ZScan(context.Background(), &immuschema.ZScanOptions{
+		Set: []byte(`mySortedSet`),
+	})
+
 	fmt.Printf("%v\n", list)
 
 }

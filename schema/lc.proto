@@ -47,6 +47,7 @@ message SafeItemExt {
 	google.protobuf.Timestamp timestamp = 2;
 }
 
+
 message ItemExt {
 	immudb.schema.Item item = 1;
 	google.protobuf.Timestamp timestamp = 2;
@@ -54,6 +55,16 @@ message ItemExt {
 
 message ItemExtList {
 	repeated ItemExt items = 1;
+}
+
+
+message ZItemExt {
+	immudb.schema.ZItem item = 1;
+	google.protobuf.Timestamp timestamp = 2;
+}
+
+message ZItemExtList {
+	repeated ZItemExt items = 1;
 }
 
 service LcService {
@@ -68,10 +79,10 @@ service LcService {
 	rpc GetBatch (immudb.schema.KeyList) returns (immudb.schema.ItemList){};
 	// scanners
 	rpc Scan(immudb.schema.ScanOptions) returns (immudb.schema.ItemList){};
-	rpc History(immudb.schema.Key) returns (immudb.schema.ItemList){};
+	rpc History(immudb.schema.HistoryOptions) returns (immudb.schema.ItemList){};
 	rpc ZAdd (immudb.schema.ZAddOptions) returns (immudb.schema.Index){};
 	rpc SafeZAdd (immudb.schema.SafeZAddOptions) returns (immudb.schema.Proof){};
-	rpc ZScan (immudb.schema.ZScanOptions) returns (immudb.schema.ItemList){};
+	rpc ZScan (immudb.schema.ZScanOptions) returns (immudb.schema.ZItemList){};
 	// mixed
 	rpc CurrentRoot(google.protobuf.Empty) returns (immudb.schema.Root) {};
 	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
@@ -80,7 +91,7 @@ service LcService {
 	rpc SendData (stream Data) returns (stream Response);
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	rpc SafeGetExt(immudb.schema.SafeGetOptions) returns (SafeItemExt){};
-	rpc ZScanExt (immudb.schema.ZScanOptions) returns (ItemExtList){};
-	rpc HistoryExt(immudb.schema.Key) returns (ItemExtList){};
+	rpc ZScanExt (immudb.schema.ZScanOptions) returns (ZItemExtList){};
+	rpc HistoryExt(immudb.schema.HistoryOptions) returns (ItemExtList){};
 
 }
