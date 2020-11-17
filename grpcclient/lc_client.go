@@ -47,6 +47,7 @@ type LcClientIf interface {
 	SafeGet(ctx context.Context, key []byte) (*immuclient.VerifiedItem, error)
 	SetBatch(ctx context.Context, in *immuschema.KVList) (*immuschema.Index, error)
 	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
+	SetBatchOps(ctx context.Context, in *immuschema.BatchOps) (*immuschema.Index, error)
 	Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error)
 	History(ctx context.Context, options *immuschema.HistoryOptions) (sl *immuschema.StructuredItemList, err error)
 	ZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuschema.Index, error)
@@ -168,4 +169,25 @@ func (c *LcClient) NewSKVList(list *immuschema.KVList) *immuschema.SKVList {
 		})
 	}
 	return slist
+}
+
+func (c *LcClient) NewSBatchOps(ops *immuschema.BatchOps) (*immuschema.BatchOps, error) {
+	for _, op := range ops.Operations {
+		switch x := op.Operation.(type) {
+		case *immuschema.BatchOp_KVs:
+			skv := c.NewSKV(x.KVs.GetKey(), x.KVs.GetValue())
+			kv, err := skv.ToKV()
+			if err != nil {
+				return nil, err
+			}
+			x.KVs = kv
+		case *immuschema.BatchOp_ZOpts:
+			continue
+		case nil:
+			continue
+		default:
+			return nil, fmt.Errorf("batch operation has unexpected type %T", x)
+		}
+	}
+	return ops, nil
 }

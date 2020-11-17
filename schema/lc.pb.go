@@ -708,7 +708,7 @@ var file_lc_proto_rawDesc = []byte{
 	0x5a, 0x49, 0x74, 0x65, 0x6d, 0x45, 0x78, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x29, 0x0a, 0x05,
 	0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x6c, 0x63,
 	0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x5a, 0x49, 0x74, 0x65, 0x6d, 0x45, 0x78, 0x74,
-	0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x32, 0x89, 0x09, 0x0a, 0x09, 0x4c, 0x63, 0x53, 0x65,
+	0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x32, 0xc9, 0x09, 0x0a, 0x09, 0x4c, 0x63, 0x53, 0x65,
 	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x36, 0x0a, 0x03, 0x53, 0x65, 0x74, 0x12, 0x17, 0x2e, 0x69,
 	0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x4b, 0x65, 0x79,
 	0x56, 0x61, 0x6c, 0x75, 0x65, 0x1a, 0x14, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73,
@@ -732,6 +732,10 @@ var file_lc_proto_rawDesc = []byte{
 	0x69, 0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x4b, 0x65,
 	0x79, 0x4c, 0x69, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73,
 	0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00,
+	0x12, 0x3e, 0x0a, 0x0b, 0x53, 0x65, 0x74, 0x42, 0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x73, 0x12,
+	0x17, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e,
+	0x42, 0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x73, 0x1a, 0x14, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64,
+	0x62, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x00,
 	0x12, 0x3d, 0x0a, 0x04, 0x53, 0x63, 0x61, 0x6e, 0x12, 0x1a, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64,
 	0x62, 0x2e, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x2e, 0x53, 0x63, 0x61, 0x6e, 0x4f, 0x70, 0x74,
 	0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x17, 0x2e, 0x69, 0x6d, 0x6d, 0x75, 0x64, 0x62, 0x2e, 0x73, 0x63,
@@ -825,16 +829,17 @@ var file_lc_proto_goTypes = []interface{}{
 	(*schema.SafeGetOptions)(nil),  // 20: immudb.schema.SafeGetOptions
 	(*schema.KVList)(nil),          // 21: immudb.schema.KVList
 	(*schema.KeyList)(nil),         // 22: immudb.schema.KeyList
-	(*schema.ScanOptions)(nil),     // 23: immudb.schema.ScanOptions
-	(*schema.HistoryOptions)(nil),  // 24: immudb.schema.HistoryOptions
-	(*schema.ZAddOptions)(nil),     // 25: immudb.schema.ZAddOptions
-	(*schema.SafeZAddOptions)(nil), // 26: immudb.schema.SafeZAddOptions
-	(*schema.ZScanOptions)(nil),    // 27: immudb.schema.ZScanOptions
-	(*empty.Empty)(nil),            // 28: google.protobuf.Empty
-	(*schema.Index)(nil),           // 29: immudb.schema.Index
-	(*schema.ItemList)(nil),        // 30: immudb.schema.ItemList
-	(*schema.ZItemList)(nil),       // 31: immudb.schema.ZItemList
-	(*schema.HealthResponse)(nil),  // 32: immudb.schema.HealthResponse
+	(*schema.BatchOps)(nil),        // 23: immudb.schema.BatchOps
+	(*schema.ScanOptions)(nil),     // 24: immudb.schema.ScanOptions
+	(*schema.HistoryOptions)(nil),  // 25: immudb.schema.HistoryOptions
+	(*schema.ZAddOptions)(nil),     // 26: immudb.schema.ZAddOptions
+	(*schema.SafeZAddOptions)(nil), // 27: immudb.schema.SafeZAddOptions
+	(*schema.ZScanOptions)(nil),    // 28: immudb.schema.ZScanOptions
+	(*empty.Empty)(nil),            // 29: google.protobuf.Empty
+	(*schema.Index)(nil),           // 30: immudb.schema.Index
+	(*schema.ItemList)(nil),        // 31: immudb.schema.ItemList
+	(*schema.ZItemList)(nil),       // 32: immudb.schema.ZItemList
+	(*schema.HealthResponse)(nil),  // 33: immudb.schema.HealthResponse
 }
 var file_lc_proto_depIdxs = []int32{
 	0,  // 0: lc.schema.ReportOptions.payload:type_name -> lc.schema.TamperReport
@@ -855,38 +860,40 @@ var file_lc_proto_depIdxs = []int32{
 	20, // 15: lc.schema.LcService.SafeGet:input_type -> immudb.schema.SafeGetOptions
 	21, // 16: lc.schema.LcService.SetBatch:input_type -> immudb.schema.KVList
 	22, // 17: lc.schema.LcService.GetBatch:input_type -> immudb.schema.KeyList
-	23, // 18: lc.schema.LcService.Scan:input_type -> immudb.schema.ScanOptions
-	24, // 19: lc.schema.LcService.History:input_type -> immudb.schema.HistoryOptions
-	25, // 20: lc.schema.LcService.ZAdd:input_type -> immudb.schema.ZAddOptions
-	26, // 21: lc.schema.LcService.SafeZAdd:input_type -> immudb.schema.SafeZAddOptions
-	27, // 22: lc.schema.LcService.ZScan:input_type -> immudb.schema.ZScanOptions
-	28, // 23: lc.schema.LcService.CurrentRoot:input_type -> google.protobuf.Empty
-	28, // 24: lc.schema.LcService.Health:input_type -> google.protobuf.Empty
-	1,  // 25: lc.schema.LcService.ReportTamper:input_type -> lc.schema.ReportOptions
-	3,  // 26: lc.schema.LcService.SendData:input_type -> lc.schema.Data
-	20, // 27: lc.schema.LcService.SafeGetExt:input_type -> immudb.schema.SafeGetOptions
-	27, // 28: lc.schema.LcService.ZScanExt:input_type -> immudb.schema.ZScanOptions
-	24, // 29: lc.schema.LcService.HistoryExt:input_type -> immudb.schema.HistoryOptions
-	29, // 30: lc.schema.LcService.Set:output_type -> immudb.schema.Index
-	15, // 31: lc.schema.LcService.Get:output_type -> immudb.schema.Item
-	11, // 32: lc.schema.LcService.SafeSet:output_type -> immudb.schema.Proof
-	13, // 33: lc.schema.LcService.SafeGet:output_type -> immudb.schema.SafeItem
-	29, // 34: lc.schema.LcService.SetBatch:output_type -> immudb.schema.Index
-	30, // 35: lc.schema.LcService.GetBatch:output_type -> immudb.schema.ItemList
-	30, // 36: lc.schema.LcService.Scan:output_type -> immudb.schema.ItemList
-	30, // 37: lc.schema.LcService.History:output_type -> immudb.schema.ItemList
-	29, // 38: lc.schema.LcService.ZAdd:output_type -> immudb.schema.Index
-	11, // 39: lc.schema.LcService.SafeZAdd:output_type -> immudb.schema.Proof
-	31, // 40: lc.schema.LcService.ZScan:output_type -> immudb.schema.ZItemList
-	12, // 41: lc.schema.LcService.CurrentRoot:output_type -> immudb.schema.Root
-	32, // 42: lc.schema.LcService.Health:output_type -> immudb.schema.HealthResponse
-	28, // 43: lc.schema.LcService.ReportTamper:output_type -> google.protobuf.Empty
-	4,  // 44: lc.schema.LcService.SendData:output_type -> lc.schema.Response
-	5,  // 45: lc.schema.LcService.SafeGetExt:output_type -> lc.schema.SafeItemExt
-	9,  // 46: lc.schema.LcService.ZScanExt:output_type -> lc.schema.ZItemExtList
-	7,  // 47: lc.schema.LcService.HistoryExt:output_type -> lc.schema.ItemExtList
-	30, // [30:48] is the sub-list for method output_type
-	12, // [12:30] is the sub-list for method input_type
+	23, // 18: lc.schema.LcService.SetBatchOps:input_type -> immudb.schema.BatchOps
+	24, // 19: lc.schema.LcService.Scan:input_type -> immudb.schema.ScanOptions
+	25, // 20: lc.schema.LcService.History:input_type -> immudb.schema.HistoryOptions
+	26, // 21: lc.schema.LcService.ZAdd:input_type -> immudb.schema.ZAddOptions
+	27, // 22: lc.schema.LcService.SafeZAdd:input_type -> immudb.schema.SafeZAddOptions
+	28, // 23: lc.schema.LcService.ZScan:input_type -> immudb.schema.ZScanOptions
+	29, // 24: lc.schema.LcService.CurrentRoot:input_type -> google.protobuf.Empty
+	29, // 25: lc.schema.LcService.Health:input_type -> google.protobuf.Empty
+	1,  // 26: lc.schema.LcService.ReportTamper:input_type -> lc.schema.ReportOptions
+	3,  // 27: lc.schema.LcService.SendData:input_type -> lc.schema.Data
+	20, // 28: lc.schema.LcService.SafeGetExt:input_type -> immudb.schema.SafeGetOptions
+	28, // 29: lc.schema.LcService.ZScanExt:input_type -> immudb.schema.ZScanOptions
+	25, // 30: lc.schema.LcService.HistoryExt:input_type -> immudb.schema.HistoryOptions
+	30, // 31: lc.schema.LcService.Set:output_type -> immudb.schema.Index
+	15, // 32: lc.schema.LcService.Get:output_type -> immudb.schema.Item
+	11, // 33: lc.schema.LcService.SafeSet:output_type -> immudb.schema.Proof
+	13, // 34: lc.schema.LcService.SafeGet:output_type -> immudb.schema.SafeItem
+	30, // 35: lc.schema.LcService.SetBatch:output_type -> immudb.schema.Index
+	31, // 36: lc.schema.LcService.GetBatch:output_type -> immudb.schema.ItemList
+	30, // 37: lc.schema.LcService.SetBatchOps:output_type -> immudb.schema.Index
+	31, // 38: lc.schema.LcService.Scan:output_type -> immudb.schema.ItemList
+	31, // 39: lc.schema.LcService.History:output_type -> immudb.schema.ItemList
+	30, // 40: lc.schema.LcService.ZAdd:output_type -> immudb.schema.Index
+	11, // 41: lc.schema.LcService.SafeZAdd:output_type -> immudb.schema.Proof
+	32, // 42: lc.schema.LcService.ZScan:output_type -> immudb.schema.ZItemList
+	12, // 43: lc.schema.LcService.CurrentRoot:output_type -> immudb.schema.Root
+	33, // 44: lc.schema.LcService.Health:output_type -> immudb.schema.HealthResponse
+	29, // 45: lc.schema.LcService.ReportTamper:output_type -> google.protobuf.Empty
+	4,  // 46: lc.schema.LcService.SendData:output_type -> lc.schema.Response
+	5,  // 47: lc.schema.LcService.SafeGetExt:output_type -> lc.schema.SafeItemExt
+	9,  // 48: lc.schema.LcService.ZScanExt:output_type -> lc.schema.ZItemExtList
+	7,  // 49: lc.schema.LcService.HistoryExt:output_type -> lc.schema.ItemExtList
+	31, // [31:50] is the sub-list for method output_type
+	12, // [12:31] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
