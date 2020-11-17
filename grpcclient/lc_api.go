@@ -58,6 +58,16 @@ func (c *LcClient) SetBatch(ctx context.Context, in *immuschema.KVList) (*immusc
 	return result, err
 }
 
+// SetBatch ...
+func (c *LcClient) SetBatchOps(ctx context.Context, op *immuschema.BatchOps) (*immuschema.Index, error) {
+	op, err := c.NewSBatchOps(op)
+	if err != nil {
+		return nil, err
+	}
+	result, err := c.ServiceClient.SetBatchOps(ctx, op)
+	return result, err
+}
+
 // GetBatch ...
 func (c *LcClient) GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error) {
 	list, err := c.ServiceClient.GetBatch(ctx, in)
@@ -248,7 +258,7 @@ func (c *LcClient) SafeZAdd(ctx context.Context, options *immuschema.ZAddOptions
 		return nil, err
 	}
 
-	key2 := store.BuildSetKey(options.Key, options.Set, options.Score.Score)
+	key2 := store.BuildSetKey(options.Key, options.Set, options.Score.Score, options.Index)
 
 	// This guard ensures that result.Leaf is equal to the item's hash computed
 	// from request values. From now on, result.Leaf can be trusted.

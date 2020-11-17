@@ -77,6 +77,7 @@ service LcService {
 	// batch
 	rpc SetBatch (immudb.schema.KVList) returns (immudb.schema.Index){};
 	rpc GetBatch (immudb.schema.KeyList) returns (immudb.schema.ItemList){};
+	rpc SetBatchOps (immudb.schema.BatchOps) returns (immudb.schema.Index){};
 	// scanners
 	rpc Scan(immudb.schema.ScanOptions) returns (immudb.schema.ItemList){};
 	rpc History(immudb.schema.HistoryOptions) returns (immudb.schema.ItemList){};
