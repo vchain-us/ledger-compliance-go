@@ -25,6 +25,9 @@ type LcServiceClient interface {
 	Get(ctx context.Context, in *schema.Key, opts ...grpc.CallOption) (*schema.Item, error)
 	SafeSet(ctx context.Context, in *schema.SafeSetOptions, opts ...grpc.CallOption) (*schema.Proof, error)
 	SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error)
+	// tamper proofing
+	Consistency(ctx context.Context, in *schema.Index, opts ...grpc.CallOption) (*schema.ConsistencyProof, error)
+	Inclusion(ctx context.Context, in *schema.Index, opts ...grpc.CallOption) (*schema.InclusionProof, error)
 	// batch
 	SetBatch(ctx context.Context, in *schema.KVList, opts ...grpc.CallOption) (*schema.Index, error)
 	GetBatch(ctx context.Context, in *schema.KeyList, opts ...grpc.CallOption) (*schema.ItemList, error)
@@ -85,6 +88,24 @@ func (c *lcServiceClient) SafeSet(ctx context.Context, in *schema.SafeSetOptions
 func (c *lcServiceClient) SafeGet(ctx context.Context, in *schema.SafeGetOptions, opts ...grpc.CallOption) (*schema.SafeItem, error) {
 	out := new(schema.SafeItem)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SafeGet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) Consistency(ctx context.Context, in *schema.Index, opts ...grpc.CallOption) (*schema.ConsistencyProof, error) {
+	out := new(schema.ConsistencyProof)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Consistency", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) Inclusion(ctx context.Context, in *schema.Index, opts ...grpc.CallOption) (*schema.InclusionProof, error) {
+	out := new(schema.InclusionProof)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Inclusion", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -258,6 +279,9 @@ type LcServiceServer interface {
 	Get(context.Context, *schema.Key) (*schema.Item, error)
 	SafeSet(context.Context, *schema.SafeSetOptions) (*schema.Proof, error)
 	SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error)
+	// tamper proofing
+	Consistency(context.Context, *schema.Index) (*schema.ConsistencyProof, error)
+	Inclusion(context.Context, *schema.Index) (*schema.InclusionProof, error)
 	// batch
 	SetBatch(context.Context, *schema.KVList) (*schema.Index, error)
 	GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error)
@@ -296,6 +320,12 @@ func (*UnimplementedLcServiceServer) SafeSet(context.Context, *schema.SafeSetOpt
 }
 func (*UnimplementedLcServiceServer) SafeGet(context.Context, *schema.SafeGetOptions) (*schema.SafeItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SafeGet not implemented")
+}
+func (*UnimplementedLcServiceServer) Consistency(context.Context, *schema.Index) (*schema.ConsistencyProof, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Consistency not implemented")
+}
+func (*UnimplementedLcServiceServer) Inclusion(context.Context, *schema.Index) (*schema.InclusionProof, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Inclusion not implemented")
 }
 func (*UnimplementedLcServiceServer) SetBatch(context.Context, *schema.KVList) (*schema.Index, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetBatch not implemented")
@@ -416,6 +446,42 @@ func _LcService_SafeGet_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).SafeGet(ctx, req.(*schema.SafeGetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_Consistency_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Index)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Consistency(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Consistency",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Consistency(ctx, req.(*schema.Index))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_Inclusion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Index)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Inclusion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Inclusion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Inclusion(ctx, req.(*schema.Index))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -717,6 +783,14 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SafeGet",
 			Handler:    _LcService_SafeGet_Handler,
+		},
+		{
+			MethodName: "Consistency",
+			Handler:    _LcService_Consistency_Handler,
+		},
+		{
+			MethodName: "Inclusion",
+			Handler:    _LcService_Inclusion_Handler,
 		},
 		{
 			MethodName: "SetBatch",

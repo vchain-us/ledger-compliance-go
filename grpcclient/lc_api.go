@@ -193,6 +193,16 @@ func (c *LcClient) SafeGet(ctx context.Context, key []byte) (vi *immuclient.Veri
 		nil
 }
 
+// Consistency
+func (c *LcClient) Consistency(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.ConsistencyProof, error) {
+	return c.ServiceClient.Consistency(ctx, in, opts...)
+}
+
+// Inclusion
+func (c *LcClient) Inclusion(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.InclusionProof, error) {
+	return c.ServiceClient.Inclusion(ctx, in, opts...)
+}
+
 // Scan ...
 func (c *LcClient) Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error) {
 	list, err := c.ServiceClient.Scan(ctx, options)
@@ -228,8 +238,7 @@ func (c *LcClient) History(ctx context.Context, options *immuschema.HistoryOptio
 
 // ZAdd ...
 func (c *LcClient) ZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuschema.Index, error) {
-	result, err := c.ServiceClient.ZAdd(ctx, options)
-	return result, err
+	return c.ServiceClient.ZAdd(ctx, options)
 }
 
 // SafeZAdd ...
