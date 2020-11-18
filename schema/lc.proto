@@ -74,6 +74,9 @@ service LcService {
 	rpc Get (immudb.schema.Key) returns (immudb.schema.Item){};
 	rpc SafeSet(immudb.schema.SafeSetOptions) returns (immudb.schema.Proof){};
 	rpc SafeGet(immudb.schema.SafeGetOptions) returns (immudb.schema.SafeItem){};
+	// tamper proofing
+	rpc Consistency(immudb.schema.Index) returns (immudb.schema.ConsistencyProof){};
+	rpc Inclusion(immudb.schema.Index) returns (immudb.schema.InclusionProof){};
 	// batch
 	rpc SetBatch (immudb.schema.KVList) returns (immudb.schema.Index){};
 	rpc GetBatch (immudb.schema.KeyList) returns (immudb.schema.ItemList){};

@@ -46,6 +46,8 @@ type LcClientIf interface {
 	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
 	SafeGet(ctx context.Context, key []byte) (*immuclient.VerifiedItem, error)
 	SetBatch(ctx context.Context, in *immuschema.KVList) (*immuschema.Index, error)
+	Consistency(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.ConsistencyProof, error)
+	Inclusion(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.InclusionProof, error)
 	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
 	SetBatchOps(ctx context.Context, in *immuschema.BatchOps) (*immuschema.Index, error)
 	Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error)
