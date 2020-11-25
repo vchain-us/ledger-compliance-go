@@ -31,7 +31,7 @@ type LcServiceClient interface {
 	// batch
 	SetBatch(ctx context.Context, in *schema.KVList, opts ...grpc.CallOption) (*schema.Index, error)
 	GetBatch(ctx context.Context, in *schema.KeyList, opts ...grpc.CallOption) (*schema.ItemList, error)
-	SetBatchOps(ctx context.Context, in *schema.BatchOps, opts ...grpc.CallOption) (*schema.Index, error)
+	ExecAllOps(ctx context.Context, in *schema.Ops, opts ...grpc.CallOption) (*schema.Index, error)
 	// scanners
 	Scan(ctx context.Context, in *schema.ScanOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
 	History(ctx context.Context, in *schema.HistoryOptions, opts ...grpc.CallOption) (*schema.ItemList, error)
@@ -130,9 +130,9 @@ func (c *lcServiceClient) GetBatch(ctx context.Context, in *schema.KeyList, opts
 	return out, nil
 }
 
-func (c *lcServiceClient) SetBatchOps(ctx context.Context, in *schema.BatchOps, opts ...grpc.CallOption) (*schema.Index, error) {
+func (c *lcServiceClient) ExecAllOps(ctx context.Context, in *schema.Ops, opts ...grpc.CallOption) (*schema.Index, error) {
 	out := new(schema.Index)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetBatchOps", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ExecAllOps", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ type LcServiceServer interface {
 	// batch
 	SetBatch(context.Context, *schema.KVList) (*schema.Index, error)
 	GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error)
-	SetBatchOps(context.Context, *schema.BatchOps) (*schema.Index, error)
+	ExecAllOps(context.Context, *schema.Ops) (*schema.Index, error)
 	// scanners
 	Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error)
 	History(context.Context, *schema.HistoryOptions) (*schema.ItemList, error)
@@ -333,8 +333,8 @@ func (*UnimplementedLcServiceServer) SetBatch(context.Context, *schema.KVList) (
 func (*UnimplementedLcServiceServer) GetBatch(context.Context, *schema.KeyList) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBatch not implemented")
 }
-func (*UnimplementedLcServiceServer) SetBatchOps(context.Context, *schema.BatchOps) (*schema.Index, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetBatchOps not implemented")
+func (*UnimplementedLcServiceServer) ExecAllOps(context.Context, *schema.Ops) (*schema.Index, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExecAllOps not implemented")
 }
 func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanOptions) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
@@ -522,20 +522,20 @@ func _LcService_GetBatch_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_SetBatchOps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.BatchOps)
+func _LcService_ExecAllOps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.Ops)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).SetBatchOps(ctx, in)
+		return srv.(LcServiceServer).ExecAllOps(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/SetBatchOps",
+		FullMethod: "/lc.schema.LcService/ExecAllOps",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).SetBatchOps(ctx, req.(*schema.BatchOps))
+		return srv.(LcServiceServer).ExecAllOps(ctx, req.(*schema.Ops))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -801,8 +801,8 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_GetBatch_Handler,
 		},
 		{
-			MethodName: "SetBatchOps",
-			Handler:    _LcService_SetBatchOps_Handler,
+			MethodName: "ExecAllOps",
+			Handler:    _LcService_ExecAllOps_Handler,
 		},
 		{
 			MethodName: "Scan",
