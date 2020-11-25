@@ -49,7 +49,7 @@ type LcClientIf interface {
 	Consistency(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.ConsistencyProof, error)
 	Inclusion(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.InclusionProof, error)
 	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
-	SetBatchOps(ctx context.Context, in *immuschema.BatchOps) (*immuschema.Index, error)
+	ExecAllOps(ctx context.Context, in *immuschema.Ops) (*immuschema.Index, error)
 	Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error)
 	History(ctx context.Context, options *immuschema.HistoryOptions) (sl *immuschema.StructuredItemList, err error)
 	ZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuschema.Index, error)
@@ -173,17 +173,17 @@ func (c *LcClient) NewSKVList(list *immuschema.KVList) *immuschema.SKVList {
 	return slist
 }
 
-func (c *LcClient) NewSBatchOps(ops *immuschema.BatchOps) (*immuschema.BatchOps, error) {
+func (c *LcClient) NewSOps(ops *immuschema.Ops) (*immuschema.Ops, error) {
 	for _, op := range ops.Operations {
 		switch x := op.Operation.(type) {
-		case *immuschema.BatchOp_KVs:
+		case *immuschema.Op_KVs:
 			skv := c.NewSKV(x.KVs.GetKey(), x.KVs.GetValue())
 			kv, err := skv.ToKV()
 			if err != nil {
 				return nil, err
 			}
 			x.KVs = kv
-		case *immuschema.BatchOp_ZOpts:
+		case *immuschema.Op_ZOpts:
 			continue
 		case nil:
 			continue

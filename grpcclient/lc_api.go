@@ -59,12 +59,12 @@ func (c *LcClient) SetBatch(ctx context.Context, in *immuschema.KVList) (*immusc
 }
 
 // SetBatch ...
-func (c *LcClient) SetBatchOps(ctx context.Context, op *immuschema.BatchOps) (*immuschema.Index, error) {
-	op, err := c.NewSBatchOps(op)
+func (c *LcClient) ExecAllOps(ctx context.Context, op *immuschema.Ops) (*immuschema.Index, error) {
+	op, err := c.NewSOps(op)
 	if err != nil {
 		return nil, err
 	}
-	result, err := c.ServiceClient.SetBatchOps(ctx, op)
+	result, err := c.ServiceClient.ExecAllOps(ctx, op)
 	return result, err
 }
 

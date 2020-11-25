@@ -25,16 +25,16 @@ import (
 )
 
 func main() {
-	client := sdk.NewLcClient(sdk.ApiKey("jxnqdxcicasvajpfxldqdanquhabiqcjrwdb"), sdk.Host("localhost"), sdk.Port(3324))
+	client := sdk.NewLcClient(sdk.ApiKey("iygjyyaoudcpelitsbdvciughnzxdujmbhxy"), sdk.Host("localhost"), sdk.Port(3324))
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	aOps := &immuschema.BatchOps{
-		Operations: []*immuschema.BatchOp{
+	aOps := &immuschema.Ops{
+		Operations: []*immuschema.Op{
 			{
-				Operation: &immuschema.BatchOp_KVs{
+				Operation: &immuschema.Op_KVs{
 					KVs: &immuschema.KeyValue{
 						Key:   []byte(`key1`),
 						Value: []byte(`val1`),
@@ -42,7 +42,7 @@ func main() {
 				},
 			},
 			{
-				Operation: &immuschema.BatchOp_KVs{
+				Operation: &immuschema.Op_KVs{
 					KVs: &immuschema.KeyValue{
 						Key:   []byte(`key2`),
 						Value: []byte(`val2`),
@@ -50,7 +50,7 @@ func main() {
 				},
 			},
 			{
-				Operation: &immuschema.BatchOp_ZOpts{
+				Operation: &immuschema.Op_ZOpts{
 					ZOpts: &immuschema.ZAddOptions{
 						Set: []byte(`mySet`),
 						Key: []byte(`key1`),
@@ -61,7 +61,7 @@ func main() {
 				},
 			},
 			{
-				Operation: &immuschema.BatchOp_ZOpts{
+				Operation: &immuschema.Op_ZOpts{
 					ZOpts: &immuschema.ZAddOptions{
 						Set: []byte(`mySet`),
 						Key: []byte(`key2`),
@@ -73,7 +73,7 @@ func main() {
 			},
 		},
 	}
-	_, err = client.SetBatchOps(context.Background(), aOps)
+	_, err = client.ExecAllOps(context.Background(), aOps)
 	if err != nil {
 		log.Fatal(err)
 	}
