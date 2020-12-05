@@ -28,8 +28,6 @@ github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
-github.com/codenotary/immudb v0.8.1-0.20201125135926-5f5386d1d2d7 h1:utkrdZBRPLO5Ni5YerzfoHxXNf3TZFRP1TQIo3IWPik=
-github.com/codenotary/immudb v0.8.1-0.20201125135926-5f5386d1d2d7/go.mod h1:otCztOd0EipuKMyYkzcWnWGRQZT5Amr4+BkDFD4i1Lg=
 github.com/codenotary/immudb v0.8.1-0.20201126165025-7474fa6772d5 h1:qxRE9O3MLgmjOHFMajLnLv5F3bYLvfLWGb8Wo3mydIY=
 github.com/codenotary/immudb v0.8.1-0.20201126165025-7474fa6772d5/go.mod h1:otCztOd0EipuKMyYkzcWnWGRQZT5Amr4+BkDFD4i1Lg=
 github.com/codenotary/merkletree v0.1.2-0.20200720105344-68d95395a656 h1:Rp8hZs7t0fNLlfLj9PzEmW/W7X+nSp0vpu5CB0ba0jM=

@@ -19,6 +19,7 @@
     * [Creating a Client](#creating-a-client)
     * [Traditional read and write](#traditional-read-and-write)
     * [Verified or Safe read and write](#verified-or-safe-read-and-write)
+- [TLS](#tls)
 - [Contributing](#contributing)
 
 ## Introduction
@@ -97,6 +98,23 @@ if err!=nil{
     return err
 }
 ```
+
+## TLS
+
+To setup a tls connection use a transport credential dial option.
+See  [tls example](examples/tls.go)
+```go
+    dialOptions := []grpc.DialOption{
+		grpc.WithTransportCredentials(tlsCredentials),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                20 * time.Second,
+			Timeout:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
+	}
+	client := sdk.NewLcClient(sdk.ApiKey("jxnqdxcicasvajpfxldqdanquhabiqcjrwdb"), sdk.Host("localhost"), sdk.Port(3324), sdk.DialOptions(dialOptions))
+```
+
 ## Contributing
 
 We welcome contributions. Feel free to join the team!
