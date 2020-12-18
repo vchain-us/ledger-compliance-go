@@ -18,7 +18,7 @@ package grpcclient
 
 import (
 	immuclient "github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/rootservice"
+	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/logger"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
@@ -74,9 +74,9 @@ func ServiceClient(serviceClient schema.LcServiceClient) LcClientOption {
 	}
 }
 
-func RootService(rootservice rootservice.RootService) LcClientOption {
+func StateService(rootservice state.StateService) LcClientOption {
 	return func(args *LcClient) {
-		args.RootService = rootservice
+		args.StateService = rootservice
 	}
 }
 

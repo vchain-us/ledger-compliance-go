@@ -19,6 +19,7 @@ package grpcclient
 import (
 	"errors"
 	"fmt"
+	"github.com/codenotary/immudb/pkg/client/state"
 	"os"
 	"sync"
 	"time"
@@ -36,29 +37,31 @@ import (
 
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
-	"github.com/codenotary/immudb/pkg/client/rootservice"
 )
 
 // ImmuClient ...
 type LcClientIf interface {
-	Set(ctx context.Context, key []byte, value []byte) (*immuschema.Index, error)
-	Get(ctx context.Context, key []byte) (*immuschema.StructuredItem, error)
-	SafeSet(ctx context.Context, key []byte, value []byte) (*immuclient.VerifiedIndex, error)
-	SafeGet(ctx context.Context, key []byte) (*immuclient.VerifiedItem, error)
-	SetBatch(ctx context.Context, in *immuschema.KVList) (*immuschema.Index, error)
-	Consistency(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.ConsistencyProof, error)
-	Inclusion(ctx context.Context, in *immuschema.Index, opts ...grpc.CallOption) (*immuschema.InclusionProof, error)
-	GetBatch(ctx context.Context, in *immuschema.KeyList) (*immuschema.StructuredItemList, error)
-	ExecAllOps(ctx context.Context, in *immuschema.Ops) (*immuschema.Index, error)
-	Scan(ctx context.Context, options *immuschema.ScanOptions) (*immuschema.StructuredItemList, error)
-	History(ctx context.Context, options *immuschema.HistoryOptions) (sl *immuschema.StructuredItemList, err error)
-	ZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuschema.Index, error)
-	SafeZAdd(ctx context.Context, options *immuschema.ZAddOptions) (*immuclient.VerifiedIndex, error)
-	ZScan(ctx context.Context, options *immuschema.ZScanOptions) (*immuschema.ZStructuredItemList, error)
+	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
+	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
 
-	ZScanExt(ctx context.Context, options *immuschema.ZScanOptions) (*schema.ZStructuredItemExtList, error)
-	HistoryExt(ctx context.Context, options *immuschema.HistoryOptions) (sl *schema.StructuredItemExtList, err error)
-	SafeGetExt(ctx context.Context, key []byte) (*schema.VerifiedItemExt, error)
+	Get(ctx context.Context, key []byte) (*immuschema.Item, error)
+	VerifiedGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuschema.Item, error)
+
+	GetAll(ctx context.Context, keys [][]byte) (*immuschema.ItemList, error)
+
+	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
+
+	Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.ItemList, error)
+	ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZItemList, error)
+
+	History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.ItemList, error)
+
+	ZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)
+	VerifiedZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)
+
+	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
+	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
+	VerifiedGetExt(ctx context.Context, key []byte) (*schema.ItemExt, error)
 
 	Connect() (err error)
 }
@@ -72,7 +75,7 @@ type LcClient struct {
 	Logger           logger.Logger
 	ClientConn       *grpc.ClientConn
 	ServiceClient    schema.LcServiceClient
-	RootService      rootservice.RootService
+	StateService     state.StateService
 	TimestampService immuclient.TimestampService
 	sync.RWMutex
 }
@@ -122,8 +125,9 @@ func (c *LcClient) Connect() (err error) {
 	c.ServiceClient = schema.NewLcServiceClient(c.ClientConn)
 
 	uuidPrv := NewLcUUIDProvider(c.ServiceClient)
-	rootPrv := NewLcRootProvider(c.ServiceClient)
-	c.RootService, err = rootservice.NewRootService(cache.NewFileCache(c.Dir), c.Logger, rootPrv, uuidPrv)
+	stateProvider := NewLcStateProvider(c.ServiceClient)
+
+	c.StateService, err = state.NewStateService(cache.NewFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
 	if err != nil {
 		c.Logger.Errorf("fail to instantiate root service: %v", err)
 		return err
@@ -137,7 +141,7 @@ func (c *LcClient) Disconnect() (err error) {
 	return c.ClientConn.Close()
 }
 
-func (c *LcClient) NewSKV(key []byte, value []byte) *immuschema.StructuredKeyValue {
+/*func (c *LcClient) NewSKV(key []byte, value []byte) *immuschema.StructuredKeyValue {
 	return &immuschema.StructuredKeyValue{
 		Key: key,
 		Value: &immuschema.Content{
@@ -154,7 +158,7 @@ func (c *LcClient) verifyAndSetRoot(result *immuschema.Proof, root *immuschema.R
 		toCache := immuschema.NewRoot()
 		toCache.SetIndex(result.Index)
 		toCache.SetRoot(result.Root)
-		err = c.RootService.SetRoot(toCache, c.ApiKey)
+		err = c.StateService.SetRoot(toCache, c.ApiKey)
 	}
 	return verified, err
 }
@@ -193,3 +197,4 @@ func (c *LcClient) NewSOps(ops *immuschema.Ops) (*immuschema.Ops, error) {
 	}
 	return ops, nil
 }
+*/

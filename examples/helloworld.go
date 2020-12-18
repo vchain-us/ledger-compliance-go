@@ -29,14 +29,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	index, err := client.SafeSet(context.Background(), []byte(`key`), []byte(`val`))
+	index, err := client.VerifiedSet(context.Background(), []byte(`key`), []byte(`val`))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("index:\t\t%v\nverified:\t%t\n\n", index.Index, index.Verified)
-	item, err := client.SafeGet(context.Background(), []byte(`key`))
+	fmt.Printf("index:\t\t%v\n\n", index.Id)
+	item, err := client.VerifiedGet(context.Background(), []byte(`key`))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("My item:\nkey:\t\t%s\nval:\t\t%s\nindex:\t\t%d\ntimestamp:\t%v\nverified:\t%t\n", item.Key, item.Value, item.Index, item.Time, item.Verified)
+	fmt.Printf("My item:\nkey:\t\t%s\nval:\t\t%s\nindex:\t\t%d\n", item.Key, item.Value, item.Tx)
 }
