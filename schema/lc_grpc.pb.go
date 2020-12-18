@@ -27,7 +27,7 @@ type LcServiceClient interface {
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableItem, error)
 	// batch
 	GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
-	ExecAllOps(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
+	ExecAll(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
 	// scanners
 	Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
 	History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
@@ -41,7 +41,7 @@ type LcServiceClient interface {
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*SafeItemExt, error)
+	VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 }
@@ -99,9 +99,9 @@ func (c *lcServiceClient) GetAll(ctx context.Context, in *schema.KeyListRequest,
 	return out, nil
 }
 
-func (c *lcServiceClient) ExecAllOps(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error) {
+func (c *lcServiceClient) ExecAll(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error) {
 	out := new(schema.TxMetadata)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ExecAllOps", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ExecAll", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -211,8 +211,8 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 	return m, nil
 }
 
-func (c *lcServiceClient) VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*SafeItemExt, error) {
-	out := new(SafeItemExt)
+func (c *lcServiceClient) VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error) {
+	out := new(VerifiableItemExt)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableSetExt", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -250,7 +250,7 @@ type LcServiceServer interface {
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableItem, error)
 	// batch
 	GetAll(context.Context, *schema.KeyListRequest) (*schema.ItemList, error)
-	ExecAllOps(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error)
+	ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error)
 	// scanners
 	Scan(context.Context, *schema.ScanRequest) (*schema.ItemList, error)
 	History(context.Context, *schema.HistoryRequest) (*schema.ItemList, error)
@@ -264,7 +264,7 @@ type LcServiceServer interface {
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	SendData(LcService_SendDataServer) error
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*SafeItemExt, error)
+	VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*VerifiableItemExt, error)
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	mustEmbedUnimplementedLcServiceServer()
@@ -289,8 +289,8 @@ func (*UnimplementedLcServiceServer) VerifiableGet(context.Context, *schema.Veri
 func (*UnimplementedLcServiceServer) GetAll(context.Context, *schema.KeyListRequest) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (*UnimplementedLcServiceServer) ExecAllOps(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecAllOps not implemented")
+func (*UnimplementedLcServiceServer) ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExecAll not implemented")
 }
 func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanRequest) (*schema.ItemList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
@@ -319,7 +319,7 @@ func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOption
 func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*SafeItemExt, error) {
+func (*UnimplementedLcServiceServer) VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*VerifiableItemExt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableSetExt not implemented")
 }
 func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error) {
@@ -424,20 +424,20 @@ func _LcService_GetAll_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_ExecAllOps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LcService_ExecAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(schema.ExecAllRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).ExecAllOps(ctx, in)
+		return srv.(LcServiceServer).ExecAll(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/ExecAllOps",
+		FullMethod: "/lc.schema.LcService/ExecAll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).ExecAllOps(ctx, req.(*schema.ExecAllRequest))
+		return srv.(LcServiceServer).ExecAll(ctx, req.(*schema.ExecAllRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -691,8 +691,8 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_GetAll_Handler,
 		},
 		{
-			MethodName: "ExecAllOps",
-			Handler:    _LcService_ExecAllOps_Handler,
+			MethodName: "ExecAll",
+			Handler:    _LcService_ExecAll_Handler,
 		},
 		{
 			MethodName: "Scan",

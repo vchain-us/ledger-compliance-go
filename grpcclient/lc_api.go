@@ -38,7 +38,7 @@ func (c *LcClient) Get(ctx context.Context, key []byte) (*immuschema.Item, error
 
 // SetBatch ...
 func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error) {
-	result, err := c.ServiceClient.ExecAllOps(ctx, in)
+	result, err := c.ServiceClient.ExecAll(ctx, in)
 	return result, err
 }
 

@@ -75,7 +75,7 @@ func main() {
 			},
 		},
 	}
-	_, err = client.ExecAllOps(context.Background(), aOps)
+	_, err = client.ExecAll(context.Background(), aOps)
 	if err != nil {
 		log.Fatal(err)
 	}

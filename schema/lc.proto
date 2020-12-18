@@ -42,7 +42,7 @@ message Response {
     immudb.schema.ImmutableState state = 5;
 }
 
-message SafeItemExt {
+message VerifiableItemExt {
 	immudb.schema.VerifiableItem item  = 1;
 	google.protobuf.Timestamp timestamp = 2;
 }
@@ -76,7 +76,7 @@ service LcService {
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableItem){};
 	// batch
 	rpc GetAll (immudb.schema.KeyListRequest) returns (immudb.schema.ItemList){};
-	rpc ExecAllOps (immudb.schema.ExecAllRequest) returns (immudb.schema.TxMetadata) {};
+	rpc ExecAll (immudb.schema.ExecAllRequest) returns (immudb.schema.TxMetadata) {};
 	// scanners
 	rpc Scan(immudb.schema.ScanRequest) returns (immudb.schema.ItemList){};
 	rpc History(immudb.schema.HistoryRequest) returns (immudb.schema.ItemList){};
@@ -90,7 +90,7 @@ service LcService {
 	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
 	rpc SendData (stream Data) returns (stream Response){};
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	rpc VerifiableSetExt(immudb.schema.VerifiableSetRequest) returns (SafeItemExt){};
+	rpc VerifiableSetExt(immudb.schema.VerifiableSetRequest) returns (VerifiableItemExt){};
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 
