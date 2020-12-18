@@ -6,7 +6,7 @@ SHELL=/bin/bash -o pipefail
 build/codegen:
 	protoc -I schema/ schema/lc.proto  \
 	-I${GOPATH}/pkg/mod \
-	-I${GOPATH}/pkg/mod/github.com/codenotary/immudb@v0.8.1-0.20201218130601-42402e20c77a/pkg/api/schema \
+	-I${GOPATH}/pkg/mod/github.com/codenotary/immudb@v0.8.1-0.20201218150906-ed2508ae72c1/pkg/api/schema \
 	-I${GOPATH}/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.14.4/third_party/googleapis \
 	-I${GOPATH}/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.14.4 \
 	--go_out=schema --go-grpc_out=schema \
