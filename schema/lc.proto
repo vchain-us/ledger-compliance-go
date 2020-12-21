@@ -38,7 +38,7 @@ message Response {
     int32 status = 1;
     string msg = 2;
     int64 msgID = 3;
-    immudb.schema.DualProof proof = 4;
+    immudb.schema.VerifiableTx VerifiableTx = 4;
     immudb.schema.ImmutableState state = 5;
 }
 
