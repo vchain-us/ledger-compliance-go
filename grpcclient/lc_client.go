@@ -44,17 +44,17 @@ type LcClientIf interface {
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
 	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
 
-	Get(ctx context.Context, key []byte) (*immuschema.Item, error)
-	VerifiedGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuschema.Item, error)
+	Get(ctx context.Context, key []byte) (*immuschema.Entry, error)
+	VerifiedGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuschema.Entry, error)
 
-	GetAll(ctx context.Context, keys [][]byte) (*immuschema.ItemList, error)
+	GetAll(ctx context.Context, keys [][]byte) (*immuschema.Entries, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
 
-	Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.ItemList, error)
-	ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZItemList, error)
+	Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
+	ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
 
-	History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.ItemList, error)
+	History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
 
 	ZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)
 	VerifiedZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)

@@ -32,7 +32,7 @@ func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immusche
 }
 
 // Get ...
-func (c *LcClient) Get(ctx context.Context, key []byte) (*immuschema.Item, error) {
+func (c *LcClient) Get(ctx context.Context, key []byte) (*immuschema.Entry, error) {
 	return c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key})
 }
 
@@ -43,7 +43,7 @@ func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (
 }
 
 // GetBatch ...
-func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.ItemList, error) {
+func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.GetAll(ctx, in)
 }
 
@@ -139,7 +139,7 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 }
 
 // SafeGet ...
-func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Item, error) {
+func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Entry, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -166,17 +166,17 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ite
 	var sourceID, targetID uint64
 	var sourceAlh, targetAlh [sha256.Size]byte
 
-	if state.TxId <= vItem.Item.Tx {
+	if state.TxId <= vItem.Entry.Tx {
 		eh = immuschema.DigestFrom(vItem.VerifiableTx.DualProof.TargetTxMetadata.EH)
 
 		sourceID = state.TxId
 		sourceAlh = immuschema.DigestFrom(state.TxHash)
-		targetID = vItem.Item.Tx
+		targetID = vItem.Entry.Tx
 		targetAlh = dualProof.TargetTxMetadata.Alh()
 	} else {
 		eh = immuschema.DigestFrom(vItem.VerifiableTx.DualProof.SourceTxMetadata.EH)
 
-		sourceID = vItem.Item.Tx
+		sourceID = vItem.Entry.Tx
 		sourceAlh = dualProof.SourceTxMetadata.Alh()
 		targetID = state.TxId
 		targetAlh = immuschema.DigestFrom(state.TxHash)
@@ -184,7 +184,7 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ite
 
 	verifies := store.VerifyInclusion(
 		inclusionProof,
-		&store.KV{Key: key, Value: vItem.Item.Value},
+		&store.KV{Key: key, Value: vItem.Entry.Value},
 		eh)
 	if !verifies {
 		return nil, store.ErrCorruptedData
@@ -223,21 +223,21 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ite
 		return nil, err
 	}
 
-	return vItem.Item, nil
+	return vItem.Entry, nil
 }
 
 // Scan ...
-func (c *LcClient) Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.ItemList, error) {
+func (c *LcClient) Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.Scan(ctx, req)
 }
 
 // ZScan ...
-func (c *LcClient) ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZItemList, error) {
+func (c *LcClient) ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error) {
 	return c.ServiceClient.ZScan(ctx, req)
 }
 
 // History ...
-func (c *LcClient) History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.ItemList, error) {
+func (c *LcClient) History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.History(ctx, req)
 }
 

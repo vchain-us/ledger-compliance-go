@@ -22,18 +22,18 @@ type LcServiceClient interface {
 	// immudb primitives
 	// setters and getters
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
-	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Item, error)
+	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
-	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableItem, error)
+	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
 	// batch
-	GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
+	GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.Entries, error)
 	ExecAll(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
 	// scanners
-	Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
-	History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.ItemList, error)
+	Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.Entries, error)
+	History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.Entries, error)
 	ZAdd(ctx context.Context, in *schema.ZAddRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
 	VerifiableZAdd(ctx context.Context, in *schema.VerifiableZAddRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
-	ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZItemList, error)
+	ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error)
 	// mixed
 	CurrentImmutableState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
@@ -63,8 +63,8 @@ func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts .
 	return out, nil
 }
 
-func (c *lcServiceClient) Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Item, error) {
-	out := new(schema.Item)
+func (c *lcServiceClient) Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error) {
+	out := new(schema.Entry)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -81,8 +81,8 @@ func (c *lcServiceClient) VerifiableSet(ctx context.Context, in *schema.Verifiab
 	return out, nil
 }
 
-func (c *lcServiceClient) VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableItem, error) {
-	out := new(schema.VerifiableItem)
+func (c *lcServiceClient) VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error) {
+	out := new(schema.VerifiableEntry)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGet", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -90,8 +90,8 @@ func (c *lcServiceClient) VerifiableGet(ctx context.Context, in *schema.Verifiab
 	return out, nil
 }
 
-func (c *lcServiceClient) GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.ItemList, error) {
-	out := new(schema.ItemList)
+func (c *lcServiceClient) GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
+	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/GetAll", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -108,8 +108,8 @@ func (c *lcServiceClient) ExecAll(ctx context.Context, in *schema.ExecAllRequest
 	return out, nil
 }
 
-func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.ItemList, error) {
-	out := new(schema.ItemList)
+func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
+	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Scan", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -117,8 +117,8 @@ func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanRequest, opts
 	return out, nil
 }
 
-func (c *lcServiceClient) History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.ItemList, error) {
-	out := new(schema.ItemList)
+func (c *lcServiceClient) History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
+	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -144,8 +144,8 @@ func (c *lcServiceClient) VerifiableZAdd(ctx context.Context, in *schema.Verifia
 	return out, nil
 }
 
-func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZItemList, error) {
-	out := new(schema.ZItemList)
+func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error) {
+	out := new(schema.ZEntries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScan", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -245,18 +245,18 @@ type LcServiceServer interface {
 	// immudb primitives
 	// setters and getters
 	Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error)
-	Get(context.Context, *schema.KeyRequest) (*schema.Item, error)
+	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
-	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableItem, error)
+	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
 	// batch
-	GetAll(context.Context, *schema.KeyListRequest) (*schema.ItemList, error)
+	GetAll(context.Context, *schema.KeyListRequest) (*schema.Entries, error)
 	ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error)
 	// scanners
-	Scan(context.Context, *schema.ScanRequest) (*schema.ItemList, error)
-	History(context.Context, *schema.HistoryRequest) (*schema.ItemList, error)
+	Scan(context.Context, *schema.ScanRequest) (*schema.Entries, error)
+	History(context.Context, *schema.HistoryRequest) (*schema.Entries, error)
 	ZAdd(context.Context, *schema.ZAddRequest) (*schema.TxMetadata, error)
 	VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error)
-	ZScan(context.Context, *schema.ZScanRequest) (*schema.ZItemList, error)
+	ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error)
 	// mixed
 	CurrentImmutableState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
@@ -277,25 +277,25 @@ type UnimplementedLcServiceServer struct {
 func (*UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (*UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Item, error) {
+func (*UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (*UnimplementedLcServiceServer) VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableSet not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableItem, error) {
+func (*UnimplementedLcServiceServer) VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGet not implemented")
 }
-func (*UnimplementedLcServiceServer) GetAll(context.Context, *schema.KeyListRequest) (*schema.ItemList, error) {
+func (*UnimplementedLcServiceServer) GetAll(context.Context, *schema.KeyListRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
 func (*UnimplementedLcServiceServer) ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExecAll not implemented")
 }
-func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanRequest) (*schema.ItemList, error) {
+func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
 }
-func (*UnimplementedLcServiceServer) History(context.Context, *schema.HistoryRequest) (*schema.ItemList, error) {
+func (*UnimplementedLcServiceServer) History(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
 }
 func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddRequest) (*schema.TxMetadata, error) {
@@ -304,7 +304,7 @@ func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddRequest) 
 func (*UnimplementedLcServiceServer) VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableZAdd not implemented")
 }
-func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZItemList, error) {
+func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
 }
 func (*UnimplementedLcServiceServer) CurrentImmutableState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
