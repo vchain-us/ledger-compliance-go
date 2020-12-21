@@ -40,6 +40,12 @@ github.com/codenotary/immudb v0.8.1-0.20201218150906-ed2508ae72c1 h1:ytbVt0S4oRn
 github.com/codenotary/immudb v0.8.1-0.20201218150906-ed2508ae72c1/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
 github.com/codenotary/immudb v0.8.1-0.20201219194913-5f5ccc209c53 h1:FdTdpgAwiAWoWR2f4eDctxxdbc9qz196Q0OOU87gqjU=
 github.com/codenotary/immudb v0.8.1-0.20201219194913-5f5ccc209c53/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
+github.com/codenotary/immudb v0.8.1-0.20201221145250-fb9489231b72 h1:454cQT0M4ZD4Io2rWZJ/VqtInAW0At0BSZqWQ3t/+ec=
+github.com/codenotary/immudb v0.8.1-0.20201221145250-fb9489231b72/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
+github.com/codenotary/immudb v0.8.1-0.20201221160546-d8c945cac1f0 h1:CKDCladHhEdlGbGN1pb//ZJEURtKKz025rXSJBfw4ZI=
+github.com/codenotary/immudb v0.8.1-0.20201221160546-d8c945cac1f0/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
+github.com/codenotary/immudb v0.8.1-0.20201221161320-7716365a2b9e h1:f90NkUqDOIsdZOy/dqZ3hUi0HLdtCdC3u9BgJc0twYM=
+github.com/codenotary/immudb v0.8.1-0.20201221161320-7716365a2b9e/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
