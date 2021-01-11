@@ -119,9 +119,8 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		Signature: verifiableTx.Signature,
 	}
 
-	// TODO: FIX state signing
-	if newState.Signature != nil {
-		ok, err := newState.CheckSignature()
+	if c.serverSigningPubKey != nil {
+		ok, err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
 		}
@@ -207,9 +206,8 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 		Signature: vItem.VerifiableTx.Signature,
 	}
 
-	// TODO: FIX state signing
-	if newState.Signature != nil {
-		ok, err := newState.CheckSignature()
+	if c.serverSigningPubKey != nil {
+		ok, err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
 		}

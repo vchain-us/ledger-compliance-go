@@ -17,6 +17,7 @@ limitations under the License.
 package grpcclient
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -67,16 +68,17 @@ type LcClientIf interface {
 }
 
 type LcClient struct {
-	Dir              string
-	Host             string
-	Port             int
-	ApiKey           string
-	DialOptions      []grpc.DialOption
-	Logger           logger.Logger
-	ClientConn       *grpc.ClientConn
-	ServiceClient    schema.LcServiceClient
-	StateService     state.StateService
-	TimestampService immuclient.TimestampService
+	Dir                 string
+	Host                string
+	Port                int
+	ApiKey              string
+	DialOptions         []grpc.DialOption
+	Logger              logger.Logger
+	ClientConn          *grpc.ClientConn
+	ServiceClient       schema.LcServiceClient
+	StateService        state.StateService
+	TimestampService    immuclient.TimestampService
+	serverSigningPubKey *ecdsa.PublicKey
 	sync.RWMutex
 }
 
@@ -105,9 +107,16 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	for _, setter := range setters {
 		setter(cli)
 	}
-	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
-		cli.ConnectionCheckerInterceptor(),
-		cli.ApiKeySetterInterceptor())))
+
+	var uic []grpc.UnaryClientInterceptor
+
+	if cli.serverSigningPubKey != nil {
+		uic = append(uic, cli.SignatureVerifierInterceptor)
+	}
+
+	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor())
+
+	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(uic...)))
 
 	return cli
 }
@@ -140,61 +149,3 @@ func (c *LcClient) Disconnect() (err error) {
 	c.ServiceClient = nil
 	return c.ClientConn.Close()
 }
-
-/*func (c *LcClient) NewSKV(key []byte, value []byte) *immuschema.StructuredKeyValue {
-	return &immuschema.StructuredKeyValue{
-		Key: key,
-		Value: &immuschema.Content{
-			Timestamp: uint64(c.TimestampService.GetTime().Unix()),
-			Payload:   value,
-		},
-	}
-}
-
-func (c *LcClient) verifyAndSetRoot(result *immuschema.Proof, root *immuschema.Root) (bool, error) {
-	verified := result.Verify(result.Leaf, *root)
-	var err error
-	if verified {
-		toCache := immuschema.NewRoot()
-		toCache.SetIndex(result.Index)
-		toCache.SetRoot(result.Root)
-		err = c.StateService.SetRoot(toCache, c.ApiKey)
-	}
-	return verified, err
-}
-
-func (c *LcClient) NewSKVList(list *immuschema.KVList) *immuschema.SKVList {
-	slist := &immuschema.SKVList{}
-	for _, kv := range list.KVs {
-		slist.SKVs = append(slist.SKVs, &immuschema.StructuredKeyValue{
-			Key: kv.Key,
-			Value: &immuschema.Content{
-				Timestamp: uint64(c.TimestampService.GetTime().Unix()),
-				Payload:   kv.Value,
-			},
-		})
-	}
-	return slist
-}
-
-func (c *LcClient) NewSOps(ops *immuschema.Ops) (*immuschema.Ops, error) {
-	for _, op := range ops.Operations {
-		switch x := op.Operation.(type) {
-		case *immuschema.Op_KVs:
-			skv := c.NewSKV(x.KVs.GetKey(), x.KVs.GetValue())
-			kv, err := skv.ToKV()
-			if err != nil {
-				return nil, err
-			}
-			x.KVs = kv
-		case *immuschema.Op_ZOpts:
-			continue
-		case nil:
-			continue
-		default:
-			return nil, fmt.Errorf("batch operation has unexpected type %T", x)
-		}
-	}
-	return ops, nil
-}
-*/

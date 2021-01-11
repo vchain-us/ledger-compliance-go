@@ -17,6 +17,7 @@ limitations under the License.
 package grpcclient
 
 import (
+	"crypto/ecdsa"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/logger"
@@ -83,5 +84,11 @@ func StateService(rootservice state.StateService) LcClientOption {
 func TimestampService(timestampService immuclient.TimestampService) LcClientOption {
 	return func(args *LcClient) {
 		args.TimestampService = timestampService
+	}
+}
+
+func ServerSigningPubKey(serverSigningPubKey *ecdsa.PublicKey) LcClientOption {
+	return func(args *LcClient) {
+		args.serverSigningPubKey = serverSigningPubKey
 	}
 }
