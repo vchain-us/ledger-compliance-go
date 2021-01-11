@@ -36,6 +36,8 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/codenotary/immudb v0.9.0-RC1 h1:PCxVeO+IPZeNwHJe0qSr3qnIEiyOlpZGoc8MlGpSjPE=
 github.com/codenotary/immudb v0.9.0-RC1/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
+github.com/codenotary/immudb v0.9.1-0.20210111100641-35a7ee3466df h1:93V+NaNXYFdjMP1a1HN7SiZVWdzQ1qIRzx1UJsJ8pvc=
+github.com/codenotary/immudb v0.9.1-0.20210111100641-35a7ee3466df/go.mod h1:/IpcypFjNwINA8qve96zgmdce96RKCEowlJ9PvcaWAo=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
