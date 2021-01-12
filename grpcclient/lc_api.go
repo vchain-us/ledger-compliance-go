@@ -21,9 +21,11 @@ import (
 	"crypto/sha256"
 	"github.com/codenotary/immudb/embedded/store"
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
+	"github.com/codenotary/immudb/pkg/database"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
+	"time"
 )
 
 // Set ...
@@ -51,6 +53,10 @@ func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
 	c.Lock()
 	defer c.Unlock()
+
+	start := time.Now()
+	defer c.Logger.Debugf("VerifiedSet finished in %s", time.Since(start))
+
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {
 		return nil, err
@@ -74,12 +80,12 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 
 	tx := immuschema.TxFrom(verifiableTx.Tx)
 
-	inclusionProof, err := tx.Proof(key)
+	inclusionProof, err := tx.Proof(database.EncodeKey(key))
 	if err != nil {
 		return nil, err
 	}
 
-	verifies := store.VerifyInclusion(inclusionProof, &store.KV{Key: key, Value: value}, tx.Eh())
+	verifies := store.VerifyInclusion(inclusionProof, database.EncodeKV(key, value), tx.Eh())
 	if !verifies {
 		return nil, store.ErrCorruptedData
 	}
@@ -142,6 +148,9 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 	c.Lock()
 	defer c.Unlock()
 
+	start := time.Now()
+	defer c.Logger.Debugf("verifiedGet finished in %s", time.Since(start))
+
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {
 		return nil, err
@@ -152,30 +161,41 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 		ProveSinceTx: state.TxId,
 	}
 
-	vItem, err := c.ServiceClient.VerifiableGet(ctx, req)
+	vEntry, err := c.ServiceClient.VerifiableGet(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	inclusionProof := immuschema.InclusionProofFrom(vItem.InclusionProof)
-	dualProof := immuschema.DualProofFrom(vItem.VerifiableTx.DualProof)
+	inclusionProof := immuschema.InclusionProofFrom(vEntry.InclusionProof)
+	dualProof := immuschema.DualProofFrom(vEntry.VerifiableTx.DualProof)
 
 	var eh [sha256.Size]byte
 
 	var sourceID, targetID uint64
 	var sourceAlh, targetAlh [sha256.Size]byte
 
-	if state.TxId <= vItem.Entry.Tx {
-		eh = immuschema.DigestFrom(vItem.VerifiableTx.DualProof.TargetTxMetadata.EH)
+	var vTx uint64
+	var kv *store.KV
+
+	if vEntry.Entry.ReferencedBy == nil {
+		vTx = vEntry.Entry.Tx
+		kv = database.EncodeKV(key, vEntry.Entry.Value)
+	} else {
+		vTx = vEntry.Entry.ReferencedBy.Tx
+		kv = database.EncodeReference(vEntry.Entry.ReferencedBy.Key, vEntry.Entry.Key, vEntry.Entry.ReferencedBy.AtTx)
+	}
+
+	if state.TxId <= vTx {
+		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.TargetTxMetadata.EH)
 
 		sourceID = state.TxId
 		sourceAlh = immuschema.DigestFrom(state.TxHash)
-		targetID = vItem.Entry.Tx
+		targetID = vTx
 		targetAlh = dualProof.TargetTxMetadata.Alh()
 	} else {
-		eh = immuschema.DigestFrom(vItem.VerifiableTx.DualProof.SourceTxMetadata.EH)
+		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.SourceTxMetadata.EH)
 
-		sourceID = vItem.Entry.Tx
+		sourceID = vTx
 		sourceAlh = dualProof.SourceTxMetadata.Alh()
 		targetID = state.TxId
 		targetAlh = immuschema.DigestFrom(state.TxHash)
@@ -183,7 +203,7 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 
 	verifies := store.VerifyInclusion(
 		inclusionProof,
-		&store.KV{Key: key, Value: vItem.Entry.Value},
+		kv,
 		eh)
 	if !verifies {
 		return nil, store.ErrCorruptedData
@@ -203,7 +223,7 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 	newState := &immuschema.ImmutableState{
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
-		Signature: vItem.VerifiableTx.Signature,
+		Signature: vEntry.VerifiableTx.Signature,
 	}
 
 	if c.serverSigningPubKey != nil {
@@ -221,7 +241,7 @@ func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Ent
 		return nil, err
 	}
 
-	return vItem.Entry, nil
+	return vEntry.Entry, nil
 }
 
 // Scan ...
@@ -283,57 +303,102 @@ func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryRe
 	return c.ServiceClient.HistoryExt(ctx, options)
 }
 
-func (c *LcClient) VerifiedGetExt(ctx context.Context, key []byte) (itemExt *schema.ItemExt, err error) {
+func (c *LcClient) VerifiedGetExt(ctx context.Context, key []byte) (itemExt *schema.VerifiableItemExt, err error) {
 	c.Lock()
 	defer c.Unlock()
-	/*
-		root, err := c.StateService.GetRoot(ctx, c.ApiKey)
+
+	start := time.Now()
+	defer c.Logger.Debugf("verifiedGet finished in %s", time.Since(start))
+
+	state, err := c.StateService.GetState(ctx, c.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &immuschema.VerifiableGetRequest{
+		KeyRequest:   &immuschema.KeyRequest{Key: key, SinceTx: state.TxId},
+		ProveSinceTx: state.TxId,
+	}
+
+	vEntryExt, err := c.ServiceClient.VerifiableGetExt(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	inclusionProof := immuschema.InclusionProofFrom(vEntryExt.Item.InclusionProof)
+	dualProof := immuschema.DualProofFrom(vEntryExt.Item.VerifiableTx.DualProof)
+
+	var eh [sha256.Size]byte
+
+	var sourceID, targetID uint64
+	var sourceAlh, targetAlh [sha256.Size]byte
+
+	var vTx uint64
+	var kv *store.KV
+
+	if vEntryExt.Item.Entry.ReferencedBy == nil {
+		vTx = vEntryExt.Item.Entry.Tx
+		kv = database.EncodeKV(key, vEntryExt.Item.Entry.Value)
+	} else {
+		vTx = vEntryExt.Item.Entry.ReferencedBy.Tx
+		kv = database.EncodeReference(vEntryExt.Item.Entry.ReferencedBy.Key, vEntryExt.Item.Entry.Key, vEntryExt.Item.Entry.ReferencedBy.AtTx)
+	}
+
+	if state.TxId <= vTx {
+		eh = immuschema.DigestFrom(vEntryExt.Item.VerifiableTx.DualProof.TargetTxMetadata.EH)
+
+		sourceID = state.TxId
+		sourceAlh = immuschema.DigestFrom(state.TxHash)
+		targetID = vTx
+		targetAlh = dualProof.TargetTxMetadata.Alh()
+	} else {
+		eh = immuschema.DigestFrom(vEntryExt.Item.VerifiableTx.DualProof.SourceTxMetadata.EH)
+
+		sourceID = vTx
+		sourceAlh = dualProof.SourceTxMetadata.Alh()
+		targetID = state.TxId
+		targetAlh = immuschema.DigestFrom(state.TxHash)
+	}
+
+	verifies := store.VerifyInclusion(
+		inclusionProof,
+		kv,
+		eh)
+	if !verifies {
+		return nil, store.ErrCorruptedData
+	}
+
+	verifies = store.VerifyDualProof(
+		dualProof,
+		sourceID,
+		targetID,
+		sourceAlh,
+		targetAlh,
+	)
+	if !verifies {
+		return nil, store.ErrCorruptedData
+	}
+
+	newState := &immuschema.ImmutableState{
+		TxId:      targetID,
+		TxHash:    targetAlh[:],
+		Signature: vEntryExt.Item.VerifiableTx.Signature,
+	}
+
+	if c.serverSigningPubKey != nil {
+		ok, err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
 		}
-
-		sgOpts := &immuschema.SafeGetOptions{
-			Key: key,
-			RootIndex: &immuschema.Index{
-				Index: root.GetIndex(),
-			},
+		if !ok {
+			return nil, store.ErrCorruptedData
 		}
+	}
 
-		safeItemExt, err := c.ServiceClient.SafeGetExt(ctx, sgOpts)
-		if err != nil {
-			return nil, err
-		}
+	err = c.StateService.SetState(c.ApiKey, newState)
+	if err != nil {
+		return nil, err
+	}
 
-		h, err := safeItemExt.Item.Hash()
-		if err != nil {
-			return nil, err
-		}
-		verified := safeItemExt.Item.Proof.Verify(h, *root)
-		if verified {
-			// saving a fresh root
-			tocache := immuschema.NewRoot()
-			tocache.SetIndex(safeItemExt.Item.Proof.At)
-			tocache.SetRoot(safeItemExt.Item.Proof.Root)
-			err = c.StateService.SetRoot(tocache, c.ApiKey)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		sitem, err := safeItemExt.Item.ToSafeSItem()
-		if err != nil {
-			return nil, err
-		}
-
-		return &schema.VerifiedItemExt{
-			Item: &immuclient.VerifiedItem{
-				Key:      sitem.Item.GetKey(),
-				Value:    sitem.Item.Value.Payload,
-				Index:    sitem.Item.GetIndex(),
-				Time:     sitem.Item.Value.Timestamp,
-				Verified: verified,
-			},
-			Timestamp: safeItemExt.Timestamp,
-		}, nil*/
-	return
+	return vEntryExt, nil
 }

@@ -84,13 +84,14 @@ service LcService {
 	rpc VerifiableZAdd (immudb.schema.VerifiableZAddRequest) returns (immudb.schema.VerifiableTx){};
 	rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){};
 	// mixed
-	rpc CurrentImmutableState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
+	rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
+
 	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
 	// ledger compliance extensions
 	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
 	rpc SendData (stream Data) returns (stream Response){};
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	rpc VerifiableSetExt(immudb.schema.VerifiableSetRequest) returns (VerifiableItemExt){};
+	rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 

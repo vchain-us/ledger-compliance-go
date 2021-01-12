@@ -35,13 +35,13 @@ type LcServiceClient interface {
 	VerifiableZAdd(ctx context.Context, in *schema.VerifiableZAddRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error)
 	// mixed
-	CurrentImmutableState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
+	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
+	VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 }
@@ -153,9 +153,9 @@ func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanRequest, op
 	return out, nil
 }
 
-func (c *lcServiceClient) CurrentImmutableState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error) {
+func (c *lcServiceClient) CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error) {
 	out := new(schema.ImmutableState)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentImmutableState", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentState", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -211,9 +211,9 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 	return m, nil
 }
 
-func (c *lcServiceClient) VerifiableSetExt(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error) {
+func (c *lcServiceClient) VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error) {
 	out := new(VerifiableItemExt)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableSetExt", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGetExt", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -258,13 +258,13 @@ type LcServiceServer interface {
 	VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error)
 	ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error)
 	// mixed
-	CurrentImmutableState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
+	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	SendData(LcService_SendDataServer) error
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*VerifiableItemExt, error)
+	VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error)
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	mustEmbedUnimplementedLcServiceServer()
@@ -307,8 +307,8 @@ func (*UnimplementedLcServiceServer) VerifiableZAdd(context.Context, *schema.Ver
 func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
 }
-func (*UnimplementedLcServiceServer) CurrentImmutableState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CurrentImmutableState not implemented")
+func (*UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
 }
 func (*UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
@@ -319,8 +319,8 @@ func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOption
 func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableSetExt(context.Context, *schema.VerifiableSetRequest) (*VerifiableItemExt, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifiableSetExt not implemented")
+func (*UnimplementedLcServiceServer) VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGetExt not implemented")
 }
 func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScanExt not implemented")
@@ -532,20 +532,20 @@ func _LcService_ZScan_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_CurrentImmutableState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LcService_CurrentState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).CurrentImmutableState(ctx, in)
+		return srv.(LcServiceServer).CurrentState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/CurrentImmutableState",
+		FullMethod: "/lc.schema.LcService/CurrentState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).CurrentImmutableState(ctx, req.(*empty.Empty))
+		return srv.(LcServiceServer).CurrentState(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -612,20 +612,20 @@ func (x *lcServiceSendDataServer) Recv() (*Data, error) {
 	return m, nil
 }
 
-func _LcService_VerifiableSetExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.VerifiableSetRequest)
+func _LcService_VerifiableGetExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.VerifiableGetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VerifiableSetExt(ctx, in)
+		return srv.(LcServiceServer).VerifiableGetExt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VerifiableSetExt",
+		FullMethod: "/lc.schema.LcService/VerifiableGetExt",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VerifiableSetExt(ctx, req.(*schema.VerifiableSetRequest))
+		return srv.(LcServiceServer).VerifiableGetExt(ctx, req.(*schema.VerifiableGetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -715,8 +715,8 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_ZScan_Handler,
 		},
 		{
-			MethodName: "CurrentImmutableState",
-			Handler:    _LcService_CurrentImmutableState_Handler,
+			MethodName: "CurrentState",
+			Handler:    _LcService_CurrentState_Handler,
 		},
 		{
 			MethodName: "Health",
@@ -727,8 +727,8 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_ReportTamper_Handler,
 		},
 		{
-			MethodName: "VerifiableSetExt",
-			Handler:    _LcService_VerifiableSetExt_Handler,
+			MethodName: "VerifiableGetExt",
+			Handler:    _LcService_VerifiableGetExt_Handler,
 		},
 		{
 			MethodName: "ZScanExt",
