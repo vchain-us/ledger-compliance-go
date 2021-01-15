@@ -220,7 +220,7 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 		return nil, err
 	}
 
-	if kReq.SinceTx == 0 {
+	if kReq.SinceTx == 0 && kReq.AtTx == 0 {
 		kReq.SinceTx = state.TxId
 	}
 
@@ -266,7 +266,7 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 		return nil, err
 	}
 
-	if kReq.SinceTx == 0 {
+	if kReq.SinceTx == 0 && kReq.AtTx == 0 {
 		kReq.SinceTx = state.TxId
 	}
 
