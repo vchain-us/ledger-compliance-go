@@ -46,9 +46,11 @@ type LcClientIf interface {
 	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
 
 	Get(ctx context.Context, key []byte) (*immuschema.Entry, error)
-	VerifiedGet(ctx context.Context, key []byte, opts ...grpc.CallOption) (*immuschema.Entry, error)
+	VerifiedGet(ctx context.Context, key []byte) (*immuschema.Entry, error)
+	VerifiedGetSince(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
+	VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
 
-	GetAll(ctx context.Context, keys [][]byte) (*immuschema.Entries, error)
+	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
 
@@ -57,12 +59,10 @@ type LcClientIf interface {
 
 	History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
 
-	ZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)
-	VerifiedZAddAt(ctx context.Context, set []byte, score float64, key []byte, txID uint64) (*immuschema.TxMetadata, error)
-
 	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
 	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
-	VerifiedGetExt(ctx context.Context, key []byte) (*schema.ItemExt, error)
+	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
+	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
 
 	Connect() (err error)
 }
