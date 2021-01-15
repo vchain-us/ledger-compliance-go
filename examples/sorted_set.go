@@ -1,5 +1,3 @@
-// +build ignore
-
 /*
 Copyright 2019-2020 vChain, Inc.
 
@@ -27,59 +25,50 @@ import (
 )
 
 func main() {
-	client := sdk.NewLcClient(sdk.ApiKey("vipicevtthnqiveufonnkhnoshkoyrbvpeyj"), sdk.Host("localhost"), sdk.Port(3324))
+	client := sdk.NewLcClient(sdk.ApiKey("msvvnhdhfseqbveblqxruhasfrvkqlutctcj"), sdk.Host("localhost"), sdk.Port(3324))
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.SafeSet(context.Background(), []byte(`key1`), []byte(`val1`))
+	_, err = client.VerifiedSet(context.Background(), []byte(`key1`), []byte(`val1`))
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.SafeSet(context.Background(), []byte(`key2`), []byte(`val2`))
+	_, err = client.VerifiedSet(context.Background(), []byte(`key2`), []byte(`val2`))
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.SafeSet(context.Background(), []byte(`key3`), []byte(`val3`))
+	_, err = client.VerifiedSet(context.Background(), []byte(`key3`), []byte(`val3`))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	id, err := client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
-		Set: []byte(`mySortedSet`),
-		Score: &immuschema.Score{
-			Score: 5,
-		},
-		Key: []byte(`key1`),
+	_, err = client.ZAddAt(context.Background(), &immuschema.ZAddRequest{
+		Set:   []byte(`mySortedSet`),
+		Score: 5,
+		Key:   []byte(`key1`),
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(id.Verified)
-	id, err = client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
-		Set: []byte(`mySortedSet`),
-		Score: &immuschema.Score{
-			Score: 99,
-		},
-		Key: []byte(`key3`),
+	_, err = client.ZAddAt(context.Background(), &immuschema.ZAddRequest{
+		Set:   []byte(`mySortedSet`),
+		Score: 99,
+		Key:   []byte(`key3`),
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(id.Verified)
-	id, err = client.SafeZAdd(context.Background(), &immuschema.ZAddOptions{
-		Set: []byte(`mySortedSet`),
-		Score: &immuschema.Score{
-			Score: 1,
-		},
-		Key: []byte(`key2`),
+	_, err = client.ZAddAt(context.Background(), &immuschema.ZAddRequest{
+		Set:   []byte(`mySortedSet`),
+		Score: 1,
+		Key:   []byte(`key2`),
 	})
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	println(id.Verified)
-	list, err := client.ZScan(context.Background(), &immuschema.ZScanOptions{
+	list, err := client.ZScan(context.Background(), &immuschema.ZScanRequest{
 		Set: []byte(`mySortedSet`),
 	})
 
