@@ -38,6 +38,13 @@ func (c *LcClient) Get(ctx context.Context, key []byte) (*immuschema.Entry, erro
 	return c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key})
 }
 
+// GetAt ...
+func (c *LcClient) GetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error) {
+	return c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key,
+		AtTx: tx,
+	})
+}
+
 // ExecAll ...
 func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error) {
 	result, err := c.ServiceClient.ExecAll(ctx, in)
@@ -173,11 +180,19 @@ func (c *LcClient) VerifiedGetExt(ctx context.Context, key []byte) (itemExt *sch
 	})
 }
 
-// VerifiedGetExt ...
+// VerifiedGetExtSince ...
 func (c *LcClient) VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error) {
 	return c.verifiedGetExt(ctx, &immuschema.KeyRequest{
 		Key:     key,
 		SinceTx: tx,
+	})
+}
+
+// VerifiedGetExtAt ...
+func (c *LcClient) VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error) {
+	return c.verifiedGetExt(ctx, &immuschema.KeyRequest{
+		Key:  key,
+		AtTx: tx,
 	})
 }
 
