@@ -58,8 +58,11 @@ func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*
 
 // VerifiedSet ...
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
-	c.Lock()
-	defer c.Unlock()
+	err := c.StateService.CacheLock()
+	if err != nil {
+		return nil, err
+	}
+	defer c.StateService.CacheUnlock()
 
 	start := time.Now()
 	defer c.Logger.Debugf("VerifiedSet finished in %s", time.Since(start))
@@ -227,16 +230,15 @@ func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryRe
 }
 
 func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyRequest) (itemExt *schema.VerifiableItemExt, err error) {
-	c.Lock()
-	defer c.Unlock()
+	err = c.StateService.CacheLock()
+	if err != nil {
+		return nil, err
+	}
+	defer c.StateService.CacheUnlock()
 
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {
 		return nil, err
-	}
-
-	if kReq.SinceTx == 0 && kReq.AtTx == 0 {
-		kReq.SinceTx = state.TxId
 	}
 
 	req := &immuschema.VerifiableGetRequest{
@@ -273,16 +275,15 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 }
 
 func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest) (vi *immuschema.Entry, err error) {
-	c.Lock()
-	defer c.Unlock()
+	err = c.StateService.CacheLock()
+	if err != nil {
+		return nil, err
+	}
+	defer c.StateService.CacheUnlock()
 
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {
 		return nil, err
-	}
-
-	if kReq.SinceTx == 0 && kReq.AtTx == 0 {
-		kReq.SinceTx = state.TxId
 	}
 
 	req := &immuschema.VerifiableGetRequest{
