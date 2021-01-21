@@ -40,7 +40,7 @@ import (
 	immuclient "github.com/codenotary/immudb/pkg/client"
 )
 
-// ImmuClient ...
+// LcClientIf ...
 type LcClientIf interface {
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
 	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
@@ -62,6 +62,9 @@ type LcClientIf interface {
 
 	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
 	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
+
+	Health(ctx context.Context) (*immuschema.HealthResponse, error)
+
 	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
@@ -129,7 +132,6 @@ func (c *LcClient) Connect() (err error) {
 	}
 	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
 	if err != nil {
-		c.Logger.Errorf("fail to dial: %v", err)
 		return err
 	}
 
@@ -140,7 +142,6 @@ func (c *LcClient) Connect() (err error) {
 
 	c.StateService, err = state.NewStateService(cache.NewFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
 	if err != nil {
-		c.Logger.Errorf("fail to instantiate root service: %v", err)
 		return err
 	}
 

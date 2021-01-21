@@ -22,6 +22,7 @@ import (
 	"github.com/codenotary/immudb/embedded/store"
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/database"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
@@ -227,6 +228,10 @@ func (c *LcClient) ZScanExt(ctx context.Context, options *immuschema.ZScanReques
 // HistoryExt ...
 func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (*schema.ItemExtList, error) {
 	return c.ServiceClient.HistoryExt(ctx, options)
+}
+
+func (c *LcClient) Health(ctx context.Context) (*immuschema.HealthResponse, error) {
+	return c.ServiceClient.Health(ctx, &empty.Empty{})
 }
 
 func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyRequest) (itemExt *schema.VerifiableItemExt, err error) {
