@@ -31,7 +31,6 @@ import (
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc/keepalive"
 
-	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/timestamp"
 	"github.com/codenotary/immudb/pkg/logger"
 	"google.golang.org/grpc"
@@ -140,7 +139,7 @@ func (c *LcClient) Connect() (err error) {
 	uuidPrv := NewLcUUIDProvider(c.ServiceClient)
 	stateProvider := NewLcStateProvider(c.ServiceClient)
 
-	c.StateService, err = state.NewStateService(cache.NewFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
+	c.StateService, err = NewLcStateService(NewLcFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
 	if err != nil {
 		return err
 	}
