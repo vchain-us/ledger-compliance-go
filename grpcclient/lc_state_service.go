@@ -53,7 +53,7 @@ func (r *lcStateService) GetState(ctx context.Context, apiKey string) (*schema.I
 	if err == nil {
 		return st, nil
 	}
-	if err.Error() == "could not find previous state" {
+	if err == ErrStateNotFound {
 		if st, err := r.cache.GetAndClean(r.serverUUID, apiKey); err == nil {
 			return st, nil
 		}

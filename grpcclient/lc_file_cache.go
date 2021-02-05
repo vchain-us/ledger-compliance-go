@@ -39,11 +39,11 @@ func (w *FileCache) Get(serverUUID, db string) (*schema.ImmutableState, error) {
 		if strings.Contains(line, db+":") {
 			r := strings.Split(line, ":")
 			if r[1] == "" {
-				return nil, fmt.Errorf("could not find previous state")
+				return nil, ErrStateNotFound
 			}
 			oldState, err := base64.StdEncoding.DecodeString(r[1])
 			if err != nil {
-				return nil, fmt.Errorf("could not find previous state")
+				return nil, ErrStateNotFound
 			}
 			state := &schema.ImmutableState{}
 			if err = proto.Unmarshal(oldState, state); err != nil {
@@ -52,13 +52,13 @@ func (w *FileCache) Get(serverUUID, db string) (*schema.ImmutableState, error) {
 			return state, nil
 		}
 	}
-	return nil, fmt.Errorf("could not find previous state")
+	return nil, ErrStateNotFound
 }
 
 // GetAndClean retrieve the state for db identifier and remove it from state file
 func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, error) {
 	state, err := w.Get(serverUUID, db)
-	if err != nil && err.Error() != "could not find previous state" {
+	if err != nil && err != ErrStateNotFound {
 		return nil, err
 	}
 	f, err := os.Open(w.getStateFileName(serverUUID))
@@ -146,7 +146,7 @@ func (fl *FileLocker) Lock() (err error) {
 
 func (fl *FileLocker) Unlock() (err error) {
 	if fl.unlockFunc == nil {
-		return fmt.Errorf("try to lock a not locked file")
+		return ErrNotLockedFile
 	}
 	fl.unlockFunc()
 	return nil
