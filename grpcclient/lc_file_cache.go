@@ -58,7 +58,7 @@ func (w *FileCache) Get(serverUUID, db string) (*schema.ImmutableState, error) {
 // GetAndClean retrieve the state for db identifier and remove it from state file
 func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, error) {
 	state, err := w.Get(serverUUID, db)
-	if err != nil && err != ErrStateNotFound {
+	if err != nil {
 		return nil, err
 	}
 	f, err := os.Open(w.getStateFileName(serverUUID))
