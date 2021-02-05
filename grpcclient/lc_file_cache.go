@@ -2,8 +2,8 @@ package grpcclient
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/base64"
-	"fmt"
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/rogpeppe/go-internal/lockedfile"
 	"io/ioutil"
@@ -68,11 +68,11 @@ func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, 
 
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
-	var lines []byte
+	var lines [][]byte
 	for scanner.Scan() {
 		line := scanner.Text()
 		if !strings.Contains(line, db+":") && line != "" {
-			lines = append(lines, []byte(line+"\n")...)
+			lines = append(lines, []byte(line))
 		}
 	}
 	if err := f.Close(); err != nil {
@@ -82,7 +82,8 @@ func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, 
 	if err != nil {
 		return nil, err
 	}
-	err = ioutil.WriteFile(w.getStateFileName(serverUUID), lines, 0644)
+
+	err = ioutil.WriteFile(w.getStateFileName(serverUUID), bytes.Join(lines, []byte("\n")), 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ func (w *FileCache) Set(serverUUID, db string, state *schema.ImmutableState) err
 	input, _ := ioutil.ReadFile(fn)
 	lines := strings.Split(string(input), "\n")
 
-	newState := db + ":" + base64.StdEncoding.EncodeToString(raw) + "\n"
+	newState := db + ":" + base64.StdEncoding.EncodeToString(raw)
 	var exists bool
 	for i, line := range lines {
 		if strings.Contains(line, db+":") {
