@@ -108,26 +108,24 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	var sourceID, targetID uint64
 	var sourceAlh, targetAlh [sha256.Size]byte
 
-	if state.TxId == 0 {
-		sourceID = tx.ID
-		sourceAlh = tx.Alh
-	} else {
-		sourceID = state.TxId
-		sourceAlh = immuschema.DigestFrom(state.TxHash)
-	}
+	sourceID = state.TxId
+	sourceAlh = immuschema.DigestFrom(state.TxHash)
 
 	targetID = tx.ID
 	targetAlh = tx.Alh
 
-	verifies = store.VerifyDualProof(
-		immuschema.DualProofFrom(verifiableTx.DualProof),
-		sourceID,
-		targetID,
-		sourceAlh,
-		targetAlh,
-	)
-	if !verifies {
-		return nil, store.ErrCorruptedData
+	if state.TxId > 0 {
+		verifies = store.VerifyDualProof(
+			immuschema.DualProofFrom(verifiableTx.DualProof),
+			sourceID,
+			targetID,
+			sourceAlh,
+			targetAlh,
+		)
+
+		if !verifies {
+			return nil, store.ErrCorruptedData
+		}
 	}
 
 	newState := &immuschema.ImmutableState{
@@ -368,15 +366,17 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 		return nil, store.ErrCorruptedData
 	}
 
-	verifies = store.VerifyDualProof(
-		dualProof,
-		sourceID,
-		targetID,
-		sourceAlh,
-		targetAlh,
-	)
-	if !verifies {
-		return nil, store.ErrCorruptedData
+	if state.TxId > 0 {
+		verifies = store.VerifyDualProof(
+			dualProof,
+			sourceID,
+			targetID,
+			sourceAlh,
+			targetAlh,
+		)
+		if !verifies {
+			return nil, store.ErrCorruptedData
+		}
 	}
 
 	newState := &immuschema.ImmutableState{
