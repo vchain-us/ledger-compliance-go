@@ -19,6 +19,10 @@ package grpcclient
 import (
 	"context"
 	"crypto/sha256"
+	"io/ioutil"
+	"os"
+	"time"
+
 	"github.com/codenotary/immudb/embedded/store"
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/database"
@@ -26,7 +30,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
-	"time"
 )
 
 // Set ...
@@ -230,6 +233,27 @@ func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryRe
 
 func (c *LcClient) Health(ctx context.Context) (*immuschema.HealthResponse, error) {
 	return c.ServiceClient.Health(ctx, &empty.Empty{})
+}
+
+// SetFile ...
+func (c *LcClient) SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error) {
+	bs, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return c.ServiceClient.Set(ctx, &immuschema.SetRequest{KVs: []*immuschema.KeyValue{{Key: key, Value: bs}}})
+}
+
+// GetFile ...
+func (c *LcClient) GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error) {
+	entry, err := c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key})
+	if err != nil {
+		return nil, err
+	}
+	if err := ioutil.WriteFile(filePath, entry.Value, os.ModePerm); err != nil {
+		return nil, err
+	}
+	return entry, nil
 }
 
 func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyRequest) (itemExt *schema.VerifiableItemExt, err error) {
