@@ -13,7 +13,8 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
+// Requires gRPC-Go v1.32.0 or later.
+const _ = grpc.SupportPackageIsVersion7
 
 // LcServiceClient is the client API for LcService service.
 //
@@ -44,6 +45,15 @@ type LcServiceClient interface {
 	VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
+	// streams
+	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
+	StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error)
+	StreamVerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (LcService_StreamVerifiableGetClient, error)
+	StreamVerifiableSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamVerifiableSetClient, error)
+	StreamScan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (LcService_StreamScanClient, error)
+	StreamZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (LcService_StreamZScanClient, error)
+	StreamHistory(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (LcService_StreamHistoryClient, error)
+	StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error)
 }
 
 type lcServiceClient struct {
@@ -181,7 +191,7 @@ func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, o
 }
 
 func (c *lcServiceClient) SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_LcService_serviceDesc.Streams[0], "/lc.schema.LcService/SendData", opts...)
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[0], "/lc.schema.LcService/SendData", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +248,268 @@ func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryRequ
 	return out, nil
 }
 
+func (c *lcServiceClient) StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[1], "/lc.schema.LcService/streamGet", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamGetClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LcService_StreamGetClient interface {
+	Recv() (*schema.Chunk, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamGetClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamGetClient) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[2], "/lc.schema.LcService/streamSet", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamSetClient{stream}
+	return x, nil
+}
+
+type LcService_StreamSetClient interface {
+	Send(*schema.Chunk) error
+	CloseAndRecv() (*schema.TxMetadata, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamSetClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamSetClient) Send(m *schema.Chunk) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamSetClient) CloseAndRecv() (*schema.TxMetadata, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(schema.TxMetadata)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamVerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (LcService_StreamVerifiableGetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[3], "/lc.schema.LcService/streamVerifiableGet", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamVerifiableGetClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LcService_StreamVerifiableGetClient interface {
+	Recv() (*schema.Chunk, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamVerifiableGetClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamVerifiableGetClient) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamVerifiableSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamVerifiableSetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[4], "/lc.schema.LcService/streamVerifiableSet", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamVerifiableSetClient{stream}
+	return x, nil
+}
+
+type LcService_StreamVerifiableSetClient interface {
+	Send(*schema.Chunk) error
+	CloseAndRecv() (*schema.VerifiableTx, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamVerifiableSetClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamVerifiableSetClient) Send(m *schema.Chunk) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamVerifiableSetClient) CloseAndRecv() (*schema.VerifiableTx, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(schema.VerifiableTx)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamScan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (LcService_StreamScanClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[5], "/lc.schema.LcService/streamScan", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamScanClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LcService_StreamScanClient interface {
+	Recv() (*schema.Chunk, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamScanClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamScanClient) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (LcService_StreamZScanClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[6], "/lc.schema.LcService/streamZScan", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamZScanClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LcService_StreamZScanClient interface {
+	Recv() (*schema.Chunk, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamZScanClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamZScanClient) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamHistory(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (LcService_StreamHistoryClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[7], "/lc.schema.LcService/streamHistory", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamHistoryClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LcService_StreamHistoryClient interface {
+	Recv() (*schema.Chunk, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamHistoryClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamHistoryClient) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *lcServiceClient) StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[8], "/lc.schema.LcService/streamExecAll", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamExecAllClient{stream}
+	return x, nil
+}
+
+type LcService_StreamExecAllClient interface {
+	Send(*schema.Chunk) error
+	CloseAndRecv() (*schema.TxMetadata, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamExecAllClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamExecAllClient) Send(m *schema.Chunk) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamExecAllClient) CloseAndRecv() (*schema.TxMetadata, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(schema.TxMetadata)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LcServiceServer is the server API for LcService service.
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
@@ -267,6 +539,15 @@ type LcServiceServer interface {
 	VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error)
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
+	// streams
+	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
+	StreamSet(LcService_StreamSetServer) error
+	StreamVerifiableGet(*schema.VerifiableGetRequest, LcService_StreamVerifiableGetServer) error
+	StreamVerifiableSet(LcService_StreamVerifiableSetServer) error
+	StreamScan(*schema.ScanRequest, LcService_StreamScanServer) error
+	StreamZScan(*schema.ZScanRequest, LcService_StreamZScanServer) error
+	StreamHistory(*schema.HistoryRequest, LcService_StreamHistoryServer) error
+	StreamExecAll(LcService_StreamExecAllServer) error
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -274,64 +555,95 @@ type LcServiceServer interface {
 type UnimplementedLcServiceServer struct {
 }
 
-func (*UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error) {
+func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (*UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
+func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error) {
+func (UnimplementedLcServiceServer) VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableSet not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error) {
+func (UnimplementedLcServiceServer) VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGet not implemented")
 }
-func (*UnimplementedLcServiceServer) GetAll(context.Context, *schema.KeyListRequest) (*schema.Entries, error) {
+func (UnimplementedLcServiceServer) GetAll(context.Context, *schema.KeyListRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (*UnimplementedLcServiceServer) ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error) {
+func (UnimplementedLcServiceServer) ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExecAll not implemented")
 }
-func (*UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanRequest) (*schema.Entries, error) {
+func (UnimplementedLcServiceServer) Scan(context.Context, *schema.ScanRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Scan not implemented")
 }
-func (*UnimplementedLcServiceServer) History(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
+func (UnimplementedLcServiceServer) History(context.Context, *schema.HistoryRequest) (*schema.Entries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
 }
-func (*UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddRequest) (*schema.TxMetadata, error) {
+func (UnimplementedLcServiceServer) ZAdd(context.Context, *schema.ZAddRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZAdd not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error) {
+func (UnimplementedLcServiceServer) VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableZAdd not implemented")
 }
-func (*UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error) {
+func (UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
 }
-func (*UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
+func (UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
 }
-func (*UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
+func (UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
-func (*UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
+func (UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
 }
-func (*UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
+func (UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
-func (*UnimplementedLcServiceServer) VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error) {
+func (UnimplementedLcServiceServer) VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGetExt not implemented")
 }
-func (*UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error) {
+func (UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScanExt not implemented")
 }
-func (*UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error) {
+func (UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HistoryExt not implemented")
 }
-func (*UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
+func (UnimplementedLcServiceServer) StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamGet not implemented")
+}
+func (UnimplementedLcServiceServer) StreamSet(LcService_StreamSetServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamSet not implemented")
+}
+func (UnimplementedLcServiceServer) StreamVerifiableGet(*schema.VerifiableGetRequest, LcService_StreamVerifiableGetServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamVerifiableGet not implemented")
+}
+func (UnimplementedLcServiceServer) StreamVerifiableSet(LcService_StreamVerifiableSetServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamVerifiableSet not implemented")
+}
+func (UnimplementedLcServiceServer) StreamScan(*schema.ScanRequest, LcService_StreamScanServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamScan not implemented")
+}
+func (UnimplementedLcServiceServer) StreamZScan(*schema.ZScanRequest, LcService_StreamZScanServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamZScan not implemented")
+}
+func (UnimplementedLcServiceServer) StreamHistory(*schema.HistoryRequest, LcService_StreamHistoryServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamHistory not implemented")
+}
+func (UnimplementedLcServiceServer) StreamExecAll(LcService_StreamExecAllServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamExecAll not implemented")
+}
+func (UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
 
-func RegisterLcServiceServer(s *grpc.Server, srv LcServiceServer) {
-	s.RegisterService(&_LcService_serviceDesc, srv)
+// UnsafeLcServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LcServiceServer will
+// result in compilation errors.
+type UnsafeLcServiceServer interface {
+	mustEmbedUnimplementedLcServiceServer()
+}
+
+func RegisterLcServiceServer(s grpc.ServiceRegistrar, srv LcServiceServer) {
+	s.RegisterService(&LcService_ServiceDesc, srv)
 }
 
 func _LcService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -666,7 +978,193 @@ func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-var _LcService_serviceDesc = grpc.ServiceDesc{
+func _LcService_StreamGet_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(schema.KeyRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LcServiceServer).StreamGet(m, &lcServiceStreamGetServer{stream})
+}
+
+type LcService_StreamGetServer interface {
+	Send(*schema.Chunk) error
+	grpc.ServerStream
+}
+
+type lcServiceStreamGetServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamGetServer) Send(m *schema.Chunk) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _LcService_StreamSet_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LcServiceServer).StreamSet(&lcServiceStreamSetServer{stream})
+}
+
+type LcService_StreamSetServer interface {
+	SendAndClose(*schema.TxMetadata) error
+	Recv() (*schema.Chunk, error)
+	grpc.ServerStream
+}
+
+type lcServiceStreamSetServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamSetServer) SendAndClose(m *schema.TxMetadata) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamSetServer) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _LcService_StreamVerifiableGet_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(schema.VerifiableGetRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LcServiceServer).StreamVerifiableGet(m, &lcServiceStreamVerifiableGetServer{stream})
+}
+
+type LcService_StreamVerifiableGetServer interface {
+	Send(*schema.Chunk) error
+	grpc.ServerStream
+}
+
+type lcServiceStreamVerifiableGetServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamVerifiableGetServer) Send(m *schema.Chunk) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _LcService_StreamVerifiableSet_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LcServiceServer).StreamVerifiableSet(&lcServiceStreamVerifiableSetServer{stream})
+}
+
+type LcService_StreamVerifiableSetServer interface {
+	SendAndClose(*schema.VerifiableTx) error
+	Recv() (*schema.Chunk, error)
+	grpc.ServerStream
+}
+
+type lcServiceStreamVerifiableSetServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamVerifiableSetServer) SendAndClose(m *schema.VerifiableTx) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamVerifiableSetServer) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _LcService_StreamScan_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(schema.ScanRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LcServiceServer).StreamScan(m, &lcServiceStreamScanServer{stream})
+}
+
+type LcService_StreamScanServer interface {
+	Send(*schema.Chunk) error
+	grpc.ServerStream
+}
+
+type lcServiceStreamScanServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamScanServer) Send(m *schema.Chunk) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _LcService_StreamZScan_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(schema.ZScanRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LcServiceServer).StreamZScan(m, &lcServiceStreamZScanServer{stream})
+}
+
+type LcService_StreamZScanServer interface {
+	Send(*schema.Chunk) error
+	grpc.ServerStream
+}
+
+type lcServiceStreamZScanServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamZScanServer) Send(m *schema.Chunk) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _LcService_StreamHistory_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(schema.HistoryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LcServiceServer).StreamHistory(m, &lcServiceStreamHistoryServer{stream})
+}
+
+type LcService_StreamHistoryServer interface {
+	Send(*schema.Chunk) error
+	grpc.ServerStream
+}
+
+type lcServiceStreamHistoryServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamHistoryServer) Send(m *schema.Chunk) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _LcService_StreamExecAll_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LcServiceServer).StreamExecAll(&lcServiceStreamExecAllServer{stream})
+}
+
+type LcService_StreamExecAllServer interface {
+	SendAndClose(*schema.TxMetadata) error
+	Recv() (*schema.Chunk, error)
+	grpc.ServerStream
+}
+
+type lcServiceStreamExecAllServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamExecAllServer) SendAndClose(m *schema.TxMetadata) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamExecAllServer) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// LcService_ServiceDesc is the grpc.ServiceDesc for LcService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var LcService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "lc.schema.LcService",
 	HandlerType: (*LcServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
@@ -744,6 +1242,46 @@ var _LcService_serviceDesc = grpc.ServiceDesc{
 			StreamName:    "SendData",
 			Handler:       _LcService_SendData_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "streamGet",
+			Handler:       _LcService_StreamGet_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamSet",
+			Handler:       _LcService_StreamSet_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "streamVerifiableGet",
+			Handler:       _LcService_StreamVerifiableGet_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamVerifiableSet",
+			Handler:       _LcService_StreamVerifiableSet_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "streamScan",
+			Handler:       _LcService_StreamScan_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamZScan",
+			Handler:       _LcService_StreamZScan_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamHistory",
+			Handler:       _LcService_StreamHistory_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamExecAll",
+			Handler:       _LcService_StreamExecAll_Handler,
 			ClientStreams: true,
 		},
 	},
