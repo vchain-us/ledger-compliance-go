@@ -98,4 +98,13 @@ service LcService {
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 
+	// streams
+	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxMetadata) {};
+	rpc streamVerifiableGet(immudb.schema.VerifiableGetRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamVerifiableSet(stream immudb.schema.Chunk) returns (immudb.schema.VerifiableTx) {};
+	rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxMetadata) {};
 }

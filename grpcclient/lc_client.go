@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/codenotary/immudb/pkg/client/state"
+	"github.com/codenotary/immudb/pkg/stream"
 
 	"context"
 
@@ -74,20 +75,31 @@ type LcClientIf interface {
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
 
 	Connect() (err error)
+
+	// streams
+	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error)
+	StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error)
+	StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error)
+	StreamVerifiedGet(ctx context.Context, req *immuschema.VerifiableGetRequest) (*immuschema.Entry, error)
+	StreamScan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
+	StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
+	StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
 }
 
 type LcClient struct {
-	Dir                 string
-	Host                string
-	Port                int
-	ApiKey              string
-	DialOptions         []grpc.DialOption
-	Logger              logger.Logger
-	ClientConn          *grpc.ClientConn
-	ServiceClient       schema.LcServiceClient
-	StateService        state.StateService
-	TimestampService    immuclient.TimestampService
-	serverSigningPubKey *ecdsa.PublicKey
+	Dir                  string
+	Host                 string
+	Port                 int
+	ApiKey               string
+	DialOptions          []grpc.DialOption
+	Logger               logger.Logger
+	ClientConn           *grpc.ClientConn
+	ServiceClient        schema.LcServiceClient
+	StateService         state.StateService
+	TimestampService     immuclient.TimestampService
+	StreamChunkSize      int
+	StreamServiceFactory stream.ServiceFactory
+	serverSigningPubKey  *ecdsa.PublicKey
 	sync.RWMutex
 }
 
@@ -102,6 +114,9 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		ApiKey:           "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
+		// TODO OGG: StreamChunkSize needs to be made configurable
+		StreamChunkSize:      immuclient.DefaultOptions().StreamChunkSize,
+		StreamServiceFactory: stream.NewStreamServiceFactory(immuclient.DefaultOptions().StreamChunkSize),
 	}
 
 	cli.DialOptions = []grpc.DialOption{
