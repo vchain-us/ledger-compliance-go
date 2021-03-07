@@ -20,10 +20,11 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/state"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/codenotary/immudb/pkg/client/state"
 
 	"context"
 
@@ -69,6 +70,9 @@ type LcClientIf interface {
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
 
 	Connect() (err error)
+
+	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error)
+	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
 }
 
 type LcClient struct {
