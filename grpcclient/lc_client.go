@@ -69,6 +69,9 @@ type LcClientIf interface {
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
 
+	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error)
+	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
+
 	Connect() (err error)
 }
 
