@@ -20,10 +20,11 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/codenotary/immudb/pkg/client/state"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/codenotary/immudb/pkg/client/state"
 
 	"context"
 
@@ -106,6 +107,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 			Timeout:             10 * time.Second,
 			PermitWithoutStream: true,
 		}),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(32 * 1024 * 1024)),
 	}
 
 	for _, setter := range setters {
