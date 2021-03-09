@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/codenotary/immudb/embedded/store"
+	"github.com/codenotary/immudb/pkg/api/schema"
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/database"
 	"github.com/codenotary/immudb/pkg/stream"
@@ -402,4 +403,21 @@ func (c *LcClient) StreamHistory(ctx context.Context, req *immuschema.HistoryReq
 		entries = append(entries, entry)
 	}
 	return &immuschema.Entries{Entries: entries}, nil
+}
+
+// StreamExecAll ...
+func (c *LcClient) StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*schema.TxMetadata, error) {
+	s, err := c.ServiceClient.StreamExecAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	eas := c.StreamServiceFactory.NewExecAllStreamSender(s)
+
+	err = eas.Send(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.CloseAndRecv()
 }

@@ -103,4 +103,5 @@ service LcService {
 	rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {};
 	rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {};
 	rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {};
+	rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxMetadata) {};
 }

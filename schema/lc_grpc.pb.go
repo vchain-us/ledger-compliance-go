@@ -53,6 +53,7 @@ type LcServiceClient interface {
 	StreamScan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (LcService_StreamScanClient, error)
 	StreamZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (LcService_StreamZScanClient, error)
 	StreamHistory(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (LcService_StreamHistoryClient, error)
+	StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error)
 }
 
 type lcServiceClient struct {
@@ -475,6 +476,40 @@ func (x *lcServiceStreamHistoryClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+func (c *lcServiceClient) StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[8], "/lc.schema.LcService/streamExecAll", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lcServiceStreamExecAllClient{stream}
+	return x, nil
+}
+
+type LcService_StreamExecAllClient interface {
+	Send(*schema.Chunk) error
+	CloseAndRecv() (*schema.TxMetadata, error)
+	grpc.ClientStream
+}
+
+type lcServiceStreamExecAllClient struct {
+	grpc.ClientStream
+}
+
+func (x *lcServiceStreamExecAllClient) Send(m *schema.Chunk) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamExecAllClient) CloseAndRecv() (*schema.TxMetadata, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(schema.TxMetadata)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LcServiceServer is the server API for LcService service.
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
@@ -512,6 +547,7 @@ type LcServiceServer interface {
 	StreamScan(*schema.ScanRequest, LcService_StreamScanServer) error
 	StreamZScan(*schema.ZScanRequest, LcService_StreamZScanServer) error
 	StreamHistory(*schema.HistoryRequest, LcService_StreamHistoryServer) error
+	StreamExecAll(LcService_StreamExecAllServer) error
 	mustEmbedUnimplementedLcServiceServer()
 }
 
@@ -593,6 +629,9 @@ func (UnimplementedLcServiceServer) StreamZScan(*schema.ZScanRequest, LcService_
 }
 func (UnimplementedLcServiceServer) StreamHistory(*schema.HistoryRequest, LcService_StreamHistoryServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamHistory not implemented")
+}
+func (UnimplementedLcServiceServer) StreamExecAll(LcService_StreamExecAllServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamExecAll not implemented")
 }
 func (UnimplementedLcServiceServer) mustEmbedUnimplementedLcServiceServer() {}
 
@@ -1096,6 +1135,32 @@ func (x *lcServiceStreamHistoryServer) Send(m *schema.Chunk) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _LcService_StreamExecAll_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LcServiceServer).StreamExecAll(&lcServiceStreamExecAllServer{stream})
+}
+
+type LcService_StreamExecAllServer interface {
+	SendAndClose(*schema.TxMetadata) error
+	Recv() (*schema.Chunk, error)
+	grpc.ServerStream
+}
+
+type lcServiceStreamExecAllServer struct {
+	grpc.ServerStream
+}
+
+func (x *lcServiceStreamExecAllServer) SendAndClose(m *schema.TxMetadata) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *lcServiceStreamExecAllServer) Recv() (*schema.Chunk, error) {
+	m := new(schema.Chunk)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LcService_ServiceDesc is the grpc.ServiceDesc for LcService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1213,6 +1278,11 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "streamHistory",
 			Handler:       _LcService_StreamHistory_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "streamExecAll",
+			Handler:       _LcService_StreamExecAll_Handler,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "lc.proto",
