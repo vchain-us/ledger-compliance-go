@@ -84,6 +84,7 @@ type LcClientIf interface {
 	StreamScan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
 	StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
 	StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
+	StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*immuschema.TxMetadata, error)
 }
 
 type LcClient struct {
