@@ -33,6 +33,8 @@ github.com/codenotary/immudb v0.9.2-0.20210306214849-7e4614cad639 h1:OyKTrZMiC4y
 github.com/codenotary/immudb v0.9.2-0.20210306214849-7e4614cad639/go.mod h1:2riWInwrg8tiL6aLr4PNRQIQ+YTN3HloMmfPnl5DaoM=
 github.com/codenotary/immudb v0.9.2-0.20210308175344-493002eddcfd h1:KwnyPsLlgCEUcT8eXPvs4pBPEA40lsuJ+xZ7SzACKKI=
 github.com/codenotary/immudb v0.9.2-0.20210308175344-493002eddcfd/go.mod h1:2riWInwrg8tiL6aLr4PNRQIQ+YTN3HloMmfPnl5DaoM=
+github.com/codenotary/immudb v0.9.2-0.20210309092049-dfee55d8105e h1:Ed8hQFGX+bY9FAmwTq5kidInSrgAuq5hiospbc6vnjk=
+github.com/codenotary/immudb v0.9.2-0.20210309092049-dfee55d8105e/go.mod h1:2riWInwrg8tiL6aLr4PNRQIQ+YTN3HloMmfPnl5DaoM=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
