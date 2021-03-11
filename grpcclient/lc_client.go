@@ -135,14 +135,18 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	}
 
 	var uic []grpc.UnaryClientInterceptor
-
 	if cli.serverSigningPubKey != nil {
 		uic = append(uic, cli.SignatureVerifierInterceptor)
 	}
-
 	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor())
 
-	cli.DialOptions = append(cli.DialOptions, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(uic...)))
+	var sic []grpc.StreamClientInterceptor
+	sic = append(sic, cli.ApiKeySetterInterceptorStream())
+
+	cli.DialOptions = append(
+		cli.DialOptions,
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(uic...)),
+		grpc.WithStreamInterceptor(grpc_middleware.ChainStreamClient(sic...)))
 
 	return cli
 }
