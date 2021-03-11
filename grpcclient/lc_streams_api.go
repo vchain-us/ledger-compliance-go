@@ -130,6 +130,9 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	}
 
 	verifiableTx, err := s.CloseAndRecv()
+	if err != nil {
+		return nil, err
+	}
 
 	if verifiableTx.Tx.Metadata.Nentries != int32(len(kvs)) {
 		return nil, store.ErrCorruptedData
