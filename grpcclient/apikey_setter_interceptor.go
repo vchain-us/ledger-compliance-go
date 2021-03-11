@@ -18,6 +18,7 @@ package grpcclient
 
 import (
 	"context"
+
 	"google.golang.org/grpc"
 )
 
@@ -27,6 +28,16 @@ func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, inter
 			ApiKey: c.ApiKey,
 		}))
 		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+}
+
+// ApiKeySetterInterceptorStream ...
+func (c *LcClient) ApiKeySetterInterceptorStream() func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, grpc.Streamer, ...grpc.CallOption) (grpc.ClientStream, error) {
+	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+		opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
+			ApiKey: c.ApiKey,
+		}))
+		return streamer(ctx, desc, cc, method, opts...)
 	}
 }
 
