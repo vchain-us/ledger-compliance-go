@@ -39,3 +39,6 @@ coverage.txt
 
 # Autogen files not desired
 API-docs.md
+
+# immudb local state
+.state*
