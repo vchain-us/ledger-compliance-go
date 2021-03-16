@@ -1,5 +1,3 @@
-// +build ignore
-
 /*
 Copyright 2019-2020 vChain, Inc.
 
@@ -27,13 +25,13 @@ import (
 )
 
 func main() {
-	client := sdk.NewLcClient(sdk.ApiKey("iygjyyaoudcpelitsbdvciughnzxdujmbhxy"), sdk.Host("localhost"), sdk.Port(3324))
+	client := sdk.NewLcClient(sdk.ApiKey("cxdriebgcjebzeitwmflozxtaqtupmmewimc"), sdk.Host("localhost"), sdk.Port(3324))
 	err := client.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	skv := &immuschema.KVList{
+	skv := &immuschema.SetRequest{
 		KVs: []*immuschema.KeyValue{
 			{
 				Key:   []byte("key1"),
@@ -49,25 +47,19 @@ func main() {
 			},
 		},
 	}
-	_, err = client.SetBatch(context.Background(), skv)
+	_, err = client.SetAll(context.Background(), skv)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	keys := &immuschema.KeyList{
-		Keys: []*immuschema.Key{
-			{
-				Key: []byte("key1"),
-			},
-			{
-				Key: []byte("key2"),
-			},
-			{
-				Key: []byte("key3"),
-			},
+	keys := &immuschema.KeyListRequest{
+		Keys: [][]byte{
+			[]byte("key1"),
+			[]byte("key2"),
+			[]byte("key3"),
 		},
 	}
-	list, err := client.GetBatch(context.Background(), keys)
+	list, err := client.GetAll(context.Background(), keys)
 	if err != nil {
 		log.Fatal(err)
 	}

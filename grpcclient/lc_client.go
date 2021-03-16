@@ -52,6 +52,7 @@ type LcClientIf interface {
 	VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
 
 	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
+	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxMetadata, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
 

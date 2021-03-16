@@ -60,6 +60,10 @@ func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*
 	return c.ServiceClient.GetAll(ctx, in)
 }
 
+func (c *LcClient) SetAll(ctx context.Context, req *immuschema.SetRequest) (*immuschema.TxMetadata, error) {
+	return c.ServiceClient.Set(ctx, req)
+}
+
 // VerifiedSet ...
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
 	err := c.StateService.CacheLock()
