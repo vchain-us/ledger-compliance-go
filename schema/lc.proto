@@ -45,12 +45,14 @@ message Response {
 message VerifiableItemExt {
 	immudb.schema.VerifiableEntry item  = 1;
 	google.protobuf.Timestamp timestamp = 2;
+	google.protobuf.Timestamp apikeyRevoked = 3;
 }
 
 
 message ItemExt {
 	immudb.schema.Entry item = 1;
 	google.protobuf.Timestamp timestamp = 2;
+	google.protobuf.Timestamp apikeyRevoked = 3;
 }
 
 message ItemExtList {
@@ -61,6 +63,7 @@ message ItemExtList {
 message ZItemExt {
 	immudb.schema.ZEntry item = 1;
 	google.protobuf.Timestamp timestamp = 2;
+	google.protobuf.Timestamp apikeyRevoked = 3;
 }
 
 message ZItemExtList {
