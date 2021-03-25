@@ -155,7 +155,7 @@ func main() {
 	fmt.Printf("StreamScan OK - Nb entries: %d\n", len(entries.GetEntries()))
 	for _, e := range entries.GetEntries() {
 		switch {
-		case bytes.Compare(e.Key, k1) == 0, bytes.Compare(e.Key, k2) == 0, bytes.Compare(e.Key, k3) == 0:
+		case bytes.Equal(e.Key, k1), bytes.Equal(e.Key, k2), bytes.Equal(e.Key, k3):
 			fmt.Printf("  - key %s found, value len: %d\n", e.Key, len(e.Value))
 		default:
 			fmt.Printf("  WARNING: unexpected key %s found\n", e.Key)
@@ -173,7 +173,7 @@ func main() {
 	fmt.Printf("StreamZScan OK - Nb Z entries: %d\n", len(zentries.GetEntries()))
 	for _, ze := range zentries.GetEntries() {
 		switch {
-		case bytes.Compare(ze.Key, k1) == 0, bytes.Compare(ze.Key, k3) == 0:
+		case bytes.Equal(ze.Key, k1), bytes.Equal(ze.Key, k3):
 			fmt.Printf("  - key %s found in set %s with score %.0f\n", ze.Key, ze.Set, ze.Score)
 		default:
 			fmt.Printf("  WARNING: unexpected key %s found in set %s\n", ze.Key, ze.Set)
