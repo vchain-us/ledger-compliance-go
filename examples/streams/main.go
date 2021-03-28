@@ -29,71 +29,9 @@ import (
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 )
 
-func randomValue(MB int) []byte {
-	v := make([]byte, MB)
-	_, err := rand.Read(v)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return v
-}
-
-func streamSetAndGet(client *sdk.LcClient, k, v []byte) error {
-	ctx := context.Background()
-	txMeta, err := client.StreamSet(ctx, []*stream.KeyValue{
-		{
-			Key:   &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(k)), Size: len(k)},
-			Value: &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(v)), Size: len(v)},
-		},
-	})
-	if err != nil {
-		return err
-	}
-	fmt.Printf("StreamSet OK - TxID: %d\n", txMeta.GetId())
-
-	entry, err := client.StreamGet(ctx, &schema.KeyRequest{Key: k})
-	if err != nil {
-		return err
-	}
-	fmt.Printf(
-		"StreamGet OK - Entry key: %s, entry value length: %d (same as the set value: %t)\n",
-		entry.Key, len(entry.Value), len(entry.Value) == len(v))
-	return nil
-}
-
-func streamVerifiedSetAndGet(client *sdk.LcClient, ks, vs [][]byte) error {
-	ctx := context.Background()
-	sKVs := make([]*stream.KeyValue, 0, len(ks))
-	for i, k := range ks {
-		sKVs = append(sKVs, &stream.KeyValue{
-			Key:   &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(k)), Size: len(k)},
-			Value: &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(vs[i])), Size: len(vs[i])},
-		})
-	}
-	txMeta, err := client.StreamVerifiedSet(ctx, sKVs)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("StreamVerifiedSet OK - TxID: %d\n", txMeta.GetId())
-
-	for i, k := range ks {
-		entry, err := client.StreamVerifiedGet(ctx, &schema.VerifiableGetRequest{
-			KeyRequest: &schema.KeyRequest{Key: k},
-		})
-		if err != nil {
-			return err
-		}
-		fmt.Printf(
-			"StreamVerifiedGet OK - Entry key: %s, entry value length: %d (same as the set value: %t)\n",
-			entry.Key, len(entry.Value), len(entry.Value) == len(vs[i]))
-	}
-
-	return nil
-}
-
 func main() {
 	client := sdk.NewLcClient(
-		sdk.ApiKey("huqymoysjtjzvkmligcvbucicjejhknlmrsk"),
+		sdk.ApiKey("APIKey1.JPOzsgjjXOQxNqTbTpvtoFXfmoHPzNuzqRvX"),
 		sdk.Host("localhost"),
 		sdk.Port(3324))
 	err := client.Connect()
@@ -192,4 +130,66 @@ func main() {
 	for _, e := range entries.GetEntries() {
 		fmt.Printf("  - key %s, value len: %d, tx: %d\n", e.Key, len(e.Value), e.Tx)
 	}
+}
+
+func randomValue(MB int) []byte {
+	v := make([]byte, MB)
+	_, err := rand.Read(v)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
+}
+
+func streamSetAndGet(client *sdk.LcClient, k, v []byte) error {
+	ctx := context.Background()
+	txMeta, err := client.StreamSet(ctx, []*stream.KeyValue{
+		{
+			Key:   &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(k)), Size: len(k)},
+			Value: &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(v)), Size: len(v)},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("StreamSet OK - TxID: %d\n", txMeta.GetId())
+
+	entry, err := client.StreamGet(ctx, &schema.KeyRequest{Key: k})
+	if err != nil {
+		return err
+	}
+	fmt.Printf(
+		"StreamGet OK - Entry key: %s, entry value length: %d (same as the set value: %t)\n",
+		entry.Key, len(entry.Value), len(entry.Value) == len(v))
+	return nil
+}
+
+func streamVerifiedSetAndGet(client *sdk.LcClient, ks, vs [][]byte) error {
+	ctx := context.Background()
+	sKVs := make([]*stream.KeyValue, 0, len(ks))
+	for i, k := range ks {
+		sKVs = append(sKVs, &stream.KeyValue{
+			Key:   &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(k)), Size: len(k)},
+			Value: &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(vs[i])), Size: len(vs[i])},
+		})
+	}
+	txMeta, err := client.StreamVerifiedSet(ctx, sKVs)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("StreamVerifiedSet OK - TxID: %d\n", txMeta.GetId())
+
+	for i, k := range ks {
+		entry, err := client.StreamVerifiedGet(ctx, &schema.VerifiableGetRequest{
+			KeyRequest: &schema.KeyRequest{Key: k},
+		})
+		if err != nil {
+			return err
+		}
+		fmt.Printf(
+			"StreamVerifiedGet OK - Entry key: %s, entry value length: %d (same as the set value: %t)\n",
+			entry.Key, len(entry.Value), len(entry.Value) == len(vs[i]))
+	}
+
+	return nil
 }
