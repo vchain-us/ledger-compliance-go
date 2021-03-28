@@ -38,6 +38,9 @@ func (c *LcClient) StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immu
 // StreamGet ...
 func (c *LcClient) StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error) {
 	gs, err := c.ServiceClient.StreamGet(ctx, k)
+	if err != nil {
+		return nil, err
+	}
 
 	kvr := c.StreamServiceFactory.NewKvStreamReceiver(c.StreamServiceFactory.NewMsgReceiver(gs))
 
