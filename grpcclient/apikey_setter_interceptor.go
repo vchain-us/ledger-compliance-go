@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, interface{}, interface{}, *grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
@@ -27,6 +28,10 @@ func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, inter
 		opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
 			ApiKey: c.ApiKey,
 		}))
+		if len(c.MetadataPairs) > 0 {
+			md := metadata.Pairs(c.MetadataPairs...)
+			ctx = metadata.NewOutgoingContext(ctx, md)
+		}
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

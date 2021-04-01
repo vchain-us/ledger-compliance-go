@@ -18,6 +18,7 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
+
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/logger"
@@ -48,6 +49,12 @@ func Port(port int) LcClientOption {
 func ApiKey(apiKey string) LcClientOption {
 	return func(args *LcClient) {
 		args.ApiKey = apiKey
+	}
+}
+
+func MetadataPairs(metadataPairs []string) LcClientOption {
+	return func(args *LcClient) {
+		args.MetadataPairs = metadataPairs
 	}
 }
 
