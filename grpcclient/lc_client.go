@@ -92,6 +92,7 @@ type LcClient struct {
 	Host                 string
 	Port                 int
 	ApiKey               string
+	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
 	Logger               logger.Logger
 	ClientConn           *grpc.ClientConn
