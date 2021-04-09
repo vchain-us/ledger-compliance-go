@@ -29,8 +29,7 @@ func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, inter
 			ApiKey: c.ApiKey,
 		}))
 		if len(c.MetadataPairs) > 0 {
-			md := metadata.Pairs(c.MetadataPairs...)
-			ctx = metadata.NewOutgoingContext(ctx, md)
+			ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
 		}
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
@@ -42,6 +41,9 @@ func (c *LcClient) ApiKeySetterInterceptorStream() func(context.Context, *grpc.S
 		opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
 			ApiKey: c.ApiKey,
 		}))
+		if len(c.MetadataPairs) > 0 {
+			ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
+		}
 		return streamer(ctx, desc, cc, method, opts...)
 	}
 }
