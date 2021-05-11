@@ -2,5 +2,8 @@ package grpcclient
 
 import "fmt"
 
-var ErrNotLockedFile = fmt.Errorf("try to lock a not locked file")
 var ErrStateNotFound = fmt.Errorf("could not find previous state")
+var ErrCacheNotLocked = fmt.Errorf("cache is not locked")
+var ErrCacheAlreadyLocked = fmt.Errorf("cache is already locked")
+var ErrPrevStateNotFound   = fmt.Errorf("could not find previous state")
+var ErrLocalStateCorrupted = fmt.Errorf("local state is corrupted")
