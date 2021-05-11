@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"github.com/codenotary/immudb/pkg/api/schema"
-	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/logger"
 	"sync"
@@ -17,7 +16,6 @@ type lcStateService struct {
 	cache         *FileCache
 	serverUUID    string
 	logger        logger.Logger
-	l             cache.Locker
 	sync.RWMutex
 }
 
@@ -41,7 +39,6 @@ func NewLcStateService(cache *FileCache,
 		cache:         cache,
 		logger:        logger,
 		serverUUID:    serverUUID,
-		l:             cache.GetLocker(serverUUID),
 	}, nil
 }
 
@@ -78,11 +75,11 @@ func (r *lcStateService) SetState(apiKey string, state *schema.ImmutableState) e
 }
 
 func (r *lcStateService) CacheLock() error {
-	return r.l.Lock()
+	return r.cache.Lock(r.serverUUID)
 }
 
 func (r *lcStateService) CacheUnlock() error {
-	return r.l.Unlock()
+	return r.cache.Unlock()
 }
 
 func obfuscateApiKey(apiKey string) string {
