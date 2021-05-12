@@ -116,18 +116,15 @@ func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableSta
 
 
 func (w *FileCache) Lock(serverUUID string) (err error) {
-	if w.stateFile != nil {
-		return ErrCacheAlreadyLocked
-	}
 	w.stateFile, err = lockedfile.OpenFile(w.getStateFilePath(serverUUID), os.O_RDWR | os.O_CREATE, 0755)
 	return err
 }
 
 func (w *FileCache) Unlock() (err error) {
-	defer func() {
-		w.stateFile = nil
-	}()
-	return w.stateFile.Close()
+	if w.stateFile != nil {
+		return w.stateFile.Close()
+	}
+	return nil
 }
 
 func (w *FileCache) getStateFilePath(UUID string) string {
