@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/rogpeppe/go-internal/lockedfile"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +31,10 @@ func NewLcFileCache(dir string) *FileCache {
 func (w *FileCache) Get(serverUUID string, db string) (*schema.ImmutableState, error) {
 	if w.stateFile == nil {
 		return nil, ErrCacheNotLocked
+	}
+	_, err := w.stateFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return nil, err
 	}
 	scanner := bufio.NewScanner(w.stateFile)
 	scanner.Split(bufio.ScanLines)
@@ -61,6 +66,10 @@ func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, 
 		return nil, err
 	}
 
+	_, err = w.stateFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return nil, err
+	}
 	scanner := bufio.NewScanner(w.stateFile)
 	scanner.Split(bufio.ScanLines)
 	var lines [][]byte
@@ -72,11 +81,14 @@ func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, 
 	}
 	output := bytes.Join(lines, []byte("\n"))
 
-	_, err = w.stateFile.WriteAt(output,0)
+	err = w.stateFile.Truncate(0)
 	if err != nil {
 		return nil, err
 	}
-
+	_, err = w.stateFile.Write(output)
+	if err != nil {
+		return nil, err
+	}
 	return state, err
 }
 
@@ -88,10 +100,14 @@ func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableSta
 	if err != nil {
 		return err
 	}
+	_, err = w.stateFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 
 	newState := db + ":" + base64.StdEncoding.EncodeToString(raw)
-	var exists bool
 
+	var exists bool
 	scanner := bufio.NewScanner(w.stateFile)
 	scanner.Split(bufio.ScanLines)
 	var lines [][]byte
@@ -107,7 +123,11 @@ func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableSta
 	}
 	output := bytes.Join(lines, []byte("\n"))
 
-	_, err = w.stateFile.WriteAt( output, 0)
+	err = w.stateFile.Truncate(0)
+	if err != nil {
+		return err
+	}
+	_, err = w.stateFile.Write(output)
 	if err != nil {
 		return err
 	}
