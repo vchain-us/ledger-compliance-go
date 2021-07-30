@@ -20,6 +20,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"os"
 	"sync"
 	"time"
@@ -64,6 +65,7 @@ type LcClientIf interface {
 
 	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
 	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
+	Feats(ctx context.Context, in *empty.Empty) (*schema.Features, error)
 
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
 

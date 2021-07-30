@@ -239,6 +239,10 @@ func (c *LcClient) Health(ctx context.Context) (*immuschema.HealthResponse, erro
 	return c.ServiceClient.Health(ctx, &empty.Empty{})
 }
 
+func (c *LcClient) Feats(ctx context.Context) (*schema.Features, error) {
+	return c.ServiceClient.Feats(ctx, &empty.Empty{})
+}
+
 // SetFile ...
 func (c *LcClient) SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error) {
 	bs, err := ioutil.ReadFile(filePath)
