@@ -73,6 +73,13 @@ message ZItemExtList {
 	repeated ZItemExt items = 1;
 }
 
+message Features {
+	repeated string feat= 1;
+	string version = 2;
+	string buildTime = 3;
+	string component = 4;
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
@@ -100,6 +107,7 @@ service LcService {
 	rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
+	rpc Feats(google.protobuf.Empty) returns (Features){};
 
 	// streams
 	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};

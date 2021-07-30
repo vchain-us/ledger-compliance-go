@@ -45,6 +45,7 @@ type LcServiceClient interface {
 	VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
+	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
 	// streams
 	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
 	StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error)
@@ -242,6 +243,15 @@ func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanRequest,
 func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error) {
 	out := new(ItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/HistoryExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error) {
+	out := new(Features)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Feats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -539,6 +549,7 @@ type LcServiceServer interface {
 	VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error)
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
+	Feats(context.Context, *empty.Empty) (*Features, error)
 	// streams
 	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
 	StreamSet(LcService_StreamSetServer) error
@@ -608,6 +619,9 @@ func (UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanReque
 }
 func (UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HistoryExt not implemented")
+}
+func (UnimplementedLcServiceServer) Feats(context.Context, *empty.Empty) (*Features, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
 }
 func (UnimplementedLcServiceServer) StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamGet not implemented")
@@ -978,6 +992,24 @@ func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Feats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Feats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Feats(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LcService_StreamGet_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(schema.KeyRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -1235,6 +1267,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HistoryExt",
 			Handler:    _LcService_HistoryExt_Handler,
+		},
+		{
+			MethodName: "Feats",
+			Handler:    _LcService_Feats_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
