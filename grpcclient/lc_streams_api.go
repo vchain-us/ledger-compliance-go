@@ -52,7 +52,7 @@ func (c *LcClient) StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*im
 	value, err := stream.ReadValue(vr, c.StreamChunkSize)
 	if err != nil {
 		if err == io.EOF {
-			return nil, stream.ErrMissingExpectedData
+			return nil, errors.New(stream.ErrMissingExpectedData)
 		}
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func (c *LcClient) StreamScan(ctx context.Context, req *immuschema.ScanRequest) 
 		value, err := stream.ReadValue(vr, c.StreamChunkSize)
 		if err != nil {
 			if err == io.EOF {
-				return nil, stream.ErrMissingExpectedData
+				return nil, errors.New(stream.ErrMissingExpectedData)
 			}
 			return nil, err
 		}
@@ -387,7 +387,7 @@ func (c *LcClient) StreamHistory(ctx context.Context, req *immuschema.HistoryReq
 		value, err := stream.ReadValue(vr, c.StreamChunkSize)
 		if err != nil {
 			if err == io.EOF {
-				return nil, stream.ErrMissingExpectedData
+				return nil, errors.New(stream.ErrMissingExpectedData)
 			}
 			return nil, err
 		}
