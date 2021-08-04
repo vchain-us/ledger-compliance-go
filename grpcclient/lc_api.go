@@ -136,6 +136,7 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	}
 
 	newState := &immuschema.ImmutableState{
+		Db:        c.ApiKeyHash,
 		TxId:      tx.ID,
 		TxHash:    tx.Alh[:],
 		Signature: verifiableTx.Signature,
@@ -239,6 +240,10 @@ func (c *LcClient) Health(ctx context.Context) (*immuschema.HealthResponse, erro
 	return c.ServiceClient.Health(ctx, &empty.Empty{})
 }
 
+func (c *LcClient) CurrentState(ctx context.Context) (*immuschema.ImmutableState, error) {
+	return c.ServiceClient.CurrentState(ctx, &empty.Empty{})
+}
+
 func (c *LcClient) Feats(ctx context.Context) (*schema.Features, error) {
 	return c.ServiceClient.Feats(ctx, &empty.Empty{})
 }
@@ -286,11 +291,10 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 		return nil, err
 	}
 
-	newState, err := verifyGet(state, vEntryExt.Item, kReq)
+	newState, err := verifyGet(state, vEntryExt.Item, kReq, c.ApiKeyHash)
 	if err != nil {
 		return nil, err
 	}
-
 	err = c.StateService.SetState(c.ApiKey, newState)
 	if err != nil {
 		return nil, err
@@ -331,7 +335,7 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 		return nil, err
 	}
 
-	newState, err := verifyGet(state, vEntry, kReq)
+	newState, err := verifyGet(state, vEntry, kReq, c.ApiKeyHash)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +358,7 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 	return vEntry.Entry, nil
 }
 
-func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEntry, kReq *immuschema.KeyRequest) (*immuschema.ImmutableState, error) {
+func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEntry, kReq *immuschema.KeyRequest, apiKeyHash string) (*immuschema.ImmutableState, error) {
 	inclusionProof := immuschema.InclusionProofFrom(vEntry.InclusionProof)
 	dualProof := immuschema.DualProofFrom(vEntry.VerifiableTx.DualProof)
 
@@ -412,6 +416,7 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 	}
 
 	newState := &immuschema.ImmutableState{
+		Db:        apiKeyHash,
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: vEntry.VerifiableTx.Signature,

@@ -30,7 +30,7 @@ func (c *LcClient) SignatureVerifierInterceptor(ctx context.Context, method stri
 	if c.serverSigningPubKey == nil {
 		return status.Error(codes.FailedPrecondition, "public key not loaded")
 	}
-	if method == "/immudb.schema.ImmuService/CurrentState" {
+	if method == "/lc.schema.LcService/CurrentState" {
 		state := reply.(*schema.ImmutableState)
 		ok, err := state.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
