@@ -1,0 +1,3 @@
+package grpcclient
+
+const ApiKeySeparator = "."

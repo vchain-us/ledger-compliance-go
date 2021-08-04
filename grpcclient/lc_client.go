@@ -18,10 +18,13 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -68,6 +71,7 @@ type LcClientIf interface {
 	Feats(ctx context.Context, in *empty.Empty) (*schema.Features, error)
 
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
+	CurrentState(ctx context.Context, in *empty.Empty) (*immuschema.ImmutableState, error)
 
 	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
@@ -87,6 +91,8 @@ type LcClientIf interface {
 	StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
 	StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
 	StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*immuschema.TxMetadata, error)
+
+	SetServerSigningPubKey(*ecdsa.PublicKey)
 }
 
 type LcClient struct {
@@ -94,6 +100,7 @@ type LcClient struct {
 	Host                 string
 	Port                 int
 	ApiKey               string
+	ApiKeyHash           string
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
 	Logger               logger.Logger
@@ -158,6 +165,17 @@ func (c *LcClient) Connect() (err error) {
 	if c.ApiKey == "" {
 		return errors.New("api key not provided")
 	}
+	pieces := strings.Split(c.ApiKey, ".")
+	if len(pieces) < 2 {
+		return errors.New("bad apikey provided")
+	}
+
+	apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
+	if len(apiKeyPieces) >= 2 {
+		signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
+		hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
+		c.ApiKeyHash = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
+	}
 	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
 	if err != nil {
 		return err
@@ -179,4 +197,8 @@ func (c *LcClient) Connect() (err error) {
 func (c *LcClient) Disconnect() (err error) {
 	c.ServiceClient = nil
 	return c.ClientConn.Close()
+}
+
+func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
+	c.serverSigningPubKey = k
 }
