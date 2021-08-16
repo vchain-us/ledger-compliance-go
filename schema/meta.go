@@ -1,3 +1,6 @@
 package schema
 
-const FeatBoM = "bom"
+const (
+	FeatBoM           = "bom"
+	FeatAllowDownload = "allowdownload"
+)
