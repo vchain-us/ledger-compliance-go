@@ -200,5 +200,7 @@ func (c *LcClient) Disconnect() (err error) {
 }
 
 func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
+	c.Lock()
+	defer c.Unlock()
 	c.serverSigningPubKey = k
 }
