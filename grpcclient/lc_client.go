@@ -22,11 +22,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/stream"
@@ -58,6 +59,7 @@ type LcClientIf interface {
 
 	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
 	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxMetadata, error)
+	SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
 
@@ -76,6 +78,7 @@ type LcClientIf interface {
 	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
+	VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error)
 
 	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error)
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)

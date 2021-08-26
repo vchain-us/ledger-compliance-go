@@ -19,6 +19,8 @@ package grpcclient
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -62,6 +64,10 @@ func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*
 
 func (c *LcClient) SetAll(ctx context.Context, req *immuschema.SetRequest) (*immuschema.TxMetadata, error) {
 	return c.ServiceClient.Set(ctx, req)
+}
+
+func (c *LcClient) SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error) {
+	return c.ServiceClient.SetMulti(ctx, req)
 }
 
 // VerifiedSet ...
@@ -206,6 +212,26 @@ func (c *LcClient) VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) 
 	})
 }
 
+// VerifiedGetExtAtMulti ...
+func (c *LcClient) VerifiedGetExtAtMulti(
+	ctx context.Context,
+	keys [][]byte,
+	txs []uint64,
+) (itemsExt []*schema.VerifiableItemExt, errs []string, err error) {
+	if len(keys) != len(txs) {
+		err = errors.New("keys and txs must have the same length")
+		return
+	}
+
+	reqs := make([]*immuschema.KeyRequest, 0, len(keys))
+	for i, key := range keys {
+		reqs = append(reqs, &immuschema.KeyRequest{Key: key, AtTx: txs[i]})
+	}
+
+	itemsExt, errs, err = c.verifiedGetExtMulti(ctx, reqs)
+	return
+}
+
 // Scan ...
 func (c *LcClient) Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.Scan(ctx, req)
@@ -311,6 +337,71 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 	}
 
 	return vEntryExt, nil
+}
+
+func (c *LcClient) verifiedGetExtMulti(
+	ctx context.Context,
+	reqs []*immuschema.KeyRequest,
+) (itemExt []*schema.VerifiableItemExt, errs []string, err error) {
+
+	err = c.StateService.CacheLock()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer c.StateService.CacheUnlock()
+
+	state, err := c.StateService.GetState(ctx, c.ApiKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req := &schema.VerifiableGetExtMultiRequest{}
+	req.Requests = make([]*immuschema.VerifiableGetRequest, 0, len(reqs))
+	for _, kr := range reqs {
+		req.Requests = append(req.Requests, &immuschema.VerifiableGetRequest{
+			KeyRequest:   kr,
+			ProveSinceTx: state.TxId,
+		})
+	}
+
+	resp, err := c.ServiceClient.VerifiableGetExtMulti(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if len(resp.GetItems()) != len(req.Requests) || len(resp.GetErrors()) != len(req.Requests) {
+		return resp.GetItems(), resp.GetErrors(), fmt.Errorf(
+			"expected %d entries and %d errors, got %d entries and %d errors",
+			len(req.Requests), len(req.Requests), len(resp.GetItems()), len(resp.GetErrors()))
+	}
+
+	itemsExt := resp.GetItems()
+	errs = resp.GetErrors()
+
+	for i, itemExt := range itemsExt {
+		if errs[i] != "" {
+			continue
+		}
+		newState, err := verifyGet(state, itemExt.GetItem(), reqs[i], c.ApiKeyHash)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = c.StateService.SetState(c.ApiKey, newState)
+		if err != nil {
+			return nil, nil, err
+		}
+		if c.serverSigningPubKey != nil {
+			ok, err := newState.CheckSignature(c.serverSigningPubKey)
+			if err != nil {
+				return nil, nil, err
+			}
+			if !ok {
+				return nil, nil, store.ErrCorruptedData
+			}
+		}
+	}
+
+	return itemsExt, errs, nil
 }
 
 func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest) (vi *immuschema.Entry, err error) {
