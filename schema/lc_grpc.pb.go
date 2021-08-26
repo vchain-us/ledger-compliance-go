@@ -23,6 +23,7 @@ type LcServiceClient interface {
 	// immudb primitives
 	// setters and getters
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
+	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -43,6 +44,7 @@ type LcServiceClient interface {
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
+	VerifiableGetExtMulti(ctx context.Context, in *VerifiableGetExtMultiRequest, opts ...grpc.CallOption) (*VerifiableGetExtMultiResponse, error)
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
@@ -68,6 +70,15 @@ func NewLcServiceClient(cc grpc.ClientConnInterface) LcServiceClient {
 func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error) {
 	out := new(schema.TxMetadata)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Set", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error) {
+	out := new(SetMultiResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetMulti", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -225,6 +236,15 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 func (c *lcServiceClient) VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error) {
 	out := new(VerifiableItemExt)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGetExt", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VerifiableGetExtMulti(ctx context.Context, in *VerifiableGetExtMultiRequest, opts ...grpc.CallOption) (*VerifiableGetExtMultiResponse, error) {
+	out := new(VerifiableGetExtMultiResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGetExtMulti", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -527,6 +547,7 @@ type LcServiceServer interface {
 	// immudb primitives
 	// setters and getters
 	Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error)
+	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -547,6 +568,7 @@ type LcServiceServer interface {
 	SendData(LcService_SendDataServer) error
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error)
+	VerifiableGetExtMulti(context.Context, *VerifiableGetExtMultiRequest) (*VerifiableGetExtMultiResponse, error)
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	Feats(context.Context, *empty.Empty) (*Features, error)
@@ -568,6 +590,9 @@ type UnimplementedLcServiceServer struct {
 
 func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+}
+func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetMulti not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -613,6 +638,9 @@ func (UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 }
 func (UnimplementedLcServiceServer) VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGetExt not implemented")
+}
+func (UnimplementedLcServiceServer) VerifiableGetExtMulti(context.Context, *VerifiableGetExtMultiRequest) (*VerifiableGetExtMultiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifiableGetExtMulti not implemented")
 }
 func (UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScanExt not implemented")
@@ -674,6 +702,24 @@ func _LcService_Set_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).Set(ctx, req.(*schema.SetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_SetMulti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetMultiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).SetMulti(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/SetMulti",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).SetMulti(ctx, req.(*SetMultiRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -956,6 +1002,24 @@ func _LcService_VerifiableGetExt_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LcService_VerifiableGetExtMulti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifiableGetExtMultiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VerifiableGetExtMulti(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VerifiableGetExtMulti",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VerifiableGetExtMulti(ctx, req.(*VerifiableGetExtMultiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LcService_ZScanExt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(schema.ZScanRequest)
 	if err := dec(in); err != nil {
@@ -1205,6 +1269,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_Set_Handler,
 		},
 		{
+			MethodName: "SetMulti",
+			Handler:    _LcService_SetMulti_Handler,
+		},
+		{
 			MethodName: "Get",
 			Handler:    _LcService_Get_Handler,
 		},
@@ -1259,6 +1327,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerifiableGetExt",
 			Handler:    _LcService_VerifiableGetExt_Handler,
+		},
+		{
+			MethodName: "VerifiableGetExtMulti",
+			Handler:    _LcService_VerifiableGetExtMulti_Handler,
 		},
 		{
 			MethodName: "ZScanExt",

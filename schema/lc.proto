@@ -80,10 +80,29 @@ message Features {
 	string component = 4;
 }
 
+message VerifiableGetExtMultiRequest {
+	repeated immudb.schema.VerifiableGetRequest requests = 1;
+}
+
+message VerifiableGetExtMultiResponse {
+	repeated VerifiableItemExt items = 1;
+	repeated string errors = 2;
+}
+
+message SetMultiRequest {
+	repeated immudb.schema.SetRequest requests = 1;
+}
+
+message SetMultiResponse {
+	repeated immudb.schema.TxMetadata transactions = 1;
+	repeated string errors = 2;
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
 	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxMetadata){};
+	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
 	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
 	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
@@ -105,6 +124,7 @@ service LcService {
 	rpc SendData (stream Data) returns (stream Response){};
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
+	rpc VerifiableGetExtMulti(VerifiableGetExtMultiRequest) returns (VerifiableGetExtMultiResponse){};
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 	rpc Feats(google.protobuf.Empty) returns (Features){};
