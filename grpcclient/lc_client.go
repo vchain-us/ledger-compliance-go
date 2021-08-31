@@ -165,20 +165,19 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 }
 
 func (c *LcClient) Connect() (err error) {
-	if c.ApiKey == "" {
-		return errors.New("api key not provided")
-	}
-	pieces := strings.Split(c.ApiKey, ".")
-	if len(pieces) < 2 {
-		return errors.New("bad apikey provided")
+	if c.ApiKey != "" {
+		pieces := strings.Split(c.ApiKey, ".")
+		if len(pieces) < 2 {
+			return errors.New("bad apikey provided")
+		}
+		apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
+		if len(apiKeyPieces) >= 2 {
+			signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
+			hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
+			c.ApiKeyHash = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
+		}
 	}
 
-	apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
-	if len(apiKeyPieces) >= 2 {
-		signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
-		hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
-		c.ApiKeyHash = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
-	}
 	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
 	if err != nil {
 		return err
