@@ -70,6 +70,11 @@ func (c *LcClient) SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*
 	return c.ServiceClient.SetMulti(ctx, req)
 }
 
+// VCNSetArtifacts ...
+func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error) {
+	return c.ServiceClient.VCNSetArtifacts(ctx, req)
+}
+
 // VerifiedSet ...
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
 	err := c.StateService.CacheLock()

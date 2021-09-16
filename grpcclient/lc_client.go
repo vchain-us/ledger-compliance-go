@@ -60,6 +60,7 @@ type LcClientIf interface {
 	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
 	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxMetadata, error)
 	SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error)
+	VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
 

@@ -98,11 +98,39 @@ message SetMultiResponse {
 	repeated string errors = 2;
 }
 
+message VCNAttachment {
+	bytes content = 1;
+}
+
+message VCNDependency {
+	enum Type {
+    Direct = 0;
+    Indirect = 1;
+  }
+	string hash = 1;
+	Type type = 2;
+}
+
+message VCNArtifact {
+	bytes artifact = 1;
+	repeated VCNDependency dependencies = 2;
+	repeated VCNAttachment attachments = 3;
+}
+
+message VCNArtifactsRequest {
+	repeated VCNArtifact artifacts = 1;
+}
+
+message VCNArtifactsResponse {
+	immudb.schema.TxMetadata transaction = 1;
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
 	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxMetadata){};
 	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
+	rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
 	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
 	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
