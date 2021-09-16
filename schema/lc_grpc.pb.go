@@ -24,6 +24,7 @@ type LcServiceClient interface {
 	// setters and getters
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxMetadata, error)
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
+	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -79,6 +80,15 @@ func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts .
 func (c *lcServiceClient) SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error) {
 	out := new(SetMultiResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetMulti", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error) {
+	out := new(VCNArtifactsResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNSetArtifacts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -548,6 +558,7 @@ type LcServiceServer interface {
 	// setters and getters
 	Set(context.Context, *schema.SetRequest) (*schema.TxMetadata, error)
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
+	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -593,6 +604,9 @@ func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*s
 }
 func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetMulti not implemented")
+}
+func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNSetArtifacts not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -720,6 +734,24 @@ func _LcService_SetMulti_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).SetMulti(ctx, req.(*SetMultiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNSetArtifacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNArtifactsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNSetArtifacts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNSetArtifacts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNSetArtifacts(ctx, req.(*VCNArtifactsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1271,6 +1303,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetMulti",
 			Handler:    _LcService_SetMulti_Handler,
+		},
+		{
+			MethodName: "VCNSetArtifacts",
+			Handler:    _LcService_VCNSetArtifacts_Handler,
 		},
 		{
 			MethodName: "Get",
