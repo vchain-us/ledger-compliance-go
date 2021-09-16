@@ -20,7 +20,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -167,10 +166,6 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 
 func (c *LcClient) Connect() (err error) {
 	if c.ApiKey != "" {
-		pieces := strings.Split(c.ApiKey, ".")
-		if len(pieces) < 2 {
-			return errors.New("bad apikey provided")
-		}
 		apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
 		if len(apiKeyPieces) >= 2 {
 			signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
