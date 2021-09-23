@@ -18,7 +18,9 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -105,6 +107,7 @@ type LcClient struct {
 	Port                 int
 	ApiKey               string
 	ApiKeyHash           string
+	PrivateKey           *ed25519.PrivateKey
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
 	Logger               logger.Logger
@@ -116,6 +119,45 @@ type LcClient struct {
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
 	sync.RWMutex
+}
+
+// ParsePrivateKey parses the private key from the specified base64 raw-URL encoded DER string.
+func ParsePrivateKey(privKeyB64 string) (ed25519.PrivateKey, error) {
+	privKeyDER, err := base64.RawURLEncoding.DecodeString(privKeyB64)
+	if err != nil {
+		return nil, fmt.Errorf("error raw-URL decoding private key from base 64 string: %v", err)
+	}
+
+	privKeyParsed, err := x509.ParsePKCS8PrivateKey(privKeyDER)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing private key DER: %v", err)
+	}
+
+	privKey, ok := privKeyParsed.(ed25519.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("private key is of an unsupported type")
+	}
+	return privKey, nil
+}
+
+// ParsePublicKey parses the public key from the specified base64 raw-URL encoded DER string.
+func ParsePublicKey(pubKeyB64 string) (ed25519.PublicKey, error) {
+	pubKeyDER, err := base64.RawURLEncoding.DecodeString(pubKeyB64)
+	if err != nil {
+		return nil, fmt.Errorf("error raw-URL decoding public key from base 64 string: %v", err)
+	}
+
+	pubKeyParsed, err := x509.ParsePKIXPublicKey(pubKeyDER)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing public key DER: %v", err)
+	}
+
+	pubKey, ok := pubKeyParsed.(ed25519.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("public key is of an unsupported type")
+	}
+
+	return pubKey, nil
 }
 
 func NewLcClient(setters ...LcClientOption) *LcClient {

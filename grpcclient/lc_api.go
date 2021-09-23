@@ -18,6 +18,7 @@ package grpcclient
 
 import (
 	"context"
+	"crypto/ed25519"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -72,6 +73,12 @@ func (c *LcClient) SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*
 
 // VCNSetArtifacts ...
 func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error) {
+	if c.PrivateKey != nil {
+		for _, artifact := range req.Artifacts {
+			signature := ed25519.Sign(*c.PrivateKey, artifact.Artifact)
+			artifact.Signature = signature
+		}
+	}
 	return c.ServiceClient.VCNSetArtifacts(ctx, req)
 }
 

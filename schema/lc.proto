@@ -47,6 +47,7 @@ message VerifiableItemExt {
 	google.protobuf.Timestamp timestamp = 2;
 	google.protobuf.Timestamp apikeyRevoked = 3;
 	string ledgerName = 4;
+	string publicKey = 5;
 }
 
 
@@ -113,8 +114,9 @@ message VCNDependency {
 
 message VCNArtifact {
 	bytes artifact = 1;
-	repeated VCNDependency dependencies = 2;
-	repeated VCNAttachment attachments = 3;
+	bytes signature = 2;
+	repeated VCNDependency dependencies = 3;
+	repeated VCNAttachment attachments = 4;
 }
 
 message VCNArtifactsRequest {
