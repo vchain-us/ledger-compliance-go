@@ -18,6 +18,7 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
+	"crypto/ed25519"
 
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -49,6 +50,13 @@ func Port(port int) LcClientOption {
 func ApiKey(apiKey string) LcClientOption {
 	return func(args *LcClient) {
 		args.ApiKey = apiKey
+	}
+}
+
+// PrivateKey sets the private key used to sign the artifacts.
+func PrivateKey(privateKey *ed25519.PrivateKey) LcClientOption {
+	return func(args *LcClient) {
+		args.PrivateKey = privateKey
 	}
 }
 
