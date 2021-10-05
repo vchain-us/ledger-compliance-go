@@ -101,6 +101,7 @@ message SetMultiResponse {
 
 message VCNAttachment {
 	bytes content = 1;
+	bytes signature = 2;
 }
 
 message VCNDependency {
@@ -115,8 +116,9 @@ message VCNDependency {
 message VCNArtifact {
 	bytes artifact = 1;
 	bytes signature = 2;
-	repeated VCNDependency dependencies = 3;
-	repeated VCNAttachment attachments = 4;
+	google.protobuf.Timestamp signedAt = 3;
+	repeated VCNDependency dependencies = 4;
+	repeated VCNAttachment attachments = 5;
 }
 
 message VCNArtifactsRequest {
