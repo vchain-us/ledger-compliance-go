@@ -116,13 +116,13 @@ message VCNDependency {
 message VCNArtifact {
 	bytes artifact = 1;
 	bytes signature = 2;
-	google.protobuf.Timestamp signedAt = 3;
-	repeated VCNDependency dependencies = 4;
-	repeated VCNAttachment attachments = 5;
+	repeated VCNDependency dependencies = 3;
+	repeated VCNAttachment attachments = 4;
 }
 
 message VCNArtifactsRequest {
 	repeated VCNArtifact artifacts = 1;
+	google.protobuf.Timestamp signedAt = 2;
 }
 
 message VCNArtifactsResponse {
