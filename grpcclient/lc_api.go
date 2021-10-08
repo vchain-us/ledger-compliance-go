@@ -18,9 +18,7 @@ package grpcclient
 
 import (
 	"context"
-	"crypto/ed25519"
 	"crypto/sha256"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -34,7 +32,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Set ...
@@ -75,21 +72,6 @@ func (c *LcClient) SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*
 
 // VCNSetArtifacts ...
 func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error) {
-	if c.PrivateKey != nil {
-		// sign artifacts and attachments and set the signature timestamp in the request
-		now := time.Now().UTC()
-		nowBytes := make([]byte, 8)
-		binary.BigEndian.PutUint64(nowBytes, uint64(now.UnixNano()))
-		for _, artifact := range req.Artifacts {
-			signature := ed25519.Sign(*c.PrivateKey, append(artifact.Artifact, nowBytes...))
-			artifact.Signature = signature
-			for _, attachment := range artifact.Attachments {
-				signature := ed25519.Sign(*c.PrivateKey, append(attachment.Content, nowBytes...))
-				attachment.Signature = signature
-			}
-		}
-		req.SignedAt = timestamppb.New(now)
-	}
 	return c.ServiceClient.VCNSetArtifacts(ctx, req)
 }
 
