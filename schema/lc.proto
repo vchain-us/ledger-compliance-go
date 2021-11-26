@@ -108,6 +108,7 @@ message VCNDependency {
 	enum Type {
     Direct = 0;
     Indirect = 1;
+    Base = 2;
   }
 	string hash = 1;
 	Type type = 2;
