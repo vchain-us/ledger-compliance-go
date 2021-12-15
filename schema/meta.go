@@ -1,6 +1,7 @@
 package schema
 
 const (
-	FeatBoM           = "bom"
-	FeatAllowDownload = "allowdownload"
+	FeatBoM                     = "bom"
+	FeatAllowDownload           = "allowdownload"
+	FeatDeepContainerInspection = "dci"
 )
