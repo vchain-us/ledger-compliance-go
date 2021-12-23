@@ -19,8 +19,9 @@ package main
 import (
 	"context"
 	"fmt"
-	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 	"log"
+
+	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 )
 
 func main() {

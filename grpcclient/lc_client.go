@@ -47,8 +47,8 @@ import (
 
 // LcClientIf ...
 type LcClientIf interface {
-	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
-	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error)
+	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
+	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
 
 	Get(ctx context.Context, key []byte) (*immuschema.Entry, error)
 	GetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
@@ -57,11 +57,11 @@ type LcClientIf interface {
 	VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
 
 	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
-	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxMetadata, error)
+	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxHeader, error)
 	SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error)
 
-	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error)
+	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxHeader, error)
 
 	Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
 	ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
@@ -80,20 +80,20 @@ type LcClientIf interface {
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
 	VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error)
 
-	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error)
+	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
 
 	Connect() (err error)
 
 	// streams
-	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error)
+	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
 	StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error)
-	StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error)
+	StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
 	StreamVerifiedGet(ctx context.Context, req *immuschema.VerifiableGetRequest) (*immuschema.Entry, error)
 	StreamScan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
 	StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
 	StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
-	StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*immuschema.TxMetadata, error)
+	StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*immuschema.TxHeader, error)
 
 	SetServerSigningPubKey(*ecdsa.PublicKey)
 }

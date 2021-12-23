@@ -35,7 +35,7 @@ import (
 )
 
 // Set ...
-func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
+func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.Set(ctx, &immuschema.SetRequest{KVs: []*immuschema.KeyValue{{Key: key, Value: value}}})
 }
 
@@ -52,7 +52,7 @@ func (c *LcClient) GetAt(ctx context.Context, key []byte, tx uint64) (*immuschem
 }
 
 // ExecAll ...
-func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxMetadata, error) {
+func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxHeader, error) {
 	result, err := c.ServiceClient.ExecAll(ctx, in)
 	return result, err
 }
@@ -62,7 +62,7 @@ func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*
 	return c.ServiceClient.GetAll(ctx, in)
 }
 
-func (c *LcClient) SetAll(ctx context.Context, req *immuschema.SetRequest) (*immuschema.TxMetadata, error) {
+func (c *LcClient) SetAll(ctx context.Context, req *immuschema.SetRequest) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.Set(ctx, req)
 }
 
@@ -76,7 +76,7 @@ func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 }
 
 // VerifiedSet ...
-func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxMetadata, error) {
+func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	err := c.StateService.CacheLock()
 	if err != nil {
 		return nil, err
@@ -107,19 +107,36 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		return nil, err
 	}
 
-	tx := immuschema.TxFrom(verifiableTx.Tx)
+	if verifiableTx.Tx.Header.Nentries != 1 || len(verifiableTx.Tx.Entries) != 1 {
+		return nil, store.ErrCorruptedData
+	}
+
+	tx := immuschema.TxFromProto(verifiableTx.Tx)
+
+	entrySpecDigest, err := store.EntrySpecDigestFor(tx.Header().Version)
+	if err != nil {
+		return nil, err
+	}
 
 	inclusionProof, err := tx.Proof(database.EncodeKey(key))
 	if err != nil {
 		return nil, err
 	}
 
-	verifies := store.VerifyInclusion(inclusionProof, database.EncodeKV(key, value), tx.Eh())
+	md := tx.Entries()[0].Metadata()
+
+	if md != nil && md.Deleted() {
+		return nil, store.ErrCorruptedData
+	}
+
+	e := database.EncodeEntrySpec(key, md, value)
+
+	verifies := store.VerifyInclusion(inclusionProof, entrySpecDigest(e), tx.Header().Eh)
 	if !verifies {
 		return nil, store.ErrCorruptedData
 	}
 
-	if tx.Eh() != immuschema.DigestFrom(verifiableTx.DualProof.TargetTxMetadata.EH) {
+	if tx.Header().Eh != immuschema.DigestFromProto(verifiableTx.DualProof.TargetTxHeader.EH) {
 		return nil, store.ErrCorruptedData
 	}
 
@@ -127,14 +144,13 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	var sourceAlh, targetAlh [sha256.Size]byte
 
 	sourceID = state.TxId
-	sourceAlh = immuschema.DigestFrom(state.TxHash)
-
-	targetID = tx.ID
-	targetAlh = tx.Alh
+	sourceAlh = immuschema.DigestFromProto(state.TxHash)
+	targetID = tx.Header().ID
+	targetAlh = tx.Header().Alh()
 
 	if state.TxId > 0 {
 		verifies = store.VerifyDualProof(
-			immuschema.DualProofFrom(verifiableTx.DualProof),
+			immuschema.DualProofFromProto(verifiableTx.DualProof),
 			sourceID,
 			targetID,
 			sourceAlh,
@@ -147,9 +163,9 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	}
 
 	newState := &immuschema.ImmutableState{
-		Db:        c.ApiKeyHash,
-		TxId:      tx.ID,
-		TxHash:    tx.Alh[:],
+		Db:        c.ApiKey,
+		TxId:      targetID,
+		TxHash:    targetAlh[:],
 		Signature: verifiableTx.Signature,
 	}
 
@@ -168,7 +184,7 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		return nil, err
 	}
 
-	return verifiableTx.Tx.Metadata, nil
+	return verifiableTx.Tx.Header, nil
 }
 
 // VerifiedGet ...
@@ -253,7 +269,7 @@ func (c *LcClient) History(ctx context.Context, req *immuschema.HistoryRequest) 
 }
 
 // ZAddAt ...
-func (c *LcClient) ZAddAt(ctx context.Context, options *immuschema.ZAddRequest) (*immuschema.TxMetadata, error) {
+func (c *LcClient) ZAddAt(ctx context.Context, options *immuschema.ZAddRequest) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.ZAdd(ctx, options)
 }
 
@@ -280,7 +296,7 @@ func (c *LcClient) Feats(ctx context.Context) (*schema.Features, error) {
 }
 
 // SetFile ...
-func (c *LcClient) SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxMetadata, error) {
+func (c *LcClient) SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error) {
 	bs, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -455,8 +471,13 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 }
 
 func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEntry, kReq *immuschema.KeyRequest, apiKeyHash string) (*immuschema.ImmutableState, error) {
-	inclusionProof := immuschema.InclusionProofFrom(vEntry.InclusionProof)
-	dualProof := immuschema.DualProofFrom(vEntry.VerifiableTx.DualProof)
+	entrySpecDigest, err := store.EntrySpecDigestFor(int(vEntry.VerifiableTx.Tx.Header.Version))
+	if err != nil {
+		return nil, err
+	}
+
+	inclusionProof := immuschema.InclusionProofFromProto(vEntry.InclusionProof)
+	dualProof := immuschema.DualProofFromProto(vEntry.VerifiableTx.DualProof)
 
 	var eh [sha256.Size]byte
 
@@ -464,35 +485,36 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 	var sourceAlh, targetAlh [sha256.Size]byte
 
 	var vTx uint64
-	var kv *store.KV
+	var e *store.EntrySpec
 
 	if vEntry.Entry.ReferencedBy == nil {
 		vTx = vEntry.Entry.Tx
-		kv = database.EncodeKV(kReq.Key, vEntry.Entry.Value)
+		e = database.EncodeEntrySpec(kReq.Key, immuschema.KVMetadataFromProto(vEntry.Entry.Metadata), vEntry.Entry.Value)
 	} else {
-		vTx = vEntry.Entry.ReferencedBy.Tx
-		kv = database.EncodeReference(vEntry.Entry.ReferencedBy.Key, vEntry.Entry.Key, vEntry.Entry.ReferencedBy.AtTx)
+		ref := vEntry.Entry.ReferencedBy
+		vTx = ref.Tx
+		e = database.EncodeReference(ref.Key, immuschema.KVMetadataFromProto(ref.Metadata), vEntry.Entry.Key, ref.AtTx)
 	}
 
 	if state.TxId <= vTx {
-		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.TargetTxMetadata.EH)
+		eh = immuschema.DigestFromProto(vEntry.VerifiableTx.DualProof.TargetTxHeader.EH)
 
 		sourceID = state.TxId
-		sourceAlh = immuschema.DigestFrom(state.TxHash)
+		sourceAlh = immuschema.DigestFromProto(state.TxHash)
 		targetID = vTx
-		targetAlh = dualProof.TargetTxMetadata.Alh()
+		targetAlh = dualProof.TargetTxHeader.Alh()
 	} else {
-		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.SourceTxMetadata.EH)
+		eh = immuschema.DigestFromProto(vEntry.VerifiableTx.DualProof.SourceTxHeader.EH)
 
 		sourceID = vTx
-		sourceAlh = dualProof.SourceTxMetadata.Alh()
+		sourceAlh = dualProof.SourceTxHeader.Alh()
 		targetID = state.TxId
-		targetAlh = immuschema.DigestFrom(state.TxHash)
+		targetAlh = immuschema.DigestFromProto(state.TxHash)
 	}
 
 	verifies := store.VerifyInclusion(
 		inclusionProof,
-		kv,
+		entrySpecDigest(e),
 		eh)
 	if !verifies {
 		return nil, store.ErrCorruptedData

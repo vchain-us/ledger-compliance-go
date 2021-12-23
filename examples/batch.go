@@ -19,9 +19,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
-	"log"
 )
 
 func main() {

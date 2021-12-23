@@ -173,11 +173,11 @@ func streamVerifiedSetAndGet(client *sdk.LcClient, ks, vs [][]byte) error {
 			Value: &stream.ValueSize{Content: bufio.NewReader(bytes.NewBuffer(vs[i])), Size: len(vs[i])},
 		})
 	}
-	txMeta, err := client.StreamVerifiedSet(ctx, sKVs)
+	txHeader, err := client.StreamVerifiedSet(ctx, sKVs)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("StreamVerifiedSet OK - TxID: %d\n", txMeta.GetId())
+	fmt.Printf("StreamVerifiedSet OK - TxID: %d\n", txHeader.GetId())
 
 	for i, k := range ks {
 		entry, err := client.StreamVerifiedGet(ctx, &schema.VerifiableGetRequest{

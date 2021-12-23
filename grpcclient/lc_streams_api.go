@@ -11,13 +11,12 @@ import (
 
 	"github.com/codenotary/immudb/embedded/store"
 	"github.com/codenotary/immudb/pkg/api/schema"
-	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/database"
 	"github.com/codenotary/immudb/pkg/stream"
 )
 
 // StreamSet ...
-func (c *LcClient) StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error) {
+func (c *LcClient) StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*schema.TxHeader, error) {
 	s, err := c.ServiceClient.StreamSet(ctx)
 	if err != nil {
 		return nil, err
@@ -36,7 +35,7 @@ func (c *LcClient) StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immu
 }
 
 // StreamGet ...
-func (c *LcClient) StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error) {
+func (c *LcClient) StreamGet(ctx context.Context, k *schema.KeyRequest) (*schema.Entry, error) {
 	gs, err := c.ServiceClient.StreamGet(ctx, k)
 	if err != nil {
 		return nil, err
@@ -57,14 +56,14 @@ func (c *LcClient) StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*im
 		return nil, err
 	}
 
-	return &immuschema.Entry{
+	return &schema.Entry{
 		Key:   key,
 		Value: value,
 	}, nil
 }
 
 // StreamVerifiedSet ...
-func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxMetadata, error) {
+func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*schema.TxHeader, error) {
 	if len(kvs) == 0 {
 		return nil, errors.New("no key-values specified")
 	}
@@ -88,7 +87,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	}
 
 	//--> collect the keys and values as they need to be used for verifications
-	stdKVs := make([]*immuschema.KeyValue, 0, len(kvs))
+	stdKVs := make([]*schema.KeyValue, 0, len(kvs))
 	for i, kv := range kvs {
 		var keyBuffer bytes.Buffer
 		keyTeeReader := io.TeeReader(kv.Key.Content, &keyBuffer)
@@ -108,7 +107,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		// put a new Reader back
 		kvs[i].Value.Content = bufio.NewReader(&valueBuffer)
 
-		stdKVs = append(stdKVs, &immuschema.KeyValue{Key: key, Value: value})
+		stdKVs = append(stdKVs, &schema.KeyValue{Key: key, Value: value})
 	}
 	//<--
 
@@ -137,26 +136,35 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		return nil, err
 	}
 
-	if verifiableTx.Tx.Metadata.Nentries != int32(len(kvs)) {
+	if verifiableTx.Tx.Header.Nentries != int32(len(kvs)) || len(verifiableTx.Tx.Entries) != len(kvs) {
 		return nil, store.ErrCorruptedData
 	}
 
-	tx := immuschema.TxFrom(verifiableTx.Tx)
+	tx := schema.TxFromProto(verifiableTx.Tx)
+
+	entrySpecDigest, err := store.EntrySpecDigestFor(tx.Header().Version)
+	if err != nil {
+		return nil, err
+	}
 
 	var verifies bool
 
-	for _, kv := range stdKVs {
+	for i, kv := range stdKVs {
 		inclusionProof, err := tx.Proof(database.EncodeKey(kv.Key))
 		if err != nil {
 			return nil, err
 		}
-		verifies = store.VerifyInclusion(inclusionProof, database.EncodeKV(kv.Key, kv.Value), tx.Eh())
+
+		md := tx.Entries()[i].Metadata()
+		e := database.EncodeEntrySpec(kv.Key, md, kv.Value)
+
+		verifies = store.VerifyInclusion(inclusionProof, entrySpecDigest(e), tx.Header().Eh)
 		if !verifies {
 			return nil, store.ErrCorruptedData
 		}
 	}
 
-	if tx.Eh() != immuschema.DigestFrom(verifiableTx.DualProof.TargetTxMetadata.EH) {
+	if tx.Header().Eh != schema.DigestFromProto(verifiableTx.DualProof.TargetTxHeader.EH) {
 		return nil, store.ErrCorruptedData
 	}
 
@@ -164,13 +172,13 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	var sourceAlh, targetAlh [sha256.Size]byte
 
 	sourceID = state.TxId
-	sourceAlh = immuschema.DigestFrom(state.TxHash)
-	targetID = tx.ID
-	targetAlh = tx.Alh
+	sourceAlh = schema.DigestFromProto(state.TxHash)
+	targetID = tx.Header().ID
+	targetAlh = tx.Header().Alh()
 
 	if state.TxId > 0 {
 		verifies = store.VerifyDualProof(
-			immuschema.DualProofFrom(verifiableTx.DualProof),
+			schema.DualProofFromProto(verifiableTx.DualProof),
 			sourceID,
 			targetID,
 			sourceAlh,
@@ -182,7 +190,8 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		}
 	}
 
-	newState := &immuschema.ImmutableState{
+	newState := &schema.ImmutableState{
+		Db:        c.ApiKey,
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: verifiableTx.Signature,
@@ -203,11 +212,11 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		return nil, err
 	}
 
-	return verifiableTx.Tx.Metadata, nil
+	return verifiableTx.Tx.Header, nil
 }
 
 // StreamVerifiedGet ...
-func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.VerifiableGetRequest) (*immuschema.Entry, error) {
+func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *schema.VerifiableGetRequest) (*schema.Entry, error) {
 	err := c.StateService.CacheLock()
 	if err != nil {
 		return nil, err
@@ -220,6 +229,9 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.Verifi
 	}
 
 	gs, err := c.ServiceClient.StreamVerifiableGet(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 
 	ver := c.StreamServiceFactory.NewVEntryStreamReceiver(c.StreamServiceFactory.NewMsgReceiver(gs))
 
@@ -234,8 +246,13 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.Verifi
 		return nil, err
 	}
 
-	inclusionProof := immuschema.InclusionProofFrom(vEntry.InclusionProof)
-	dualProof := immuschema.DualProofFrom(vEntry.VerifiableTx.DualProof)
+	entrySpecDigest, err := store.EntrySpecDigestFor(int(vEntry.VerifiableTx.Tx.Header.Version))
+	if err != nil {
+		return nil, err
+	}
+
+	inclusionProof := schema.InclusionProofFromProto(vEntry.InclusionProof)
+	dualProof := schema.DualProofFromProto(vEntry.VerifiableTx.DualProof)
 
 	var eh [sha256.Size]byte
 
@@ -243,31 +260,32 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.Verifi
 	var sourceAlh, targetAlh [sha256.Size]byte
 
 	var vTx uint64
-	var kv *store.KV
+	var e *store.EntrySpec
 
 	if vEntry.Entry.ReferencedBy == nil {
 		vTx = vEntry.Entry.Tx
-		kv = database.EncodeKV(req.KeyRequest.Key, vEntry.Entry.Value)
+		e = database.EncodeEntrySpec(req.KeyRequest.Key, schema.KVMetadataFromProto(vEntry.Entry.Metadata), vEntry.Entry.Value)
 	} else {
-		vTx = vEntry.Entry.ReferencedBy.Tx
-		kv = database.EncodeReference(vEntry.Entry.ReferencedBy.Key, vEntry.Entry.Key, vEntry.Entry.ReferencedBy.AtTx)
+		ref := vEntry.Entry.ReferencedBy
+		vTx = ref.Tx
+		e = database.EncodeReference(ref.Key, schema.KVMetadataFromProto(ref.Metadata), vEntry.Entry.Key, ref.AtTx)
 	}
 
 	if state.TxId <= vTx {
-		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.TargetTxMetadata.EH)
+		eh = schema.DigestFromProto(vEntry.VerifiableTx.DualProof.TargetTxHeader.EH)
 		sourceID = state.TxId
-		sourceAlh = immuschema.DigestFrom(state.TxHash)
+		sourceAlh = schema.DigestFromProto(state.TxHash)
 		targetID = vTx
-		targetAlh = dualProof.TargetTxMetadata.Alh()
+		targetAlh = dualProof.TargetTxHeader.Alh()
 	} else {
-		eh = immuschema.DigestFrom(vEntry.VerifiableTx.DualProof.SourceTxMetadata.EH)
+		eh = schema.DigestFromProto(vEntry.VerifiableTx.DualProof.SourceTxHeader.EH)
 		sourceID = vTx
-		sourceAlh = dualProof.SourceTxMetadata.Alh()
+		sourceAlh = dualProof.SourceTxHeader.Alh()
 		targetID = state.TxId
-		targetAlh = immuschema.DigestFrom(state.TxHash)
+		targetAlh = schema.DigestFromProto(state.TxHash)
 	}
 
-	verifies := store.VerifyInclusion(inclusionProof, kv, eh)
+	verifies := store.VerifyInclusion(inclusionProof, entrySpecDigest(e), eh)
 	if !verifies {
 		return nil, store.ErrCorruptedData
 	}
@@ -285,7 +303,8 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.Verifi
 		}
 	}
 
-	newState := &immuschema.ImmutableState{
+	newState := &schema.ImmutableState{
+		Db:        c.ApiKey,
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: vEntry.VerifiableTx.Signature,
@@ -310,13 +329,13 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *immuschema.Verifi
 }
 
 // StreamScan ...
-func (c *LcClient) StreamScan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error) {
+func (c *LcClient) StreamScan(ctx context.Context, req *schema.ScanRequest) (*schema.Entries, error) {
 	gs, err := c.ServiceClient.StreamScan(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	kvr := c.StreamServiceFactory.NewKvStreamReceiver(c.StreamServiceFactory.NewMsgReceiver(gs))
-	var entries []*immuschema.Entry
+	var entries []*schema.Entry
 	for {
 		key, vr, err := kvr.Next()
 		if err != nil {
@@ -333,24 +352,24 @@ func (c *LcClient) StreamScan(ctx context.Context, req *immuschema.ScanRequest) 
 			return nil, err
 		}
 
-		entry := &immuschema.Entry{
+		entry := &schema.Entry{
 			Key:   key,
 			Value: value,
 		}
 
 		entries = append(entries, entry)
 	}
-	return &immuschema.Entries{Entries: entries}, nil
+	return &schema.Entries{Entries: entries}, nil
 }
 
 // StreamZScan ...
-func (c *LcClient) StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error) {
+func (c *LcClient) StreamZScan(ctx context.Context, req *schema.ZScanRequest) (*schema.ZEntries, error) {
 	gs, err := c.ServiceClient.StreamZScan(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	zr := c.StreamServiceFactory.NewZStreamReceiver(c.StreamServiceFactory.NewMsgReceiver(gs))
-	var entries []*immuschema.ZEntry
+	var entries []*schema.ZEntry
 	for {
 		set, key, score, atTx, vr, err := zr.Next()
 		if err != nil {
@@ -365,17 +384,17 @@ func (c *LcClient) StreamZScan(ctx context.Context, req *immuschema.ZScanRequest
 		}
 		entries = append(entries, entry)
 	}
-	return &immuschema.ZEntries{Entries: entries}, nil
+	return &schema.ZEntries{Entries: entries}, nil
 }
 
 // StreamHistory ...
-func (c *LcClient) StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error) {
+func (c *LcClient) StreamHistory(ctx context.Context, req *schema.HistoryRequest) (*schema.Entries, error) {
 	gs, err := c.ServiceClient.StreamHistory(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	kvr := c.StreamServiceFactory.NewKvStreamReceiver(c.StreamServiceFactory.NewMsgReceiver(gs))
-	var entries []*immuschema.Entry
+	var entries []*schema.Entry
 	for {
 		key, vr, err := kvr.Next()
 		if err != nil {
@@ -392,17 +411,17 @@ func (c *LcClient) StreamHistory(ctx context.Context, req *immuschema.HistoryReq
 			return nil, err
 		}
 
-		entry := &immuschema.Entry{
+		entry := &schema.Entry{
 			Key:   key,
 			Value: value,
 		}
 		entries = append(entries, entry)
 	}
-	return &immuschema.Entries{Entries: entries}, nil
+	return &schema.Entries{Entries: entries}, nil
 }
 
 // StreamExecAll ...
-func (c *LcClient) StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*schema.TxMetadata, error) {
+func (c *LcClient) StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*schema.TxHeader, error) {
 	s, err := c.ServiceClient.StreamExecAll(ctx)
 	if err != nil {
 		return nil, err
