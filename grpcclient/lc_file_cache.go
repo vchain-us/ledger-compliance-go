@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/base64"
-	"github.com/codenotary/immudb/pkg/client/cache"
-	"github.com/rogpeppe/go-internal/lockedfile"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/codenotary/immudb/pkg/client/cache"
+	"github.com/rogpeppe/go-internal/lockedfile"
 
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/golang/protobuf/proto"
@@ -19,7 +20,7 @@ import (
 const STATE_FN = ".state-"
 
 type FileCache struct {
-	Dir string
+	Dir       string
 	stateFile *lockedfile.File
 }
 
@@ -81,6 +82,11 @@ func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, 
 	}
 	output := bytes.Join(lines, []byte("\n"))
 
+	_, err = w.stateFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return nil, err
+	}
+
 	err = w.stateFile.Truncate(0)
 	if err != nil {
 		return nil, err
@@ -116,12 +122,19 @@ func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableSta
 		if strings.Contains(line, db+":") {
 			exists = true
 			lines = append(lines, []byte(newState))
+		} else if line != "" {
+			lines = append(lines, []byte(line))
 		}
 	}
 	if !exists {
 		lines = append(lines, []byte(newState))
 	}
 	output := bytes.Join(lines, []byte("\n"))
+
+	_, err = w.stateFile.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 
 	err = w.stateFile.Truncate(0)
 	if err != nil {
@@ -134,9 +147,8 @@ func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableSta
 	return nil
 }
 
-
 func (w *FileCache) Lock(serverUUID string) (err error) {
-	w.stateFile, err = lockedfile.OpenFile(w.getStateFilePath(serverUUID), os.O_RDWR | os.O_CREATE, 0755)
+	w.stateFile, err = lockedfile.OpenFile(w.getStateFilePath(serverUUID), os.O_RDWR|os.O_CREATE, 0755)
 	return err
 }
 
