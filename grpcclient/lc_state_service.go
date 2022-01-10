@@ -50,10 +50,8 @@ func (r *lcStateService) GetState(ctx context.Context, apiKey string) (*schema.I
 	if err == nil {
 		return st, nil
 	}
-	if err == ErrStateNotFound {
-		if st, err := r.cache.GetAndClean(r.serverUUID, apiKey); err == nil {
-			return st, nil
-		}
+	if err != ErrStateNotFound {
+		return nil, err
 	}
 
 	st, err = r.stateProvider.CurrentState(ctx)

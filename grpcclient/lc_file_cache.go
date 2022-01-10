@@ -60,44 +60,6 @@ func (w *FileCache) Get(serverUUID string, db string) (*schema.ImmutableState, e
 	return nil, ErrStateNotFound
 }
 
-// GetAndClean retrieve the state for db identifier and remove it from state file
-func (w *FileCache) GetAndClean(serverUUID, db string) (*schema.ImmutableState, error) {
-	state, err := w.Get(serverUUID, db)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = w.stateFile.Seek(0, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
-	scanner := bufio.NewScanner(w.stateFile)
-	scanner.Split(bufio.ScanLines)
-	var lines [][]byte
-	for scanner.Scan() {
-		line := scanner.Text()
-		if !strings.Contains(line, db+":") && line != "" {
-			lines = append(lines, []byte(line))
-		}
-	}
-	output := bytes.Join(lines, []byte("\n"))
-
-	_, err = w.stateFile.Seek(0, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
-
-	err = w.stateFile.Truncate(0)
-	if err != nil {
-		return nil, err
-	}
-	_, err = w.stateFile.Write(output)
-	if err != nil {
-		return nil, err
-	}
-	return state, err
-}
-
 func (w *FileCache) Set(serverUUID string, db string, state *schema.ImmutableState) error {
 	if w.stateFile == nil {
 		return ErrCacheNotLocked
