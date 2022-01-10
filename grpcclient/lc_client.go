@@ -28,6 +28,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 
+	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/stream"
 
@@ -184,7 +185,7 @@ func (c *LcClient) Connect() (err error) {
 	uuidPrv := NewLcUUIDProvider(c.ServiceClient)
 	stateProvider := NewLcStateProvider(c.ServiceClient)
 
-	c.StateService, err = NewLcStateService(NewLcFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
+	c.StateService, err = NewLcStateService(cache.NewFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
 	if err != nil {
 		return err
 	}
