@@ -148,7 +148,8 @@ message VCNGetRequest {
 	Type type = 4;
     uint64 Limit = 5;
     bool Desc = 6;
-    uint64 userID = 7;
+    int64 startTS = 8;
+    int64 endTS = 9;
 }
 
 service LcService {
