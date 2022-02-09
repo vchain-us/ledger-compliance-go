@@ -130,12 +130,27 @@ message VCNArtifactsResponse {
 	immudb.schema.TxHeader transaction = 1;
 }
 
+message VCNGetRequest {
+	enum Type {
+        Artifact = 0;
+        Dependencies = 1;
+        WhatIncludes = 2;
+    }
+	string hash = 1;
+    string signerID = 2;
+    string suffix = 3;
+	Type type = 4;
+    uint64 Limit = 5;
+    bool Desc = 6;
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
 	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
 	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
 	rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
+    rpc VCNGetArtifacts(VCNGetRequest) returns (ZItemExtList){};
 	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
 	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};

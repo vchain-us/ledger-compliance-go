@@ -61,6 +61,7 @@ type LcClientIf interface {
 	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxHeader, error)
 	SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error)
+	VCNGetArtifacts(ctx context.Context, req *schema.VCNGetRequest) (*schema.ZItemExtList, error)
 
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxHeader, error)
 
