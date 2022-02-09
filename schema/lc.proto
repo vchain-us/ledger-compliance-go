@@ -135,6 +135,7 @@ message VCNGetRequest {
         Artifact = 0;
         Dependencies = 1;
         WhatIncludes = 2;
+        ArtifactTimed = 4;
     }
     enum ArtifactType {
         Any = 0;
