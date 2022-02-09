@@ -136,12 +136,18 @@ message VCNGetRequest {
         Dependencies = 1;
         WhatIncludes = 2;
     }
+    enum ArtifactType {
+        Direct = 0;
+        Indirect = 1;
+        Base = 2;
+    }
 	string hash = 1;
     string signerID = 2;
-    string suffix = 3;
+    ArtifactType aType = 3;
 	Type type = 4;
     uint64 Limit = 5;
     bool Desc = 6;
+    uint64 userID = 7;
 }
 
 service LcService {
