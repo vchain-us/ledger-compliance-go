@@ -75,8 +75,8 @@ func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return c.ServiceClient.VCNSetArtifacts(ctx, req)
 }
 
-// VCNSetArtifacts ...
-func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNGetRequest) (*schema.ZItemExtList, error) {
+// VCNGetArtifacts ...
+func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNGetRequest) (*schema.EntryList, error) {
 	return c.ServiceClient.VCNGetArtifacts(ctx, req)
 }
 

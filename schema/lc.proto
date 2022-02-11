@@ -136,6 +136,7 @@ message VCNGetRequest {
         Dependencies = 1;
         WhatIncludes = 2;
         ArtifactTimed = 4;
+        Attachment = 5;
     }
     enum ArtifactType {
         Direct = 0;
@@ -150,6 +151,21 @@ message VCNGetRequest {
     bool Desc = 6;
     int64 startTS = 8;
     int64 endTS = 9;
+    string attachName = 10;
+}
+
+message Entry {
+    bytes key = 1;
+    bytes value = 2;
+    uint64 tx = 3;
+    immudb.schema.KVMetadata metadata = 4;
+   	google.protobuf.Timestamp timestamp = 5;
+	google.protobuf.Timestamp apikeyRevoked = 6;
+	string ledgerName = 7;
+}
+
+message EntryList {
+    repeated Entry entries = 1;
 }
 
 service LcService {
@@ -158,7 +174,7 @@ service LcService {
 	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
 	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
 	rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
-    rpc VCNGetArtifacts(VCNGetRequest) returns (ZItemExtList){};
+    rpc VCNGetArtifacts(VCNGetRequest) returns (EntryList){};
 	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
 	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};

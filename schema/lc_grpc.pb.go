@@ -25,7 +25,7 @@ type LcServiceClient interface {
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
-	VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
+	VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*EntryList, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -96,8 +96,8 @@ func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsR
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*ZItemExtList, error) {
-	out := new(ZItemExtList)
+func (c *lcServiceClient) VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*EntryList, error) {
+	out := new(EntryList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetArtifacts", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -569,7 +569,7 @@ type LcServiceServer interface {
 	Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error)
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
-	VCNGetArtifacts(context.Context, *VCNGetRequest) (*ZItemExtList, error)
+	VCNGetArtifacts(context.Context, *VCNGetRequest) (*EntryList, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -619,7 +619,7 @@ func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) 
 func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNSetArtifacts not implemented")
 }
-func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNGetRequest) (*ZItemExtList, error) {
+func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNGetRequest) (*EntryList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetArtifacts not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
