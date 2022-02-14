@@ -137,6 +137,9 @@ message VCNGetRequest {
         WhatIncludes = 2;
         ArtifactTimed = 4;
         Attachment = 5;
+        ByApiKey = 6;
+        ByName = 7;
+        History = 8;
     }
     enum ArtifactType {
         Direct = 0;
@@ -152,6 +155,7 @@ message VCNGetRequest {
     int64 startTS = 8;
     int64 endTS = 9;
     string attachName = 10;
+    string artifactName = 11;
 }
 
 message Entry {
