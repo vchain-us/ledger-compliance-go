@@ -4,5 +4,5 @@ const (
 	FeatBoM                     = "bom"
 	FeatAllowDownload           = "allowdownload"
 	FeatDeepContainerInspection = "dci"
-	FeatUseVCNGetArtifact       = "useSearchArtifact"
+	FeatUseVCNSearchArtifact    = "useSearchArtifact"
 )
