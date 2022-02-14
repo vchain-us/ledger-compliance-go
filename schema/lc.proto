@@ -130,7 +130,7 @@ message VCNArtifactsResponse {
 	immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNGetRequest {
+message VCNSearchRequest {
 	enum Type {
         Artifact = 0;
         Dependencies = 1;
@@ -178,7 +178,7 @@ service LcService {
 	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
 	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
 	rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
-    rpc VCNGetArtifacts(VCNGetRequest) returns (EntryList){};
+    rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
 	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
 	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
 	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};

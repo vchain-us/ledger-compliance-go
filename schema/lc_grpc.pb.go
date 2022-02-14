@@ -25,7 +25,7 @@ type LcServiceClient interface {
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
-	VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*EntryList, error)
+	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -96,9 +96,9 @@ func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsR
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNGetArtifacts(ctx context.Context, in *VCNGetRequest, opts ...grpc.CallOption) (*EntryList, error) {
+func (c *lcServiceClient) VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error) {
 	out := new(EntryList)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetArtifacts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNSearchArtifacts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -569,7 +569,7 @@ type LcServiceServer interface {
 	Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error)
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
-	VCNGetArtifacts(context.Context, *VCNGetRequest) (*EntryList, error)
+	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -619,8 +619,8 @@ func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) 
 func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNSetArtifacts not implemented")
 }
-func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNGetRequest) (*EntryList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNGetArtifacts not implemented")
+func (UnimplementedLcServiceServer) VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNSearchArtifacts not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -770,20 +770,20 @@ func _LcService_VCNSetArtifacts_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNGetArtifacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNGetRequest)
+func _LcService_VCNSearchArtifacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNSearchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNGetArtifacts(ctx, in)
+		return srv.(LcServiceServer).VCNSearchArtifacts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNGetArtifacts",
+		FullMethod: "/lc.schema.LcService/VCNSearchArtifacts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNGetArtifacts(ctx, req.(*VCNGetRequest))
+		return srv.(LcServiceServer).VCNSearchArtifacts(ctx, req.(*VCNSearchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1341,8 +1341,8 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNSetArtifacts_Handler,
 		},
 		{
-			MethodName: "VCNGetArtifacts",
-			Handler:    _LcService_VCNGetArtifacts_Handler,
+			MethodName: "VCNSearchArtifacts",
+			Handler:    _LcService_VCNSearchArtifacts_Handler,
 		},
 		{
 			MethodName: "Get",

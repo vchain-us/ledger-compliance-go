@@ -75,9 +75,9 @@ func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return c.ServiceClient.VCNSetArtifacts(ctx, req)
 }
 
-// VCNGetArtifacts ...
-func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNGetRequest) (*schema.EntryList, error) {
-	return c.ServiceClient.VCNGetArtifacts(ctx, req)
+// VCNSearchArtifacts ...
+func (c *LcClient) VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearchRequest) (*schema.EntryList, error) {
+	return c.ServiceClient.VCNSearchArtifacts(ctx, req)
 }
 
 // VerifiedSet ...
