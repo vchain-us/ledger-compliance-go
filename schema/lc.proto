@@ -126,6 +126,10 @@ message VCNArtifactsRequest {
   google.protobuf.Timestamp signedAt = 2;
 }
 
+message VCNArtifactsGetRequest {
+	repeated string hash = 1;
+}
+
 message VCNArtifactsResponse {
   immudb.schema.TxHeader transaction = 1;
 }
@@ -216,6 +220,7 @@ service LcService {
   rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
+  rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
   rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
   rpc VCNUriSet(VCNUriSetRequest) returns (VCNUriSetResponse){};
   rpc VCNUriUpdate(VCNUriUpdateRequest) returns (VCNUriUpdateResponse){};
