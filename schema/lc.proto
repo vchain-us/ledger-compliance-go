@@ -172,6 +172,41 @@ message EntryList {
     repeated Entry entries = 1;
 }
 
+message LabelsErrorResponse {
+	string error = 1;
+}
+
+message LabelsSetRequest {
+	string hash = 1;
+	repeated string labels = 2;
+}
+
+message LabelsSetSuccessfulResponse {
+}
+
+message LabelsSetResponse {
+	oneof response {
+		LabelsErrorResponse error = 1;
+		LabelsSetSuccessfulResponse success = 2;
+	}
+}
+
+message LabelsGetRequest {
+	string hash = 1;
+	string signerID = 2;
+}
+
+message LabelsGetSuccessfulResponse {
+	repeated string labels = 1;
+}
+
+message LabelsGetResponse {
+	oneof response {
+		LabelsErrorResponse error = 1;
+		LabelsGetSuccessfulResponse success = 2;
+	}
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
@@ -204,6 +239,9 @@ service LcService {
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 	rpc Feats(google.protobuf.Empty) returns (Features){};
+	rpc LabelsAdd(LabelsSetRequest) returns (LabelsSetResponse){};
+	rpc LabelsRemove(LabelsSetRequest) returns (LabelsSetResponse){};
+	rpc LabelsGet(LabelsGetRequest) returns (LabelsGetResponse){};
 
 	// streams
 	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
