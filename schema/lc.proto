@@ -172,23 +172,12 @@ message EntryList {
     repeated Entry entries = 1;
 }
 
-message LabelsErrorResponse {
-	string error = 1;
-}
-
 message LabelsSetRequest {
 	string hash = 1;
 	repeated string labels = 2;
 }
 
-message LabelsSetSuccessfulResponse {
-}
-
 message LabelsSetResponse {
-	oneof response {
-		LabelsErrorResponse error = 1;
-		LabelsSetSuccessfulResponse success = 2;
-	}
 }
 
 message LabelsGetRequest {
@@ -196,15 +185,8 @@ message LabelsGetRequest {
 	string signerID = 2;
 }
 
-message LabelsGetSuccessfulResponse {
-	repeated string labels = 1;
-}
-
 message LabelsGetResponse {
-	oneof response {
-		LabelsErrorResponse error = 1;
-		LabelsGetSuccessfulResponse success = 2;
-	}
+	repeated string labels = 1;
 }
 
 service LcService {
