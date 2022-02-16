@@ -30,6 +30,9 @@ type LcServiceClient interface {
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
+	VCNLabelsAdd(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error)
+	VCNLabelsRemove(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error)
+	VCNLabelsGet(ctx context.Context, in *LabelsGetRequest, opts ...grpc.CallOption) (*LabelsGetResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -54,9 +57,6 @@ type LcServiceClient interface {
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 	Feats(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Features, error)
-	LabelsAdd(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error)
-	LabelsRemove(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error)
-	LabelsGet(ctx context.Context, in *LabelsGetRequest, opts ...grpc.CallOption) (*LabelsGetResponse, error)
 	// streams
 	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
 	StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error)
@@ -106,6 +106,33 @@ func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsR
 func (c *lcServiceClient) VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error) {
 	out := new(EntryList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNSearchArtifacts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNLabelsAdd(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error) {
+	out := new(LabelsSetResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsAdd", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNLabelsRemove(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error) {
+	out := new(LabelsSetResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsRemove", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNLabelsGet(ctx context.Context, in *LabelsGetRequest, opts ...grpc.CallOption) (*LabelsGetResponse, error) {
+	out := new(LabelsGetResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsGet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -299,33 +326,6 @@ func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryRequ
 func (c *lcServiceClient) Feats(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Features, error) {
 	out := new(Features)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Feats", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) LabelsAdd(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error) {
-	out := new(LabelsSetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/LabelsAdd", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) LabelsRemove(ctx context.Context, in *LabelsSetRequest, opts ...grpc.CallOption) (*LabelsSetResponse, error) {
-	out := new(LabelsSetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/LabelsRemove", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) LabelsGet(ctx context.Context, in *LabelsGetRequest, opts ...grpc.CallOption) (*LabelsGetResponse, error) {
-	out := new(LabelsGetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/LabelsGet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -604,6 +604,9 @@ type LcServiceServer interface {
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
+	VCNLabelsAdd(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error)
+	VCNLabelsRemove(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error)
+	VCNLabelsGet(context.Context, *LabelsGetRequest) (*LabelsGetResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -628,9 +631,6 @@ type LcServiceServer interface {
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	Feats(context.Context, *emptypb.Empty) (*Features, error)
-	LabelsAdd(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error)
-	LabelsRemove(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error)
-	LabelsGet(context.Context, *LabelsGetRequest) (*LabelsGetResponse, error)
 	// streams
 	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
 	StreamSet(LcService_StreamSetServer) error
@@ -658,6 +658,15 @@ func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifac
 }
 func (UnimplementedLcServiceServer) VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNSearchArtifacts not implemented")
+}
+func (UnimplementedLcServiceServer) VCNLabelsAdd(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsAdd not implemented")
+}
+func (UnimplementedLcServiceServer) VCNLabelsRemove(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsRemove not implemented")
+}
+func (UnimplementedLcServiceServer) VCNLabelsGet(context.Context, *LabelsGetRequest) (*LabelsGetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsGet not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -715,15 +724,6 @@ func (UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryR
 }
 func (UnimplementedLcServiceServer) Feats(context.Context, *emptypb.Empty) (*Features, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
-}
-func (UnimplementedLcServiceServer) LabelsAdd(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LabelsAdd not implemented")
-}
-func (UnimplementedLcServiceServer) LabelsRemove(context.Context, *LabelsSetRequest) (*LabelsSetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LabelsRemove not implemented")
-}
-func (UnimplementedLcServiceServer) LabelsGet(context.Context, *LabelsGetRequest) (*LabelsGetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LabelsGet not implemented")
 }
 func (UnimplementedLcServiceServer) StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamGet not implemented")
@@ -830,6 +830,60 @@ func _LcService_VCNSearchArtifacts_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).VCNSearchArtifacts(ctx, req.(*VCNSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNLabelsAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LabelsSetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNLabelsAdd(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNLabelsAdd",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNLabelsAdd(ctx, req.(*LabelsSetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNLabelsRemove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LabelsSetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNLabelsRemove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNLabelsRemove",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNLabelsRemove(ctx, req.(*LabelsSetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNLabelsGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LabelsGetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNLabelsGet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNLabelsGet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNLabelsGet(ctx, req.(*LabelsGetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1184,60 +1238,6 @@ func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_LabelsAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LabelsSetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).LabelsAdd(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/LabelsAdd",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).LabelsAdd(ctx, req.(*LabelsSetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_LabelsRemove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LabelsSetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).LabelsRemove(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/LabelsRemove",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).LabelsRemove(ctx, req.(*LabelsSetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_LabelsGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LabelsGetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).LabelsGet(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/LabelsGet",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).LabelsGet(ctx, req.(*LabelsGetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _LcService_StreamGet_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(schema.KeyRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -1445,6 +1445,18 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNSearchArtifacts_Handler,
 		},
 		{
+			MethodName: "VCNLabelsAdd",
+			Handler:    _LcService_VCNLabelsAdd_Handler,
+		},
+		{
+			MethodName: "VCNLabelsRemove",
+			Handler:    _LcService_VCNLabelsRemove_Handler,
+		},
+		{
+			MethodName: "VCNLabelsGet",
+			Handler:    _LcService_VCNLabelsGet_Handler,
+		},
+		{
 			MethodName: "Get",
 			Handler:    _LcService_Get_Handler,
 		},
@@ -1515,18 +1527,6 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Feats",
 			Handler:    _LcService_Feats_Handler,
-		},
-		{
-			MethodName: "LabelsAdd",
-			Handler:    _LcService_LabelsAdd_Handler,
-		},
-		{
-			MethodName: "LabelsRemove",
-			Handler:    _LcService_LabelsRemove_Handler,
-		},
-		{
-			MethodName: "LabelsGet",
-			Handler:    _LcService_LabelsGet_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
