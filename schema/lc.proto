@@ -172,20 +172,20 @@ message EntryList {
   repeated Entry entries = 1;
 }
 
-message UriSetRequest {
+message VCNUriSetRequest {
   string hash = 1;
   repeated string uris = 2;
 }
 
-message UriSetResponse {
+message VCNUriSetResponse {
 }
 
-message UriGetRequest {
+message VCNUriGetRequest {
   string hash = 1;
   string signerID = 2;
 }
 
-message UriGetResponse {
+message VCNUriGetResponse {
   repeated string uris = 1;
 }
 
@@ -196,9 +196,9 @@ service LcService {
   rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
-  rpc VCNUriAdd(UriSetRequest) returns (UriSetResponse){};
-  rpc VCNUriRemove(UriSetRequest) returns (UriSetResponse){};
-  rpc VCNUriGet(UriGetRequest) returns (UriGetResponse){};
+  rpc VCNUriAdd(VCNUriSetRequest) returns (VCNUriSetResponse){};
+  rpc VCNUriRemove(VCNUriSetRequest) returns (VCNUriSetResponse){};
+  rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
   rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
   rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
