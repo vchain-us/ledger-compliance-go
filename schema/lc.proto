@@ -178,6 +178,7 @@ message VCNUriSetRequest {
 }
 
 message VCNUriSetResponse {
+  immudb.schema.TxHeader transaction = 1;
 }
 
 message VCNUriGetRequest {
