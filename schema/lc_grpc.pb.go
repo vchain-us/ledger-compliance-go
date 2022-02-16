@@ -31,7 +31,7 @@ type LcServiceClient interface {
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNUriAdd(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
-	VCNUriRemove(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
+	VCNUriDelete(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
 	VCNUriGet(ctx context.Context, in *VCNUriGetRequest, opts ...grpc.CallOption) (*VCNUriGetResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
@@ -121,9 +121,9 @@ func (c *lcServiceClient) VCNUriAdd(ctx context.Context, in *VCNUriSetRequest, o
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNUriRemove(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error) {
+func (c *lcServiceClient) VCNUriDelete(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error) {
 	out := new(VCNUriSetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriRemove", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriDelete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -605,7 +605,7 @@ type LcServiceServer interface {
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
 	VCNUriAdd(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
-	VCNUriRemove(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
+	VCNUriDelete(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
 	VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
@@ -662,8 +662,8 @@ func (UnimplementedLcServiceServer) VCNSearchArtifacts(context.Context, *VCNSear
 func (UnimplementedLcServiceServer) VCNUriAdd(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNUriAdd not implemented")
 }
-func (UnimplementedLcServiceServer) VCNUriRemove(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNUriRemove not implemented")
+func (UnimplementedLcServiceServer) VCNUriDelete(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNUriDelete not implemented")
 }
 func (UnimplementedLcServiceServer) VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNUriGet not implemented")
@@ -852,20 +852,20 @@ func _LcService_VCNUriAdd_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNUriRemove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LcService_VCNUriDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VCNUriSetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNUriRemove(ctx, in)
+		return srv.(LcServiceServer).VCNUriDelete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNUriRemove",
+		FullMethod: "/lc.schema.LcService/VCNUriDelete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNUriRemove(ctx, req.(*VCNUriSetRequest))
+		return srv.(LcServiceServer).VCNUriDelete(ctx, req.(*VCNUriSetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1449,8 +1449,8 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNUriAdd_Handler,
 		},
 		{
-			MethodName: "VCNUriRemove",
-			Handler:    _LcService_VCNUriRemove_Handler,
+			MethodName: "VCNUriDelete",
+			Handler:    _LcService_VCNUriDelete_Handler,
 		},
 		{
 			MethodName: "VCNUriGet",

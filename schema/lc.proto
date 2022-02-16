@@ -198,7 +198,7 @@ service LcService {
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
   rpc VCNUriAdd(VCNUriSetRequest) returns (VCNUriSetResponse){};
-  rpc VCNUriRemove(VCNUriSetRequest) returns (VCNUriSetResponse){};
+  rpc VCNUriDelete(VCNUriSetRequest) returns (VCNUriSetResponse){};
   rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
   rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
