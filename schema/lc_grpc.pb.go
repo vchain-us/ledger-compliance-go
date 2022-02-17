@@ -30,6 +30,7 @@ type LcServiceClient interface {
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
+	VCNGetArtifacts(ctx context.Context, in *VCNArtifactsGetRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNUriGet(ctx context.Context, in *VCNUriGetRequest, opts ...grpc.CallOption) (*VCNUriGetResponse, error)
 	VCNUriSet(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
 	VCNUriUpdate(ctx context.Context, in *VCNUriUpdateRequest, opts ...grpc.CallOption) (*VCNUriUpdateResponse, error)
@@ -106,6 +107,15 @@ func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsR
 func (c *lcServiceClient) VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error) {
 	out := new(EntryList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNSearchArtifacts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNGetArtifacts(ctx context.Context, in *VCNArtifactsGetRequest, opts ...grpc.CallOption) (*EntryList, error) {
+	out := new(EntryList)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetArtifacts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -604,6 +614,7 @@ type LcServiceServer interface {
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
+	VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error)
 	VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error)
 	VCNUriSet(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
 	VCNUriUpdate(context.Context, *VCNUriUpdateRequest) (*VCNUriUpdateResponse, error)
@@ -658,6 +669,9 @@ func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifac
 }
 func (UnimplementedLcServiceServer) VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNSearchArtifacts not implemented")
+}
+func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNGetArtifacts not implemented")
 }
 func (UnimplementedLcServiceServer) VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNUriGet not implemented")
@@ -830,6 +844,24 @@ func _LcService_VCNSearchArtifacts_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).VCNSearchArtifacts(ctx, req.(*VCNSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNGetArtifacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNArtifactsGetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNGetArtifacts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNGetArtifacts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNGetArtifacts(ctx, req.(*VCNArtifactsGetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1443,6 +1475,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VCNSearchArtifacts",
 			Handler:    _LcService_VCNSearchArtifacts_Handler,
+		},
+		{
+			MethodName: "VCNGetArtifacts",
+			Handler:    _LcService_VCNGetArtifacts_Handler,
 		},
 		{
 			MethodName: "VCNUriGet",
