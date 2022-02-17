@@ -75,6 +75,11 @@ func (c *LcClient) VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return c.ServiceClient.VCNSetArtifacts(ctx, req)
 }
 
+// VCNSearchArtifacts ...
+func (c *LcClient) VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearchRequest) (*schema.EntryList, error) {
+	return c.ServiceClient.VCNSearchArtifacts(ctx, req)
+}
+
 // VerifiedSet ...
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	err := c.StateService.CacheLock()
