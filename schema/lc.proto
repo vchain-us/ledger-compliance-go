@@ -9,209 +9,249 @@ package lc.schema;
 option go_package = "github.com/vchain-us/ledger-compliance/server/schema";
 
 message TamperReport {
-	uint64 index = 1;
-	bytes key = 2;
-	bytes root = 3;
+  uint64 index = 1;
+  bytes key = 2;
+  bytes root = 3;
 }
 
 message ReportOptions{
-	TamperReport payload = 1;
-	immudb.schema.Signature signature = 2;
+  TamperReport payload = 1;
+  immudb.schema.Signature signature = 2;
 }
 
 message DataValue {
-    string name = 1;
-    string type = 2;
-    bytes value = 3;
+  string name = 1;
+  string type = 2;
+  bytes value = 3;
 }
 
 message Data {
-    string key = 1;
-    int64 msgID = 2;
-    string dbName = 3;
-    string tableName = 4;
-    string operation = 5;
-    bytes data = 6;
+  string key = 1;
+  int64 msgID = 2;
+  string dbName = 3;
+  string tableName = 4;
+  string operation = 5;
+  bytes data = 6;
 }
 
 message Response {
-    int32 status = 1;
-    string msg = 2;
-    int64 msgID = 3;
-    immudb.schema.VerifiableTx VerifiableTx = 4;
-    immudb.schema.ImmutableState state = 5;
+  int32 status = 1;
+  string msg = 2;
+  int64 msgID = 3;
+  immudb.schema.VerifiableTx VerifiableTx = 4;
+  immudb.schema.ImmutableState state = 5;
 }
 
 message VerifiableItemExt {
-	immudb.schema.VerifiableEntry item  = 1;
-	google.protobuf.Timestamp timestamp = 2;
-	google.protobuf.Timestamp apikeyRevoked = 3;
-	string ledgerName = 4;
-	string publicKey = 5;
+  immudb.schema.VerifiableEntry item = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp apikeyRevoked = 3;
+  string ledgerName = 4;
+  string publicKey = 5;
 }
 
 
 message ItemExt {
-	immudb.schema.Entry item = 1;
-	google.protobuf.Timestamp timestamp = 2;
-	google.protobuf.Timestamp apikeyRevoked = 3;
-	string ledgerName = 4;
+  immudb.schema.Entry item = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp apikeyRevoked = 3;
+  string ledgerName = 4;
 }
 
 message ItemExtList {
-	repeated ItemExt items = 1;
+  repeated ItemExt items = 1;
 }
 
 
 message ZItemExt {
-	immudb.schema.ZEntry item = 1;
-	google.protobuf.Timestamp timestamp = 2;
-	google.protobuf.Timestamp apikeyRevoked = 3;
-	string ledgerName = 4;
+  immudb.schema.ZEntry item = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp apikeyRevoked = 3;
+  string ledgerName = 4;
 }
 
 message ZItemExtList {
-	repeated ZItemExt items = 1;
+  repeated ZItemExt items = 1;
 }
 
 message Features {
-	repeated string feat= 1;
-	string version = 2;
-	string buildTime = 3;
-	string component = 4;
+  repeated string feat = 1;
+  string version = 2;
+  string buildTime = 3;
+  string component = 4;
 }
 
 message VerifiableGetExtMultiRequest {
-	repeated immudb.schema.VerifiableGetRequest requests = 1;
+  repeated immudb.schema.VerifiableGetRequest requests = 1;
 }
 
 message VerifiableGetExtMultiResponse {
-	repeated VerifiableItemExt items = 1;
-	repeated string errors = 2;
+  repeated VerifiableItemExt items = 1;
+  repeated string errors = 2;
 }
 
 message SetMultiRequest {
-	repeated immudb.schema.SetRequest requests = 1;
+  repeated immudb.schema.SetRequest requests = 1;
 }
 
 message SetMultiResponse {
-	repeated immudb.schema.TxHeader transactions = 1;
-	repeated string errors = 2;
+  repeated immudb.schema.TxHeader transactions = 1;
+  repeated string errors = 2;
 }
 
 message VCNAttachment {
-	bytes content = 1;
-	bytes signature = 2;
+  bytes content = 1;
+  bytes signature = 2;
 }
 
 message VCNDependency {
-	enum Type {
+  enum Type {
     Direct = 0;
     Indirect = 1;
     Base = 2;
   }
-	string hash = 1;
-	Type type = 2;
+  string hash = 1;
+  Type type = 2;
 }
 
 message VCNArtifact {
-	bytes artifact = 1;
-	bytes signature = 2;
-	repeated VCNDependency dependencies = 3;
-	repeated VCNAttachment attachments = 4;
+  bytes artifact = 1;
+  bytes signature = 2;
+  repeated VCNDependency dependencies = 3;
+  repeated VCNAttachment attachments = 4;
 }
 
 message VCNArtifactsRequest {
-	repeated VCNArtifact artifacts = 1;
-	google.protobuf.Timestamp signedAt = 2;
+  repeated VCNArtifact artifacts = 1;
+  google.protobuf.Timestamp signedAt = 2;
 }
 
 message VCNArtifactsResponse {
-	immudb.schema.TxHeader transaction = 1;
+  immudb.schema.TxHeader transaction = 1;
 }
 
 message VCNSearchRequest {
-	enum Type {
-        Artifact = 0;
-        Dependencies = 1;
-        WhatIncludes = 2;
-        ArtifactTimed = 4;
-        Attachment = 5;
-        ByApiKey = 6;
-        ByName = 7;
-        History = 8;
-    }
-    enum ArtifactType {
-        Direct = 0;
-        Indirect = 1;
-        Base = 2;
-    }
-	string hash = 1;
-    string signerID = 2;
-    ArtifactType aType = 3;
-	Type type = 4;
-    uint64 Limit = 5;
-    bool Desc = 6;
-    int64 startTS = 8;
-    int64 endTS = 9;
-    string attachName = 10;
-    string artifactName = 11;
+  enum Type {
+    Artifact = 0;
+    Dependencies = 1;
+    WhatIncludes = 2;
+    ArtifactTimed = 4;
+    Attachment = 5;
+    ByApiKey = 6;
+    ByName = 7;
+    History = 8;
+  }
+  enum ArtifactType {
+    Direct = 0;
+    Indirect = 1;
+    Base = 2;
+  }
+  string hash = 1;
+  string signerID = 2;
+  ArtifactType aType = 3;
+  Type type = 4;
+  uint64 Limit = 5;
+  bool Desc = 6;
+  int64 startTS = 8;
+  int64 endTS = 9;
+  string attachName = 10;
+  string artifactName = 11;
 }
 
 message Entry {
-    bytes key = 1;
-    bytes value = 2;
-    uint64 tx = 3;
-    immudb.schema.KVMetadata metadata = 4;
-   	google.protobuf.Timestamp timestamp = 5;
-	google.protobuf.Timestamp apikeyRevoked = 6;
-	string ledgerName = 7;
+  bytes key = 1;
+  bytes value = 2;
+  uint64 tx = 3;
+  immudb.schema.KVMetadata metadata = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Timestamp apikeyRevoked = 6;
+  string ledgerName = 7;
 }
 
 message EntryList {
-    repeated Entry entries = 1;
+  repeated Entry entries = 1;
+}
+
+message VCNUriUpdateRequest {
+  enum VCNUriOpType {
+    ADD = 0;
+    DELETE = 1;
+  }
+
+  message VCNUriOp {
+    VCNUriOpType opType = 1;
+    repeated string uris = 2;
+  }
+
+  string hash = 1;
+  repeated VCNUriOp ops = 2;
+}
+
+message VCNUriUpdateResponse {
+  immudb.schema.TxHeader transaction = 1;
+}
+
+message VCNUriSetRequest {
+  string hash = 1;
+  repeated string uris = 2;
+}
+
+message VCNUriSetResponse {
+  immudb.schema.TxHeader transaction = 1;
+}
+
+message VCNUriGetRequest {
+  string hash = 1;
+  string signerID = 2;
+}
+
+message VCNUriGetResponse {
+  repeated string uris = 1;
 }
 
 service LcService {
-	// immudb primitives
-	// setters and getters
-	rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
-	rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
-	rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
-    rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
-	rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
-	rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
-	rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
-	// batch
-	rpc GetAll (immudb.schema.KeyListRequest) returns (immudb.schema.Entries){};
-	rpc ExecAll (immudb.schema.ExecAllRequest) returns (immudb.schema.TxHeader) {};
-	// scanners
-	rpc Scan(immudb.schema.ScanRequest) returns (immudb.schema.Entries){};
-	rpc History(immudb.schema.HistoryRequest) returns (immudb.schema.Entries){};
-	rpc ZAdd (immudb.schema.ZAddRequest) returns (immudb.schema.TxHeader){};
-	rpc VerifiableZAdd (immudb.schema.VerifiableZAddRequest) returns (immudb.schema.VerifiableTx){};
-	rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){};
-	// mixed
-	rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
+  // immudb primitives
+  // setters and getters
+  rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
+  rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
+  rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
+  rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
+  rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
+  rpc VCNUriSet(VCNUriSetRequest) returns (VCNUriSetResponse){};
+  rpc VCNUriUpdate(VCNUriUpdateRequest) returns (VCNUriUpdateResponse){};
+  rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
+  rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
+  rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
+  // batch
+  rpc GetAll (immudb.schema.KeyListRequest) returns (immudb.schema.Entries){};
+  rpc ExecAll (immudb.schema.ExecAllRequest) returns (immudb.schema.TxHeader) {};
+  // scanners
+  rpc Scan(immudb.schema.ScanRequest) returns (immudb.schema.Entries){};
+  rpc History(immudb.schema.HistoryRequest) returns (immudb.schema.Entries){};
+  rpc ZAdd (immudb.schema.ZAddRequest) returns (immudb.schema.TxHeader){};
+  rpc VerifiableZAdd (immudb.schema.VerifiableZAddRequest) returns (immudb.schema.VerifiableTx){};
+  rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){};
+  // mixed
+  rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
 
-	rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
-	// ledger compliance extensions
-	rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
-	rpc SendData (stream Data) returns (stream Response){};
-	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-	rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
-	rpc VerifiableGetExtMulti(VerifiableGetExtMultiRequest) returns (VerifiableGetExtMultiResponse){};
-	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
-	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
-	rpc Feats(google.protobuf.Empty) returns (Features){};
+  rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
+  // ledger compliance extensions
+  rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
+  rpc SendData (stream Data) returns (stream Response){};
+  // ledger compliance extensions - items extended with additional properties managed by LC backend (date)
+  rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
+  rpc VerifiableGetExtMulti(VerifiableGetExtMultiRequest) returns (VerifiableGetExtMultiResponse){};
+  rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
+  rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
+  rpc Feats(google.protobuf.Empty) returns (Features){};
 
-	// streams
-	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
-	rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
-	rpc streamVerifiableGet(immudb.schema.VerifiableGetRequest) returns (stream immudb.schema.Chunk) {};
-	rpc streamVerifiableSet(stream immudb.schema.Chunk) returns (immudb.schema.VerifiableTx) {};
-	rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {};
-	rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {};
-	rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {};
-	rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
+  // streams
+  rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
+  rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
+  rpc streamVerifiableGet(immudb.schema.VerifiableGetRequest) returns (stream immudb.schema.Chunk) {};
+  rpc streamVerifiableSet(stream immudb.schema.Chunk) returns (immudb.schema.VerifiableTx) {};
+  rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {};
+  rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {};
+  rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {};
+  rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
 }
