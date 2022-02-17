@@ -127,7 +127,16 @@ message VCNArtifactsRequest {
 }
 
 message VCNArtifactsGetRequest {
-	repeated string hash = 1;
+	repeated string hashes = 1;
+	bool verify = 2;
+	uint64 proveSinceTx = 3;
+}
+
+message Proof {
+	immudb.schema.VerifiableTx verifiableTx = 1;
+	immudb.schema.InclusionProof inclusionProof = 2;
+	immudb.schema.KVMetadata metadata = 3;
+	bytes immudbFullKey = 4;
 }
 
 message VCNArtifactsResponse {
@@ -163,13 +172,13 @@ message VCNSearchRequest {
 }
 
 message Entry {
-  bytes key = 1;
-  bytes value = 2;
-  uint64 tx = 3;
-  immudb.schema.KVMetadata metadata = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  google.protobuf.Timestamp apikeyRevoked = 6;
-  string ledgerName = 7;
+    bytes key = 1;
+    bytes value = 2;
+    uint64 tx = 3;
+   	google.protobuf.Timestamp timestamp = 4;
+	  google.protobuf.Timestamp apikeyRevoked = 5;
+	  string ledgerName = 6;
+		Proof proof = 7;
 }
 
 message EntryList {
