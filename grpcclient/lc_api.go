@@ -17,8 +17,10 @@ limitations under the License.
 package grpcclient
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -82,7 +84,78 @@ func (c *LcClient) VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearch
 
 // VCNGetArtifacts ...
 func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifactsGetRequest) (*schema.EntryList, error) {
-	return c.ServiceClient.VCNGetArtifacts(ctx, req)
+	if len(req.Hashes) > 1 && req.Verify {
+		return nil, errors.New("verify can only be used with one hash")
+	}
+	if len(req.Hashes) != 1 || !req.Verify {
+		resp, err := c.ServiceClient.VCNGetArtifacts(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	}
+
+	err := c.StateService.CacheLock()
+	if err != nil {
+		return nil, err
+	}
+	defer c.StateService.CacheUnlock()
+
+	state, err := c.StateService.GetState(ctx, c.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req.ProveSinceTx = state.TxId
+	resp, err := c.ServiceClient.VCNGetArtifacts(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	hashDecoded, err := hex.DecodeString(req.Hashes[0])
+	if err != nil {
+		return nil, err
+	}
+	// check if the artifact hash is contained in the original immudb full key. We can enforce this check using a predefined key composition format
+	if !bytes.Contains(resp.Entries[0].Proof.ImmudbFullKey, hashDecoded) {
+		return nil, store.ErrCorruptedData
+	}
+
+	ventry := &immuschema.VerifiableEntry{
+		Entry: &immuschema.Entry{
+			Tx:       resp.Entries[0].Tx,
+			Key:      resp.Entries[0].Proof.ImmudbFullKey,
+			Value:    resp.Entries[0].Value,
+			Metadata: resp.Entries[0].Proof.Metadata,
+		},
+		VerifiableTx:   resp.Entries[0].Proof.VerifiableTx,
+		InclusionProof: resp.Entries[0].Proof.InclusionProof,
+	}
+
+	kReq := &immuschema.KeyRequest{
+		Key: resp.Entries[0].Proof.ImmudbFullKey,
+	}
+
+	newState, err := verifyGet(state, ventry, kReq, c.ApiKeyHash)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.StateService.SetState(c.ApiKey, newState)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.serverSigningPubKey != nil {
+		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, store.ErrCorruptedData
+		}
+	}
+	return resp, nil
 }
 
 // VerifiedSet ...
