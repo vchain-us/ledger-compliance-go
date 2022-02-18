@@ -222,6 +222,16 @@ message VCNUriGetResponse {
   repeated string uris = 1;
 }
 
+message VCNGetAttachmentRequest{
+  string signerID = 1;
+  string artifactHash = 2;
+  string attachmentHash = 3;
+}
+
+message VCNGetAttachmentResponse{
+  bytes attachment = 1;
+}
+
 service LcService {
   // immudb primitives
   // setters and getters
@@ -233,6 +243,7 @@ service LcService {
   rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
   rpc VCNUriSet(VCNUriSetRequest) returns (VCNUriSetResponse){};
   rpc VCNUriUpdate(VCNUriUpdateRequest) returns (VCNUriUpdateResponse){};
+  rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
   rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
   rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
