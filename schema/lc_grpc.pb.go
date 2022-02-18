@@ -34,6 +34,7 @@ type LcServiceClient interface {
 	VCNUriGet(ctx context.Context, in *VCNUriGetRequest, opts ...grpc.CallOption) (*VCNUriGetResponse, error)
 	VCNUriSet(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
 	VCNUriUpdate(ctx context.Context, in *VCNUriUpdateRequest, opts ...grpc.CallOption) (*VCNUriUpdateResponse, error)
+	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
@@ -143,6 +144,15 @@ func (c *lcServiceClient) VCNUriSet(ctx context.Context, in *VCNUriSetRequest, o
 func (c *lcServiceClient) VCNUriUpdate(ctx context.Context, in *VCNUriUpdateRequest, opts ...grpc.CallOption) (*VCNUriUpdateResponse, error) {
 	out := new(VCNUriUpdateResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error) {
+	out := new(VCNGetAttachmentResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetAttachment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -618,6 +628,7 @@ type LcServiceServer interface {
 	VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error)
 	VCNUriSet(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
 	VCNUriUpdate(context.Context, *VCNUriUpdateRequest) (*VCNUriUpdateResponse, error)
+	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
@@ -681,6 +692,9 @@ func (UnimplementedLcServiceServer) VCNUriSet(context.Context, *VCNUriSetRequest
 }
 func (UnimplementedLcServiceServer) VCNUriUpdate(context.Context, *VCNUriUpdateRequest) (*VCNUriUpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNUriUpdate not implemented")
+}
+func (UnimplementedLcServiceServer) VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNGetAttachment not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -916,6 +930,24 @@ func _LcService_VCNUriUpdate_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).VCNUriUpdate(ctx, req.(*VCNUriUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNGetAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNGetAttachmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNGetAttachment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNGetAttachment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNGetAttachment(ctx, req.(*VCNGetAttachmentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1491,6 +1523,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VCNUriUpdate",
 			Handler:    _LcService_VCNUriUpdate_Handler,
+		},
+		{
+			MethodName: "VCNGetAttachment",
+			Handler:    _LcService_VCNGetAttachment_Handler,
 		},
 		{
 			MethodName: "Get",
