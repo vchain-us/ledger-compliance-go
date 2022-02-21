@@ -31,9 +31,9 @@ type LcServiceClient interface {
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNGetArtifacts(ctx context.Context, in *VCNArtifactsGetRequest, opts ...grpc.CallOption) (*EntryList, error)
-	VCNUriGet(ctx context.Context, in *VCNUriGetRequest, opts ...grpc.CallOption) (*VCNUriGetResponse, error)
-	VCNUriSet(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error)
-	VCNUriUpdate(ctx context.Context, in *VCNUriUpdateRequest, opts ...grpc.CallOption) (*VCNUriUpdateResponse, error)
+	VCNLabelsGet(ctx context.Context, in *VCNLabelsGetRequest, opts ...grpc.CallOption) (*VCNLabelsGetResponse, error)
+	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
+	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
@@ -123,27 +123,27 @@ func (c *lcServiceClient) VCNGetArtifacts(ctx context.Context, in *VCNArtifactsG
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNUriGet(ctx context.Context, in *VCNUriGetRequest, opts ...grpc.CallOption) (*VCNUriGetResponse, error) {
-	out := new(VCNUriGetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriGet", in, out, opts...)
+func (c *lcServiceClient) VCNLabelsGet(ctx context.Context, in *VCNLabelsGetRequest, opts ...grpc.CallOption) (*VCNLabelsGetResponse, error) {
+	out := new(VCNLabelsGetResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsGet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNUriSet(ctx context.Context, in *VCNUriSetRequest, opts ...grpc.CallOption) (*VCNUriSetResponse, error) {
-	out := new(VCNUriSetResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriSet", in, out, opts...)
+func (c *lcServiceClient) VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error) {
+	out := new(VCNLabelsSetResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsSet", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNUriUpdate(ctx context.Context, in *VCNUriUpdateRequest, opts ...grpc.CallOption) (*VCNUriUpdateResponse, error) {
-	out := new(VCNUriUpdateResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNUriUpdate", in, out, opts...)
+func (c *lcServiceClient) VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error) {
+	out := new(VCNLabelsUpdateResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsUpdate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -625,9 +625,9 @@ type LcServiceServer interface {
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
 	VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error)
-	VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error)
-	VCNUriSet(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error)
-	VCNUriUpdate(context.Context, *VCNUriUpdateRequest) (*VCNUriUpdateResponse, error)
+	VCNLabelsGet(context.Context, *VCNLabelsGetRequest) (*VCNLabelsGetResponse, error)
+	VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error)
+	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
@@ -684,14 +684,14 @@ func (UnimplementedLcServiceServer) VCNSearchArtifacts(context.Context, *VCNSear
 func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetArtifacts not implemented")
 }
-func (UnimplementedLcServiceServer) VCNUriGet(context.Context, *VCNUriGetRequest) (*VCNUriGetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNUriGet not implemented")
+func (UnimplementedLcServiceServer) VCNLabelsGet(context.Context, *VCNLabelsGetRequest) (*VCNLabelsGetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsGet not implemented")
 }
-func (UnimplementedLcServiceServer) VCNUriSet(context.Context, *VCNUriSetRequest) (*VCNUriSetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNUriSet not implemented")
+func (UnimplementedLcServiceServer) VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsSet not implemented")
 }
-func (UnimplementedLcServiceServer) VCNUriUpdate(context.Context, *VCNUriUpdateRequest) (*VCNUriUpdateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNUriUpdate not implemented")
+func (UnimplementedLcServiceServer) VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsUpdate not implemented")
 }
 func (UnimplementedLcServiceServer) VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetAttachment not implemented")
@@ -880,56 +880,56 @@ func _LcService_VCNGetArtifacts_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNUriGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNUriGetRequest)
+func _LcService_VCNLabelsGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNLabelsGetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNUriGet(ctx, in)
+		return srv.(LcServiceServer).VCNLabelsGet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNUriGet",
+		FullMethod: "/lc.schema.LcService/VCNLabelsGet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNUriGet(ctx, req.(*VCNUriGetRequest))
+		return srv.(LcServiceServer).VCNLabelsGet(ctx, req.(*VCNLabelsGetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNUriSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNUriSetRequest)
+func _LcService_VCNLabelsSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNLabelsSetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNUriSet(ctx, in)
+		return srv.(LcServiceServer).VCNLabelsSet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNUriSet",
+		FullMethod: "/lc.schema.LcService/VCNLabelsSet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNUriSet(ctx, req.(*VCNUriSetRequest))
+		return srv.(LcServiceServer).VCNLabelsSet(ctx, req.(*VCNLabelsSetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNUriUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNUriUpdateRequest)
+func _LcService_VCNLabelsUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNLabelsUpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNUriUpdate(ctx, in)
+		return srv.(LcServiceServer).VCNLabelsUpdate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNUriUpdate",
+		FullMethod: "/lc.schema.LcService/VCNLabelsUpdate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNUriUpdate(ctx, req.(*VCNUriUpdateRequest))
+		return srv.(LcServiceServer).VCNLabelsUpdate(ctx, req.(*VCNLabelsUpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1513,16 +1513,16 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNGetArtifacts_Handler,
 		},
 		{
-			MethodName: "VCNUriGet",
-			Handler:    _LcService_VCNUriGet_Handler,
+			MethodName: "VCNLabelsGet",
+			Handler:    _LcService_VCNLabelsGet_Handler,
 		},
 		{
-			MethodName: "VCNUriSet",
-			Handler:    _LcService_VCNUriSet_Handler,
+			MethodName: "VCNLabelsSet",
+			Handler:    _LcService_VCNLabelsSet_Handler,
 		},
 		{
-			MethodName: "VCNUriUpdate",
-			Handler:    _LcService_VCNUriUpdate_Handler,
+			MethodName: "VCNLabelsUpdate",
+			Handler:    _LcService_VCNLabelsUpdate_Handler,
 		},
 		{
 			MethodName: "VCNGetAttachment",
