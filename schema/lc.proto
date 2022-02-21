@@ -185,41 +185,41 @@ message EntryList {
   repeated Entry entries = 1;
 }
 
-message VCNUriUpdateRequest {
-  enum VCNUriOpType {
+message VCNLabelsUpdateRequest {
+  enum VCNLabelsOpType {
     ADD = 0;
     DELETE = 1;
   }
 
-  message VCNUriOp {
-    VCNUriOpType opType = 1;
-    repeated string uris = 2;
+  message VCNLabelsOp {
+    VCNLabelsOpType opType = 1;
+    repeated string labels = 2;
   }
 
   string hash = 1;
-  repeated VCNUriOp ops = 2;
+  repeated VCNLabelsOp ops = 2;
 }
 
-message VCNUriUpdateResponse {
+message VCNLabelsUpdateResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNUriSetRequest {
+message VCNLabelsSetRequest {
   string hash = 1;
-  repeated string uris = 2;
+  repeated string labels = 2;
 }
 
-message VCNUriSetResponse {
+message VCNLabelsSetResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNUriGetRequest {
+message VCNLabelsGetRequest {
   string hash = 1;
   string signerID = 2;
 }
 
-message VCNUriGetResponse {
-  repeated string uris = 1;
+message VCNLabelsGetResponse {
+  repeated string labels = 1;
 }
 
 message VCNGetAttachmentRequest{
@@ -240,9 +240,9 @@ service LcService {
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
   rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
-  rpc VCNUriGet(VCNUriGetRequest) returns (VCNUriGetResponse){};
-  rpc VCNUriSet(VCNUriSetRequest) returns (VCNUriSetResponse){};
-  rpc VCNUriUpdate(VCNUriUpdateRequest) returns (VCNUriUpdateResponse){};
+  rpc VCNLabelsGet(VCNLabelsGetRequest) returns (VCNLabelsGetResponse){};
+  rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
+  rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
   rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
