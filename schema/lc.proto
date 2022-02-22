@@ -48,6 +48,7 @@ message VerifiableItemExt {
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
   string publicKey = 5;
+  string UID = 6;
 }
 
 
@@ -56,6 +57,8 @@ message ItemExt {
   google.protobuf.Timestamp timestamp = 2;
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
+  string publicKey = 5;
+  string UID = 6;
 }
 
 message ItemExtList {
@@ -68,6 +71,8 @@ message ZItemExt {
   google.protobuf.Timestamp timestamp = 2;
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
+  string publicKey = 5;
+  string UID = 6;
 }
 
 message ZItemExtList {
@@ -180,6 +185,8 @@ message Entry {
   google.protobuf.Timestamp apikeyRevoked = 5;
   string ledgerName = 6;
   Proof proof = 7;
+  string publicKey = 8;
+  string UID = 9;
 }
 
 message EntryList {
