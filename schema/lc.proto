@@ -169,6 +169,7 @@ message VCNSearchRequest {
   int64 endTS = 9;
   string attachName = 10;
   string artifactName = 11;
+  string UID = 12;
 }
 
 message Entry {
