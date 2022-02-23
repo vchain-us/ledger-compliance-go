@@ -209,6 +209,10 @@ message VCNLabelsSetRequest {
   repeated string labels = 2;
 }
 
+message VCNLabelsBulkSetRequest {
+  repeated VCNLabelsSetRequest request = 1;
+}
+
 message VCNLabelsSetResponse {
   immudb.schema.TxHeader transaction = 1;
 }
@@ -242,6 +246,7 @@ service LcService {
   rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
   rpc VCNLabelsGet(VCNLabelsGetRequest) returns (VCNLabelsGetResponse){};
   rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
+  rpc VCNLabelsBulkSet(VCNLabelsBulkSetRequest) returns (VCNLabelsSetResponse){};
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
