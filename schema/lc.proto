@@ -213,22 +213,35 @@ message VCNLabelsUpdateResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNLabelsSetRequest {
+message LabelsSetRequest {
   string hash = 1;
   repeated string labels = 2;
+}
+
+message VCNLabelsSetRequest {
+  repeated LabelsSetRequest request = 1;
 }
 
 message VCNLabelsSetResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNLabelsGetRequest {
+message LabelsGetRequest {
   string hash = 1;
   string signerID = 2;
 }
 
+message VCNLabelsGetRequest {
+  repeated LabelsGetRequest request = 1;
+}
+
+message LabelsGetResponse {
+  string hash = 1;
+  repeated string labels = 2;
+}
+
 message VCNLabelsGetResponse {
-  repeated string labels = 1;
+  repeated LabelsGetResponse response = 1;
 }
 
 message VCNGetAttachmentRequest{
