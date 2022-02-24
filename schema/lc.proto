@@ -48,6 +48,7 @@ message VerifiableItemExt {
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
   string publicKey = 5;
+  string UID = 6;
 }
 
 
@@ -56,6 +57,8 @@ message ItemExt {
   google.protobuf.Timestamp timestamp = 2;
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
+  string publicKey = 5;
+  string UID = 6;
 }
 
 message ItemExtList {
@@ -68,6 +71,8 @@ message ZItemExt {
   google.protobuf.Timestamp timestamp = 2;
   google.protobuf.Timestamp apikeyRevoked = 3;
   string ledgerName = 4;
+  string publicKey = 5;
+  string UID = 6;
 }
 
 message ZItemExtList {
@@ -130,6 +135,7 @@ message VCNArtifactsGetRequest {
   repeated string hashes = 1;
   bool verify = 2;
   uint64 proveSinceTx = 3;
+  string UID = 4;
 }
 
 message Proof {
@@ -169,6 +175,7 @@ message VCNSearchRequest {
   int64 endTS = 9;
   string attachName = 10;
   string artifactName = 11;
+  string UID = 12;
 }
 
 message Entry {
@@ -179,6 +186,8 @@ message Entry {
   google.protobuf.Timestamp apikeyRevoked = 5;
   string ledgerName = 6;
   Proof proof = 7;
+  string publicKey = 8;
+  string UID = 9;
 }
 
 message EntryList {
