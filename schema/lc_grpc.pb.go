@@ -28,7 +28,7 @@ type LcServiceClient interface {
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNGetArtifacts(ctx context.Context, in *VCNArtifactsGetRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNLabelsGet(ctx context.Context, in *VCNLabelsGetRequest, opts ...grpc.CallOption) (*VCNLabelsGetResponse, error)
-	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequests, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
+	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
@@ -128,7 +128,7 @@ func (c *lcServiceClient) VCNLabelsGet(ctx context.Context, in *VCNLabelsGetRequ
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequests, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error) {
+func (c *lcServiceClient) VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error) {
 	out := new(VCNLabelsSetResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNLabelsSet", in, out, opts...)
 	if err != nil {
@@ -622,7 +622,7 @@ type LcServiceServer interface {
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
 	VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error)
 	VCNLabelsGet(context.Context, *VCNLabelsGetRequest) (*VCNLabelsGetResponse, error)
-	VCNLabelsSet(context.Context, *VCNLabelsSetRequests) (*VCNLabelsSetResponse, error)
+	VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
@@ -683,7 +683,7 @@ func (UnimplementedLcServiceServer) VCNGetArtifacts(context.Context, *VCNArtifac
 func (UnimplementedLcServiceServer) VCNLabelsGet(context.Context, *VCNLabelsGetRequest) (*VCNLabelsGetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsGet not implemented")
 }
-func (UnimplementedLcServiceServer) VCNLabelsSet(context.Context, *VCNLabelsSetRequests) (*VCNLabelsSetResponse, error) {
+func (UnimplementedLcServiceServer) VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNLabelsSet not implemented")
 }
 func (UnimplementedLcServiceServer) VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error) {
@@ -895,7 +895,7 @@ func _LcService_VCNLabelsGet_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _LcService_VCNLabelsSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNLabelsSetRequests)
+	in := new(VCNLabelsSetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -907,7 +907,7 @@ func _LcService_VCNLabelsSet_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/lc.schema.LcService/VCNLabelsSet",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNLabelsSet(ctx, req.(*VCNLabelsSetRequests))
+		return srv.(LcServiceServer).VCNLabelsSet(ctx, req.(*VCNLabelsSetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

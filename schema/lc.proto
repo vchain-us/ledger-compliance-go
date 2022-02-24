@@ -204,26 +204,35 @@ message VCNLabelsUpdateResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNLabelsSetRequest {
+message VCNLabelsSingleSetRequest {
   string hash = 1;
   repeated string labels = 2;
 }
 
-message VCNLabelsSetRequests {
-  repeated VCNLabelsSetRequest request = 1;
+message VCNLabelsSetRequest {
+  repeated VCNLabelsSingleSetRequest request = 1;
 }
 
 message VCNLabelsSetResponse {
   immudb.schema.TxHeader transaction = 1;
 }
 
-message VCNLabelsGetRequest {
+message VCNLabelsSingleGetRequest {
   string hash = 1;
   string signerID = 2;
 }
 
+message VCNLabelsGetRequest {
+  repeated VCNLabelsSingleGetRequest request = 1;
+}
+
+message VCNLabelsSingleGetResponse {
+  string hash = 1;
+  repeated string labels = 2;
+}
+
 message VCNLabelsGetResponse {
-  repeated string labels = 1;
+  repeated VCNLabelsSingleGetResponse response = 1;
 }
 
 message VCNGetAttachmentRequest{
@@ -245,7 +254,7 @@ service LcService {
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
   rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
   rpc VCNLabelsGet(VCNLabelsGetRequest) returns (VCNLabelsGetResponse){};
-  rpc VCNLabelsSet(VCNLabelsSetRequests) returns (VCNLabelsSetResponse){};
+  rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
