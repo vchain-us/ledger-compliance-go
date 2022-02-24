@@ -135,7 +135,7 @@ message VCNArtifactsGetRequest {
   repeated string hashes = 1;
   bool verify = 2;
   uint64 proveSinceTx = 3;
-  string UID = 12;
+  string UID = 4;
 }
 
 message Proof {
