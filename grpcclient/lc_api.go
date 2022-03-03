@@ -160,6 +160,10 @@ func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return resp, nil
 }
 
+func (c *LcClient) VCNGetSignature(ctx context.Context, in *schema.VCNGetSignatureRequest, opts ...grpc.CallOption) (*schema.VCNGetSignatureResponse, error) {
+	return c.ServiceClient.VCNGetSignature(ctx, in, opts...)
+}
+
 // Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	err := c.StateService.CacheLock()

@@ -20,12 +20,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LcServiceClient interface {
-	// Deprecated: Do not use.
-	// immudb primitives
-	// setters and getters
-	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
-	// Deprecated: Do not use.
-	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
 	VCNGetArtifacts(ctx context.Context, in *VCNArtifactsGetRequest, opts ...grpc.CallOption) (*EntryList, error)
@@ -33,6 +27,20 @@ type LcServiceClient interface {
 	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
+	VCNGetSignature(ctx context.Context, in *VCNGetSignatureRequest, opts ...grpc.CallOption) (*VCNGetSignatureResponse, error)
+	// mixed
+	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
+	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
+	// ledger compliance extensions
+	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
+	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
+	// Deprecated: Do not use.
+	// immudb primitives
+	// setters and getters
+	// immudb primitives are deprecated
+	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
+	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	// Deprecated: Do not use.
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
 	// Deprecated: Do not use.
@@ -55,11 +63,6 @@ type LcServiceClient interface {
 	VerifiableZAdd(ctx context.Context, in *schema.VerifiableZAddRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
 	// Deprecated: Do not use.
 	ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error)
-	// mixed
-	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
-	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
-	// ledger compliance extensions
-	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Deprecated: Do not use.
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
 	// Deprecated: Do not use.
@@ -71,7 +74,6 @@ type LcServiceClient interface {
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	// Deprecated: Do not use.
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
-	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
 	// Deprecated: Do not use.
 	// streams
 	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
@@ -97,26 +99,6 @@ type lcServiceClient struct {
 
 func NewLcServiceClient(cc grpc.ClientConnInterface) LcServiceClient {
 	return &lcServiceClient{cc}
-}
-
-// Deprecated: Do not use.
-func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error) {
-	out := new(schema.TxHeader)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Set", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Deprecated: Do not use.
-func (c *lcServiceClient) SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error) {
-	out := new(SetMultiResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetMulti", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *lcServiceClient) VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error) {
@@ -176,6 +158,71 @@ func (c *lcServiceClient) VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpda
 func (c *lcServiceClient) VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error) {
 	out := new(VCNGetAttachmentResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetAttachment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) VCNGetSignature(ctx context.Context, in *VCNGetSignatureRequest, opts ...grpc.CallOption) (*VCNGetSignatureResponse, error) {
+	out := new(VCNGetSignatureResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetSignature", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error) {
+	out := new(schema.ImmutableState)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error) {
+	out := new(schema.HealthResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Health", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ReportTamper", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error) {
+	out := new(Features)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Feats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Deprecated: Do not use.
+func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error) {
+	out := new(schema.TxHeader)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Set", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Deprecated: Do not use.
+func (c *lcServiceClient) SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error) {
+	out := new(SetMultiResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetMulti", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -282,33 +329,6 @@ func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanRequest, op
 	return out, nil
 }
 
-func (c *lcServiceClient) CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error) {
-	out := new(schema.ImmutableState)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentState", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error) {
-	out := new(schema.HealthResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Health", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ReportTamper", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Deprecated: Do not use.
 func (c *lcServiceClient) SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[0], "/lc.schema.LcService/SendData", opts...)
@@ -375,15 +395,6 @@ func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanRequest,
 func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error) {
 	out := new(ItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/HistoryExt", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error) {
-	out := new(Features)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Feats", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -664,12 +675,6 @@ func (x *lcServiceStreamExecAllClient) CloseAndRecv() (*schema.TxHeader, error) 
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
 type LcServiceServer interface {
-	// Deprecated: Do not use.
-	// immudb primitives
-	// setters and getters
-	Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error)
-	// Deprecated: Do not use.
-	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
 	VCNGetArtifacts(context.Context, *VCNArtifactsGetRequest) (*EntryList, error)
@@ -677,6 +682,20 @@ type LcServiceServer interface {
 	VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
+	VCNGetSignature(context.Context, *VCNGetSignatureRequest) (*VCNGetSignatureResponse, error)
+	// mixed
+	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
+	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
+	// ledger compliance extensions
+	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
+	Feats(context.Context, *empty.Empty) (*Features, error)
+	// Deprecated: Do not use.
+	// immudb primitives
+	// setters and getters
+	// immudb primitives are deprecated
+	Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
+	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	// Deprecated: Do not use.
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
 	// Deprecated: Do not use.
@@ -699,11 +718,6 @@ type LcServiceServer interface {
 	VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error)
 	// Deprecated: Do not use.
 	ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error)
-	// mixed
-	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
-	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
-	// ledger compliance extensions
-	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	// Deprecated: Do not use.
 	SendData(LcService_SendDataServer) error
 	// Deprecated: Do not use.
@@ -715,7 +729,6 @@ type LcServiceServer interface {
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	// Deprecated: Do not use.
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
-	Feats(context.Context, *empty.Empty) (*Features, error)
 	// Deprecated: Do not use.
 	// streams
 	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
@@ -740,12 +753,6 @@ type LcServiceServer interface {
 type UnimplementedLcServiceServer struct {
 }
 
-func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
-}
-func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetMulti not implemented")
-}
 func (UnimplementedLcServiceServer) VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNSetArtifacts not implemented")
 }
@@ -766,6 +773,27 @@ func (UnimplementedLcServiceServer) VCNLabelsUpdate(context.Context, *VCNLabelsU
 }
 func (UnimplementedLcServiceServer) VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetAttachment not implemented")
+}
+func (UnimplementedLcServiceServer) VCNGetSignature(context.Context, *VCNGetSignatureRequest) (*VCNGetSignatureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNGetSignature not implemented")
+}
+func (UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
+}
+func (UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
+}
+func (UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
+}
+func (UnimplementedLcServiceServer) Feats(context.Context, *empty.Empty) (*Features, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
+}
+func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+}
+func (UnimplementedLcServiceServer) SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetMulti not implemented")
 }
 func (UnimplementedLcServiceServer) Get(context.Context, *schema.KeyRequest) (*schema.Entry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -797,15 +825,6 @@ func (UnimplementedLcServiceServer) VerifiableZAdd(context.Context, *schema.Veri
 func (UnimplementedLcServiceServer) ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ZScan not implemented")
 }
-func (UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
-}
-func (UnimplementedLcServiceServer) Health(context.Context, *empty.Empty) (*schema.HealthResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
-}
-func (UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReportTamper not implemented")
-}
 func (UnimplementedLcServiceServer) SendData(LcService_SendDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendData not implemented")
 }
@@ -820,9 +839,6 @@ func (UnimplementedLcServiceServer) ZScanExt(context.Context, *schema.ZScanReque
 }
 func (UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HistoryExt not implemented")
-}
-func (UnimplementedLcServiceServer) Feats(context.Context, *empty.Empty) (*Features, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
 }
 func (UnimplementedLcServiceServer) StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamGet not implemented")
@@ -859,42 +875,6 @@ type UnsafeLcServiceServer interface {
 
 func RegisterLcServiceServer(s grpc.ServiceRegistrar, srv LcServiceServer) {
 	s.RegisterService(&LcService_ServiceDesc, srv)
-}
-
-func _LcService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(schema.SetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).Set(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/Set",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).Set(ctx, req.(*schema.SetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_SetMulti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetMultiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).SetMulti(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/SetMulti",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).SetMulti(ctx, req.(*SetMultiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _LcService_VCNSetArtifacts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1019,6 +999,132 @@ func _LcService_VCNGetAttachment_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).VCNGetAttachment(ctx, req.(*VCNGetAttachmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_VCNGetSignature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNGetSignatureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).VCNGetSignature(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/VCNGetSignature",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).VCNGetSignature(ctx, req.(*VCNGetSignatureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_CurrentState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).CurrentState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/CurrentState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).CurrentState(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Health",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Health(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_ReportTamper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ReportTamper(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ReportTamper",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ReportTamper(ctx, req.(*ReportOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Feats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Feats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Feats(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(schema.SetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).Set(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/Set",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).Set(ctx, req.(*schema.SetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_SetMulti_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetMultiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).SetMulti(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/SetMulti",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).SetMulti(ctx, req.(*SetMultiRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1203,60 +1309,6 @@ func _LcService_ZScan_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_CurrentState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).CurrentState(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/CurrentState",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).CurrentState(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).Health(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/Health",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).Health(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_ReportTamper_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReportOptions)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).ReportTamper(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/ReportTamper",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).ReportTamper(ctx, req.(*ReportOptions))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _LcService_SendData_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(LcServiceServer).SendData(&lcServiceSendDataServer{stream})
 }
@@ -1351,24 +1403,6 @@ func _LcService_HistoryExt_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).HistoryExt(ctx, req.(*schema.HistoryRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).Feats(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/Feats",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).Feats(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1564,14 +1598,6 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*LcServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Set",
-			Handler:    _LcService_Set_Handler,
-		},
-		{
-			MethodName: "SetMulti",
-			Handler:    _LcService_SetMulti_Handler,
-		},
-		{
 			MethodName: "VCNSetArtifacts",
 			Handler:    _LcService_VCNSetArtifacts_Handler,
 		},
@@ -1598,6 +1624,34 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VCNGetAttachment",
 			Handler:    _LcService_VCNGetAttachment_Handler,
+		},
+		{
+			MethodName: "VCNGetSignature",
+			Handler:    _LcService_VCNGetSignature_Handler,
+		},
+		{
+			MethodName: "CurrentState",
+			Handler:    _LcService_CurrentState_Handler,
+		},
+		{
+			MethodName: "Health",
+			Handler:    _LcService_Health_Handler,
+		},
+		{
+			MethodName: "ReportTamper",
+			Handler:    _LcService_ReportTamper_Handler,
+		},
+		{
+			MethodName: "Feats",
+			Handler:    _LcService_Feats_Handler,
+		},
+		{
+			MethodName: "Set",
+			Handler:    _LcService_Set_Handler,
+		},
+		{
+			MethodName: "SetMulti",
+			Handler:    _LcService_SetMulti_Handler,
 		},
 		{
 			MethodName: "Get",
@@ -1640,18 +1694,6 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_ZScan_Handler,
 		},
 		{
-			MethodName: "CurrentState",
-			Handler:    _LcService_CurrentState_Handler,
-		},
-		{
-			MethodName: "Health",
-			Handler:    _LcService_Health_Handler,
-		},
-		{
-			MethodName: "ReportTamper",
-			Handler:    _LcService_ReportTamper_Handler,
-		},
-		{
 			MethodName: "VerifiableGetExt",
 			Handler:    _LcService_VerifiableGetExt_Handler,
 		},
@@ -1666,10 +1708,6 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HistoryExt",
 			Handler:    _LcService_HistoryExt_Handler,
-		},
-		{
-			MethodName: "Feats",
-			Handler:    _LcService_Feats_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -254,15 +254,17 @@ message VCNGetAttachmentResponse{
   bytes attachment = 1;
 }
 
+message VCNGetSignatureRequest{
+  string artifactHash = 1;
+  string signerID = 2;
+  uint64 atTx = 3;
+}
+
+message VCNGetSignatureResponse{
+  bytes signatureJSON = 1;
+}
+
 service LcService {
-  // immudb primitives
-  // setters and getters
-  rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){
-    option deprecated = true;
-  };
-  rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){
-    option deprecated = true;
-  };
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
   rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
@@ -270,6 +272,23 @@ service LcService {
   rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
+  rpc VCNGetSignature(VCNGetSignatureRequest) returns (VCNGetSignatureResponse){};
+  // mixed
+  rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
+  rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
+  // ledger compliance extensions
+  rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
+  rpc Feats(google.protobuf.Empty) returns (Features){};
+
+  // immudb primitives
+  // setters and getters
+  // immudb primitives are deprecated
+  rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){
+    option deprecated = true;
+  };
+  rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){
+    option deprecated = true;
+  };
   rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){
     option deprecated = true;
   };
@@ -302,12 +321,6 @@ service LcService {
   rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){
     option deprecated = true;
   };
-  // mixed
-  rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
-
-  rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
-  // ledger compliance extensions
-  rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
   rpc SendData (stream Data) returns (stream Response){
     option deprecated = true;
   };
@@ -324,8 +337,6 @@ service LcService {
   rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){
     option deprecated = true;
   };
-  rpc Feats(google.protobuf.Empty) returns (Features){};
-
   // streams
   rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {
     option deprecated = true;
