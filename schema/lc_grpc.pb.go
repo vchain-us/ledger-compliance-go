@@ -20,9 +20,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LcServiceClient interface {
+	// Deprecated: Do not use.
 	// immudb primitives
 	// setters and getters
 	Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, in *VCNArtifactsRequest, opts ...grpc.CallOption) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, in *VCNSearchRequest, opts ...grpc.CallOption) (*EntryList, error)
@@ -31,38 +33,61 @@ type LcServiceClient interface {
 	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
+	// Deprecated: Do not use.
 	Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error)
+	// Deprecated: Do not use.
 	VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
+	// Deprecated: Do not use.
 	VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error)
+	// Deprecated: Do not use.
 	// batch
 	GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	ExecAll(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	// scanners
 	Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	ZAdd(ctx context.Context, in *schema.ZAddRequest, opts ...grpc.CallOption) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	VerifiableZAdd(ctx context.Context, in *schema.VerifiableZAddRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error)
+	// Deprecated: Do not use.
 	ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error)
 	// mixed
 	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
+	// Deprecated: Do not use.
 	SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error)
+	// Deprecated: Do not use.
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error)
+	// Deprecated: Do not use.
 	VerifiableGetExtMulti(ctx context.Context, in *VerifiableGetExtMultiRequest, opts ...grpc.CallOption) (*VerifiableGetExtMultiResponse, error)
+	// Deprecated: Do not use.
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
+	// Deprecated: Do not use.
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
+	// Deprecated: Do not use.
 	// streams
 	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
+	// Deprecated: Do not use.
 	StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error)
+	// Deprecated: Do not use.
 	StreamVerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (LcService_StreamVerifiableGetClient, error)
+	// Deprecated: Do not use.
 	StreamVerifiableSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamVerifiableSetClient, error)
+	// Deprecated: Do not use.
 	StreamScan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (LcService_StreamScanClient, error)
+	// Deprecated: Do not use.
 	StreamZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (LcService_StreamZScanClient, error)
+	// Deprecated: Do not use.
 	StreamHistory(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (LcService_StreamHistoryClient, error)
+	// Deprecated: Do not use.
 	StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error)
 }
 
@@ -74,6 +99,7 @@ func NewLcServiceClient(cc grpc.ClientConnInterface) LcServiceClient {
 	return &lcServiceClient{cc}
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts ...grpc.CallOption) (*schema.TxHeader, error) {
 	out := new(schema.TxHeader)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Set", in, out, opts...)
@@ -83,6 +109,7 @@ func (c *lcServiceClient) Set(ctx context.Context, in *schema.SetRequest, opts .
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) SetMulti(ctx context.Context, in *SetMultiRequest, opts ...grpc.CallOption) (*SetMultiResponse, error) {
 	out := new(SetMultiResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/SetMulti", in, out, opts...)
@@ -155,6 +182,7 @@ func (c *lcServiceClient) VCNGetAttachment(ctx context.Context, in *VCNGetAttach
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) Get(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (*schema.Entry, error) {
 	out := new(schema.Entry)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Get", in, out, opts...)
@@ -164,6 +192,7 @@ func (c *lcServiceClient) Get(ctx context.Context, in *schema.KeyRequest, opts .
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) VerifiableSet(ctx context.Context, in *schema.VerifiableSetRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error) {
 	out := new(schema.VerifiableTx)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableSet", in, out, opts...)
@@ -173,6 +202,7 @@ func (c *lcServiceClient) VerifiableSet(ctx context.Context, in *schema.Verifiab
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) VerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*schema.VerifiableEntry, error) {
 	out := new(schema.VerifiableEntry)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGet", in, out, opts...)
@@ -182,6 +212,7 @@ func (c *lcServiceClient) VerifiableGet(ctx context.Context, in *schema.Verifiab
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) GetAll(ctx context.Context, in *schema.KeyListRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
 	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/GetAll", in, out, opts...)
@@ -191,6 +222,7 @@ func (c *lcServiceClient) GetAll(ctx context.Context, in *schema.KeyListRequest,
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) ExecAll(ctx context.Context, in *schema.ExecAllRequest, opts ...grpc.CallOption) (*schema.TxHeader, error) {
 	out := new(schema.TxHeader)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ExecAll", in, out, opts...)
@@ -200,6 +232,7 @@ func (c *lcServiceClient) ExecAll(ctx context.Context, in *schema.ExecAllRequest
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
 	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Scan", in, out, opts...)
@@ -209,6 +242,7 @@ func (c *lcServiceClient) Scan(ctx context.Context, in *schema.ScanRequest, opts
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) History(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*schema.Entries, error) {
 	out := new(schema.Entries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/History", in, out, opts...)
@@ -218,6 +252,7 @@ func (c *lcServiceClient) History(ctx context.Context, in *schema.HistoryRequest
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) ZAdd(ctx context.Context, in *schema.ZAddRequest, opts ...grpc.CallOption) (*schema.TxHeader, error) {
 	out := new(schema.TxHeader)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZAdd", in, out, opts...)
@@ -227,6 +262,7 @@ func (c *lcServiceClient) ZAdd(ctx context.Context, in *schema.ZAddRequest, opts
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) VerifiableZAdd(ctx context.Context, in *schema.VerifiableZAddRequest, opts ...grpc.CallOption) (*schema.VerifiableTx, error) {
 	out := new(schema.VerifiableTx)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableZAdd", in, out, opts...)
@@ -236,6 +272,7 @@ func (c *lcServiceClient) VerifiableZAdd(ctx context.Context, in *schema.Verifia
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) ZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*schema.ZEntries, error) {
 	out := new(schema.ZEntries)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScan", in, out, opts...)
@@ -272,6 +309,7 @@ func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, o
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) SendData(ctx context.Context, opts ...grpc.CallOption) (LcService_SendDataClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[0], "/lc.schema.LcService/SendData", opts...)
 	if err != nil {
@@ -303,6 +341,7 @@ func (x *lcServiceSendDataClient) Recv() (*Response, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) VerifiableGetExt(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (*VerifiableItemExt, error) {
 	out := new(VerifiableItemExt)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGetExt", in, out, opts...)
@@ -312,6 +351,7 @@ func (c *lcServiceClient) VerifiableGetExt(ctx context.Context, in *schema.Verif
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) VerifiableGetExtMulti(ctx context.Context, in *VerifiableGetExtMultiRequest, opts ...grpc.CallOption) (*VerifiableGetExtMultiResponse, error) {
 	out := new(VerifiableGetExtMultiResponse)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VerifiableGetExtMulti", in, out, opts...)
@@ -321,6 +361,7 @@ func (c *lcServiceClient) VerifiableGetExtMulti(ctx context.Context, in *Verifia
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error) {
 	out := new(ZItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ZScanExt", in, out, opts...)
@@ -330,6 +371,7 @@ func (c *lcServiceClient) ZScanExt(ctx context.Context, in *schema.ZScanRequest,
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error) {
 	out := new(ItemExtList)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/HistoryExt", in, out, opts...)
@@ -348,6 +390,7 @@ func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...gr
 	return out, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[1], "/lc.schema.LcService/streamGet", opts...)
 	if err != nil {
@@ -380,6 +423,7 @@ func (x *lcServiceStreamGetClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[2], "/lc.schema.LcService/streamSet", opts...)
 	if err != nil {
@@ -414,6 +458,7 @@ func (x *lcServiceStreamSetClient) CloseAndRecv() (*schema.TxHeader, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamVerifiableGet(ctx context.Context, in *schema.VerifiableGetRequest, opts ...grpc.CallOption) (LcService_StreamVerifiableGetClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[3], "/lc.schema.LcService/streamVerifiableGet", opts...)
 	if err != nil {
@@ -446,6 +491,7 @@ func (x *lcServiceStreamVerifiableGetClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamVerifiableSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamVerifiableSetClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[4], "/lc.schema.LcService/streamVerifiableSet", opts...)
 	if err != nil {
@@ -480,6 +526,7 @@ func (x *lcServiceStreamVerifiableSetClient) CloseAndRecv() (*schema.VerifiableT
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamScan(ctx context.Context, in *schema.ScanRequest, opts ...grpc.CallOption) (LcService_StreamScanClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[5], "/lc.schema.LcService/streamScan", opts...)
 	if err != nil {
@@ -512,6 +559,7 @@ func (x *lcServiceStreamScanClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamZScan(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (LcService_StreamZScanClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[6], "/lc.schema.LcService/streamZScan", opts...)
 	if err != nil {
@@ -544,6 +592,7 @@ func (x *lcServiceStreamZScanClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamHistory(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (LcService_StreamHistoryClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[7], "/lc.schema.LcService/streamHistory", opts...)
 	if err != nil {
@@ -576,6 +625,7 @@ func (x *lcServiceStreamHistoryClient) Recv() (*schema.Chunk, error) {
 	return m, nil
 }
 
+// Deprecated: Do not use.
 func (c *lcServiceClient) StreamExecAll(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamExecAllClient, error) {
 	stream, err := c.cc.NewStream(ctx, &LcService_ServiceDesc.Streams[8], "/lc.schema.LcService/streamExecAll", opts...)
 	if err != nil {
@@ -614,9 +664,11 @@ func (x *lcServiceStreamExecAllClient) CloseAndRecv() (*schema.TxHeader, error) 
 // All implementations must embed UnimplementedLcServiceServer
 // for forward compatibility
 type LcServiceServer interface {
+	// Deprecated: Do not use.
 	// immudb primitives
 	// setters and getters
 	Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	SetMulti(context.Context, *SetMultiRequest) (*SetMultiResponse, error)
 	VCNSetArtifacts(context.Context, *VCNArtifactsRequest) (*VCNArtifactsResponse, error)
 	VCNSearchArtifacts(context.Context, *VCNSearchRequest) (*EntryList, error)
@@ -625,38 +677,61 @@ type LcServiceServer interface {
 	VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
+	// Deprecated: Do not use.
 	Get(context.Context, *schema.KeyRequest) (*schema.Entry, error)
+	// Deprecated: Do not use.
 	VerifiableSet(context.Context, *schema.VerifiableSetRequest) (*schema.VerifiableTx, error)
+	// Deprecated: Do not use.
 	VerifiableGet(context.Context, *schema.VerifiableGetRequest) (*schema.VerifiableEntry, error)
+	// Deprecated: Do not use.
 	// batch
 	GetAll(context.Context, *schema.KeyListRequest) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	ExecAll(context.Context, *schema.ExecAllRequest) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	// scanners
 	Scan(context.Context, *schema.ScanRequest) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	History(context.Context, *schema.HistoryRequest) (*schema.Entries, error)
+	// Deprecated: Do not use.
 	ZAdd(context.Context, *schema.ZAddRequest) (*schema.TxHeader, error)
+	// Deprecated: Do not use.
 	VerifiableZAdd(context.Context, *schema.VerifiableZAddRequest) (*schema.VerifiableTx, error)
+	// Deprecated: Do not use.
 	ZScan(context.Context, *schema.ZScanRequest) (*schema.ZEntries, error)
 	// mixed
 	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
+	// Deprecated: Do not use.
 	SendData(LcService_SendDataServer) error
+	// Deprecated: Do not use.
 	// ledger compliance extensions - items extended with additional properties managed by LC backend (date)
 	VerifiableGetExt(context.Context, *schema.VerifiableGetRequest) (*VerifiableItemExt, error)
+	// Deprecated: Do not use.
 	VerifiableGetExtMulti(context.Context, *VerifiableGetExtMultiRequest) (*VerifiableGetExtMultiResponse, error)
+	// Deprecated: Do not use.
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
+	// Deprecated: Do not use.
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	Feats(context.Context, *empty.Empty) (*Features, error)
+	// Deprecated: Do not use.
 	// streams
 	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
+	// Deprecated: Do not use.
 	StreamSet(LcService_StreamSetServer) error
+	// Deprecated: Do not use.
 	StreamVerifiableGet(*schema.VerifiableGetRequest, LcService_StreamVerifiableGetServer) error
+	// Deprecated: Do not use.
 	StreamVerifiableSet(LcService_StreamVerifiableSetServer) error
+	// Deprecated: Do not use.
 	StreamScan(*schema.ScanRequest, LcService_StreamScanServer) error
+	// Deprecated: Do not use.
 	StreamZScan(*schema.ZScanRequest, LcService_StreamZScanServer) error
+	// Deprecated: Do not use.
 	StreamHistory(*schema.HistoryRequest, LcService_StreamHistoryServer) error
+	// Deprecated: Do not use.
 	StreamExecAll(LcService_StreamExecAllServer) error
 	mustEmbedUnimplementedLcServiceServer()
 }
