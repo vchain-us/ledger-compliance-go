@@ -26,8 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/empty"
-
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/stream"
@@ -48,39 +46,54 @@ import (
 
 // LcClientIf ...
 type LcClientIf interface {
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
-
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	Get(ctx context.Context, key []byte) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	GetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGet(ctx context.Context, key []byte) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetSince(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error)
-
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error)
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	SetAll(ctx context.Context, kvList *immuschema.SetRequest) (*immuschema.TxHeader, error)
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error)
 	VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error)
-	VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearchRequest) (*schema.ZItemExtList, error)
+	VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearchRequest) (*schema.EntryList, error)
 	VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifactsGetRequest) (*schema.EntryList, error)
-
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxHeader, error)
 
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
-
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
-
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
-	Feats(ctx context.Context, in *empty.Empty) (*schema.Features, error)
+	Feats(ctx context.Context) (*schema.Features, error)
 
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
-	CurrentState(ctx context.Context, in *empty.Empty) (*immuschema.ImmutableState, error)
+	CurrentState(ctx context.Context) (*immuschema.ImmutableState, error)
 
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error)
 
 	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
@@ -89,13 +102,21 @@ type LcClientIf interface {
 	Connect() (err error)
 
 	// streams
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
+	// Deprecated: use LcClient.VCNGetArtifacts instead
 	StreamVerifiedGet(ctx context.Context, req *immuschema.VerifiableGetRequest) (*immuschema.Entry, error)
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	StreamScan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error)
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	StreamZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error)
+	// Deprecated: use LcClient.VCNSearchArtifacts instead
 	StreamHistory(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error)
+	// Deprecated: use LcClient.VCNSetArtifacts instead
 	StreamExecAll(ctx context.Context, req *stream.ExecAllRequest) (*immuschema.TxHeader, error)
 
 	SetServerSigningPubKey(*ecdsa.PublicKey)

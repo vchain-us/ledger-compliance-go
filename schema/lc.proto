@@ -257,8 +257,12 @@ message VCNGetAttachmentResponse{
 service LcService {
   // immudb primitives
   // setters and getters
-  rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){};
-  rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){};
+  rpc Set (immudb.schema.SetRequest) returns (immudb.schema.TxHeader){
+    option deprecated = true;
+  };
+  rpc SetMulti (SetMultiRequest) returns (SetMultiResponse){
+    option deprecated = true;
+  };
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
   rpc VCNGetArtifacts (VCNArtifactsGetRequest) returns (EntryList){};
@@ -266,39 +270,85 @@ service LcService {
   rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
-  rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){};
-  rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){};
-  rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){};
+  rpc Get (immudb.schema.KeyRequest) returns (immudb.schema.Entry){
+    option deprecated = true;
+  };
+  rpc VerifiableSet (immudb.schema.VerifiableSetRequest) returns (immudb.schema.VerifiableTx){
+    option deprecated = true;
+  };
+  rpc VerifiableGet (immudb.schema.VerifiableGetRequest) returns (immudb.schema.VerifiableEntry){
+    option deprecated = true;
+  };
   // batch
-  rpc GetAll (immudb.schema.KeyListRequest) returns (immudb.schema.Entries){};
-  rpc ExecAll (immudb.schema.ExecAllRequest) returns (immudb.schema.TxHeader) {};
+  rpc GetAll (immudb.schema.KeyListRequest) returns (immudb.schema.Entries){
+    option deprecated = true;
+  };
+  rpc ExecAll (immudb.schema.ExecAllRequest) returns (immudb.schema.TxHeader) {
+    option deprecated = true;
+  };
   // scanners
-  rpc Scan(immudb.schema.ScanRequest) returns (immudb.schema.Entries){};
-  rpc History(immudb.schema.HistoryRequest) returns (immudb.schema.Entries){};
-  rpc ZAdd (immudb.schema.ZAddRequest) returns (immudb.schema.TxHeader){};
-  rpc VerifiableZAdd (immudb.schema.VerifiableZAddRequest) returns (immudb.schema.VerifiableTx){};
-  rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){};
+  rpc Scan(immudb.schema.ScanRequest) returns (immudb.schema.Entries){
+    option deprecated = true;
+  };
+  rpc History(immudb.schema.HistoryRequest) returns (immudb.schema.Entries){
+    option deprecated = true;
+  };
+  rpc ZAdd (immudb.schema.ZAddRequest) returns (immudb.schema.TxHeader){
+    option deprecated = true;
+  };
+  rpc VerifiableZAdd (immudb.schema.VerifiableZAddRequest) returns (immudb.schema.VerifiableTx){
+    option deprecated = true;
+  };
+  rpc ZScan (immudb.schema.ZScanRequest) returns (immudb.schema.ZEntries){
+    option deprecated = true;
+  };
   // mixed
   rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
 
   rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
   // ledger compliance extensions
   rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
-  rpc SendData (stream Data) returns (stream Response){};
+  rpc SendData (stream Data) returns (stream Response){
+    option deprecated = true;
+  };
   // ledger compliance extensions - items extended with additional properties managed by LC backend (date)
-  rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){};
-  rpc VerifiableGetExtMulti(VerifiableGetExtMultiRequest) returns (VerifiableGetExtMultiResponse){};
-  rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
-  rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
+  rpc VerifiableGetExt(immudb.schema.VerifiableGetRequest) returns (VerifiableItemExt){
+    option deprecated = true;
+  };
+  rpc VerifiableGetExtMulti(VerifiableGetExtMultiRequest) returns (VerifiableGetExtMultiResponse){
+    option deprecated = true;
+  };
+  rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){
+    option deprecated = true;
+  };
+  rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){
+    option deprecated = true;
+  };
   rpc Feats(google.protobuf.Empty) returns (Features){};
 
   // streams
-  rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
-  rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
-  rpc streamVerifiableGet(immudb.schema.VerifiableGetRequest) returns (stream immudb.schema.Chunk) {};
-  rpc streamVerifiableSet(stream immudb.schema.Chunk) returns (immudb.schema.VerifiableTx) {};
-  rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {};
-  rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {};
-  rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {};
-  rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
+  rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {
+    option deprecated = true;
+  };
+  rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {
+    option deprecated = true;
+  };
+  rpc streamVerifiableGet(immudb.schema.VerifiableGetRequest) returns (stream immudb.schema.Chunk) {
+    option deprecated = true;
+  };
+  rpc streamVerifiableSet(stream immudb.schema.Chunk) returns (immudb.schema.VerifiableTx) {
+    option deprecated = true;
+  };
+  rpc streamScan(immudb.schema.ScanRequest) returns (stream immudb.schema.Chunk) {
+    option deprecated = true;
+  };
+  rpc streamZScan(immudb.schema.ZScanRequest) returns (stream immudb.schema.Chunk) {
+    option deprecated = true;
+  };
+  rpc streamHistory(immudb.schema.HistoryRequest) returns (stream immudb.schema.Chunk) {
+    option deprecated = true;
+  };
+  rpc streamExecAll(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {
+    option deprecated = true;
+  };
 }

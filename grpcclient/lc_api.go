@@ -36,38 +36,40 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Set ...
+// Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.Set(ctx, &immuschema.SetRequest{KVs: []*immuschema.KeyValue{{Key: key, Value: value}}})
 }
 
-// Get ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) Get(ctx context.Context, key []byte) (*immuschema.Entry, error) {
 	return c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key})
 }
 
-// GetAt ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) GetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error) {
 	return c.ServiceClient.Get(ctx, &immuschema.KeyRequest{Key: key,
 		AtTx: tx,
 	})
 }
 
-// ExecAll ...
+// Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) ExecAll(ctx context.Context, in *immuschema.ExecAllRequest) (*immuschema.TxHeader, error) {
 	result, err := c.ServiceClient.ExecAll(ctx, in)
 	return result, err
 }
 
-// GetAll ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) GetAll(ctx context.Context, in *immuschema.KeyListRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.GetAll(ctx, in)
 }
 
+// Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) SetAll(ctx context.Context, req *immuschema.SetRequest) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.Set(ctx, req)
 }
 
+// Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) SetMulti(ctx context.Context, req *schema.SetMultiRequest) (*schema.SetMultiResponse, error) {
 	return c.ServiceClient.SetMulti(ctx, req)
 }
@@ -158,7 +160,7 @@ func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return resp, nil
 }
 
-// VerifiedSet ...
+// Deprecated: use VCNSetArtifacts instead
 func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error) {
 	err := c.StateService.CacheLock()
 	if err != nil {
@@ -270,14 +272,14 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	return verifiableTx.Tx.Header, nil
 }
 
-// VerifiedGet ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGet(ctx context.Context, key []byte) (*immuschema.Entry, error) {
 	return c.verifiedGet(ctx, &immuschema.KeyRequest{
 		Key: key,
 	})
 }
 
-// VerifiedGetAt ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error) {
 	return c.verifiedGet(ctx, &immuschema.KeyRequest{
 		Key:  key,
@@ -285,7 +287,7 @@ func (c *LcClient) VerifiedGetAt(ctx context.Context, key []byte, tx uint64) (*i
 	})
 }
 
-// VerifiedGetSince ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGetSince(ctx context.Context, key []byte, tx uint64) (*immuschema.Entry, error) {
 	return c.verifiedGet(ctx, &immuschema.KeyRequest{
 		Key:     key,
@@ -293,14 +295,14 @@ func (c *LcClient) VerifiedGetSince(ctx context.Context, key []byte, tx uint64) 
 	})
 }
 
-// VerifiedGetExt ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGetExt(ctx context.Context, key []byte) (itemExt *schema.VerifiableItemExt, err error) {
 	return c.verifiedGetExt(ctx, &immuschema.KeyRequest{
 		Key: key,
 	})
 }
 
-// VerifiedGetExtSince ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error) {
 	return c.verifiedGetExt(ctx, &immuschema.KeyRequest{
 		Key:     key,
@@ -308,7 +310,7 @@ func (c *LcClient) VerifiedGetExtSince(ctx context.Context, key []byte, tx uint6
 	})
 }
 
-// VerifiedGetExtAt ...
+// Deprecated: use VCNGetArtifacts instead
 func (c *LcClient) VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error) {
 	return c.verifiedGetExt(ctx, &immuschema.KeyRequest{
 		Key:  key,
@@ -316,12 +318,8 @@ func (c *LcClient) VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) 
 	})
 }
 
-// VerifiedGetExtAtMulti ...
-func (c *LcClient) VerifiedGetExtAtMulti(
-	ctx context.Context,
-	keys [][]byte,
-	txs []uint64,
-) (itemsExt []*schema.VerifiableItemExt, errs []string, err error) {
+// Deprecated: use VCNGetArtifacts instead
+func (c *LcClient) VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error) {
 	if len(keys) != len(txs) {
 		err = errors.New("keys and txs must have the same length")
 		return
@@ -336,32 +334,32 @@ func (c *LcClient) VerifiedGetExtAtMulti(
 	return
 }
 
-// Scan ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) Scan(ctx context.Context, req *immuschema.ScanRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.Scan(ctx, req)
 }
 
-// ZScan ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) ZScan(ctx context.Context, req *immuschema.ZScanRequest) (*immuschema.ZEntries, error) {
 	return c.ServiceClient.ZScan(ctx, req)
 }
 
-// History ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) History(ctx context.Context, req *immuschema.HistoryRequest) (*immuschema.Entries, error) {
 	return c.ServiceClient.History(ctx, req)
 }
 
-// ZAddAt ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) ZAddAt(ctx context.Context, options *immuschema.ZAddRequest) (*immuschema.TxHeader, error) {
 	return c.ServiceClient.ZAdd(ctx, options)
 }
 
-// ZScanExt ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error) {
 	return c.ServiceClient.ZScanExt(ctx, options)
 }
 
-// HistoryExt ...
+// Deprecated: use VCNSearchArtifacts instead
 func (c *LcClient) HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (*schema.ItemExtList, error) {
 	return c.ServiceClient.HistoryExt(ctx, options)
 }
