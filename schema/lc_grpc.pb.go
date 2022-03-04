@@ -27,7 +27,7 @@ type LcServiceClient interface {
 	VCNLabelsSet(ctx context.Context, in *VCNLabelsSetRequest, opts ...grpc.CallOption) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
-	VCNGetSignature(ctx context.Context, in *VCNGetSignatureRequest, opts ...grpc.CallOption) (*VCNGetSignatureResponse, error)
+	VCNGetClientSignature(ctx context.Context, in *VCNGetClientSignatureRequest, opts ...grpc.CallOption) (*VCNGetClientSignatureResponse, error)
 	// mixed
 	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
@@ -164,9 +164,9 @@ func (c *lcServiceClient) VCNGetAttachment(ctx context.Context, in *VCNGetAttach
 	return out, nil
 }
 
-func (c *lcServiceClient) VCNGetSignature(ctx context.Context, in *VCNGetSignatureRequest, opts ...grpc.CallOption) (*VCNGetSignatureResponse, error) {
-	out := new(VCNGetSignatureResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetSignature", in, out, opts...)
+func (c *lcServiceClient) VCNGetClientSignature(ctx context.Context, in *VCNGetClientSignatureRequest, opts ...grpc.CallOption) (*VCNGetClientSignatureResponse, error) {
+	out := new(VCNGetClientSignatureResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/VCNGetClientSignature", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -682,7 +682,7 @@ type LcServiceServer interface {
 	VCNLabelsSet(context.Context, *VCNLabelsSetRequest) (*VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
-	VCNGetSignature(context.Context, *VCNGetSignatureRequest) (*VCNGetSignatureResponse, error)
+	VCNGetClientSignature(context.Context, *VCNGetClientSignatureRequest) (*VCNGetClientSignatureResponse, error)
 	// mixed
 	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
@@ -774,8 +774,8 @@ func (UnimplementedLcServiceServer) VCNLabelsUpdate(context.Context, *VCNLabelsU
 func (UnimplementedLcServiceServer) VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetAttachment not implemented")
 }
-func (UnimplementedLcServiceServer) VCNGetSignature(context.Context, *VCNGetSignatureRequest) (*VCNGetSignatureResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VCNGetSignature not implemented")
+func (UnimplementedLcServiceServer) VCNGetClientSignature(context.Context, *VCNGetClientSignatureRequest) (*VCNGetClientSignatureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VCNGetClientSignature not implemented")
 }
 func (UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
@@ -1003,20 +1003,20 @@ func _LcService_VCNGetAttachment_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_VCNGetSignature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VCNGetSignatureRequest)
+func _LcService_VCNGetClientSignature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VCNGetClientSignatureRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).VCNGetSignature(ctx, in)
+		return srv.(LcServiceServer).VCNGetClientSignature(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/VCNGetSignature",
+		FullMethod: "/lc.schema.LcService/VCNGetClientSignature",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).VCNGetSignature(ctx, req.(*VCNGetSignatureRequest))
+		return srv.(LcServiceServer).VCNGetClientSignature(ctx, req.(*VCNGetClientSignatureRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1626,8 +1626,8 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNGetAttachment_Handler,
 		},
 		{
-			MethodName: "VCNGetSignature",
-			Handler:    _LcService_VCNGetSignature_Handler,
+			MethodName: "VCNGetClientSignature",
+			Handler:    _LcService_VCNGetClientSignature_Handler,
 		},
 		{
 			MethodName: "CurrentState",

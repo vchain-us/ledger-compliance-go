@@ -49,7 +49,7 @@ type LcClientIf interface {
 	VCNSetArtifacts(ctx context.Context, req *schema.VCNArtifactsRequest) (*schema.VCNArtifactsResponse, error)
 	VCNSearchArtifacts(ctx context.Context, req *schema.VCNSearchRequest) (*schema.EntryList, error)
 	VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifactsGetRequest) (*schema.EntryList, error)
-	VCNGetSignature(ctx context.Context, in *schema.VCNGetSignatureRequest, opts ...grpc.CallOption) (*schema.VCNGetSignatureResponse, error)
+	VCNGetClientSignature(ctx context.Context, in *schema.VCNGetClientSignatureRequest, opts ...grpc.CallOption) (*schema.VCNGetClientSignatureResponse, error)
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
 	CurrentState(ctx context.Context) (*immuschema.ImmutableState, error)
 	Feats(ctx context.Context) (*schema.Features, error)

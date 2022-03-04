@@ -160,8 +160,8 @@ func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	return resp, nil
 }
 
-func (c *LcClient) VCNGetSignature(ctx context.Context, in *schema.VCNGetSignatureRequest, opts ...grpc.CallOption) (*schema.VCNGetSignatureResponse, error) {
-	return c.ServiceClient.VCNGetSignature(ctx, in, opts...)
+func (c *LcClient) VCNGetClientSignature(ctx context.Context, in *schema.VCNGetClientSignatureRequest, opts ...grpc.CallOption) (*schema.VCNGetClientSignatureResponse, error) {
+	return c.ServiceClient.VCNGetClientSignature(ctx, in, opts...)
 }
 
 // Deprecated: use VCNSetArtifacts instead
