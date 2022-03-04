@@ -254,13 +254,13 @@ message VCNGetAttachmentResponse{
   bytes attachment = 1;
 }
 
-message VCNGetSignatureRequest{
+message VCNGetClientSignatureRequest{
   string artifactHash = 1;
   string signerID = 2;
   uint64 atTx = 3;
 }
 
-message VCNGetSignatureResponse{
+message VCNGetClientSignatureResponse{
   bytes signatureJSON = 1;
 }
 
@@ -272,7 +272,7 @@ service LcService {
   rpc VCNLabelsSet(VCNLabelsSetRequest) returns (VCNLabelsSetResponse){};
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
-  rpc VCNGetSignature(VCNGetSignatureRequest) returns (VCNGetSignatureResponse){};
+  rpc VCNGetClientSignature(VCNGetClientSignatureRequest) returns (VCNGetClientSignatureResponse){};
   // mixed
   rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
   rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
