@@ -136,6 +136,7 @@ message VCNArtifactsGetRequest {
   bool verify = 2;
   uint64 proveSinceTx = 3;
   string UID = 4;
+  string signerID = 5;
 }
 
 message Proof {
