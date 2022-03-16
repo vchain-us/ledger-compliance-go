@@ -84,6 +84,12 @@ type LcClientIf interface {
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
 
 	Connect() (err error)
+	IsConnected() bool
+
+	ConsistencyCheck(ctx context.Context) error
+
+	GetApiKey() string
+	SetApiKey(string)
 
 	// streams
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
@@ -102,7 +108,7 @@ type LcClient struct {
 	Dir                  string
 	Host                 string
 	Port                 int
-	ApiKey               string
+	apiKey               string
 	ApiKeyHash           string
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
@@ -115,6 +121,7 @@ type LcClient struct {
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
 	sync.RWMutex
+	akm sync.RWMutex
 }
 
 func NewLcClient(setters ...LcClientOption) *LcClient {
@@ -125,7 +132,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Dir:              "",
 		Host:             "localhost",
 		Port:             3324,
-		ApiKey:           "",
+		apiKey:           "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 		// TODO OGG: StreamChunkSize needs to be made configurable
@@ -165,8 +172,8 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 }
 
 func (c *LcClient) Connect() (err error) {
-	if c.ApiKey != "" {
-		apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
+	if c.GetApiKey() != "" {
+		apiKeyPieces := strings.Split(c.GetApiKey(), ApiKeySeparator)
 		if len(apiKeyPieces) >= 2 {
 			signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
 			hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
@@ -192,6 +199,13 @@ func (c *LcClient) Connect() (err error) {
 	return nil
 }
 
+func (c *LcClient) IsConnected() bool {
+	if c.ClientConn != nil && c.ServiceClient != nil && c.GetApiKey() != "" {
+		return true
+	}
+	return false
+}
+
 func (c *LcClient) Disconnect() (err error) {
 	c.ServiceClient = nil
 	return c.ClientConn.Close()
@@ -201,4 +215,16 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 	c.Lock()
 	defer c.Unlock()
 	c.serverSigningPubKey = k
+}
+
+func (c *LcClient) SetApiKey(apiKey string) {
+	c.akm.Lock()
+	defer c.akm.Unlock()
+	c.apiKey = apiKey
+}
+
+func (c *LcClient) GetApiKey() string {
+	c.akm.RLock()
+	defer c.akm.RUnlock()
+	return c.apiKey
 }

@@ -25,9 +25,16 @@ import (
 
 func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, interface{}, interface{}, *grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		if c.ApiKey != "" {
+		md, ok := metadata.FromOutgoingContext(ctx)
+		if ok {
+			authHeader, ok := md["lc-api-key"]
+			if ok && len(authHeader) > 0 && authHeader[0] != "" {
+				c.SetApiKey(authHeader[0])
+			}
+		}
+		if c.GetApiKey() != "" {
 			opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
-				ApiKey: c.ApiKey,
+				ApiKey: c.GetApiKey(),
 			}))
 		}
 		if len(c.MetadataPairs) > 0 {
@@ -40,9 +47,9 @@ func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, inter
 // ApiKeySetterInterceptorStream ...
 func (c *LcClient) ApiKeySetterInterceptorStream() func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, grpc.Streamer, ...grpc.CallOption) (grpc.ClientStream, error) {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-		if c.ApiKey != "" {
+		if c.GetApiKey() != "" {
 			opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
-				ApiKey: c.ApiKey,
+				ApiKey: c.GetApiKey(),
 			}))
 			if len(c.MetadataPairs) > 0 {
 				ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
