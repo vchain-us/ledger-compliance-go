@@ -9,37 +9,37 @@ package lc.schema;
 option go_package = "github.com/vchain-us/ledger-compliance/server/schema";
 
 message TamperReport {
-	uint64 index = 1;
-	bytes key = 2;
-	bytes root = 3;
+  uint64 index = 1;
+  bytes key = 2;
+  bytes root = 3;
 }
 
 message ReportOptions{
-	TamperReport payload = 1;
-	immudb.schema.Signature signature = 2;
+  TamperReport payload = 1;
+  immudb.schema.Signature signature = 2;
 }
 
 message DataValue {
-    string name = 1;
-    string type = 2;
-    bytes value = 3;
+  string name = 1;
+  string type = 2;
+  bytes value = 3;
 }
 
 message Data {
-    string key = 1;
-    int64 msgID = 2;
-    string dbName = 3;
-    string tableName = 4;
-    string operation = 5;
-    bytes data = 6;
+  string key = 1;
+  int64 msgID = 2;
+  string dbName = 3;
+  string tableName = 4;
+  string operation = 5;
+  bytes data = 6;
 }
 
 message Response {
-    int32 status = 1;
-    string msg = 2;
-    int64 msgID = 3;
-    immudb.schema.VerifiableTx VerifiableTx = 4;
-    immudb.schema.ImmutableState state = 5;
+  int32 status = 1;
+  string msg = 2;
+  int64 msgID = 3;
+  immudb.schema.VerifiableTx VerifiableTx = 4;
+  immudb.schema.ImmutableState state = 5;
 }
 
 message VerifiableItemExt {
@@ -130,6 +130,19 @@ message VCNArtifactsResponse {
 	immudb.schema.TxHeader transaction = 1;
 }
 
+message ConsistencyProofRequest {
+  uint64 tx = 1;
+  uint64 proveSinceTx = 2;
+}
+
+message ConsistencyProofResponse {
+  Proof proof = 1;
+}
+
+message Proof {
+  immudb.schema.VerifiableTx verifiableTx = 1;
+}
+
 service LcService {
 	// immudb primitives
 	// setters and getters
@@ -161,7 +174,7 @@ service LcService {
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 	rpc Feats(google.protobuf.Empty) returns (Features){};
-
+	rpc GetConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
 	// streams
 	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
 	rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};
