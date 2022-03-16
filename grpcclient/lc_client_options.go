@@ -48,7 +48,7 @@ func Port(port int) LcClientOption {
 
 func ApiKey(apiKey string) LcClientOption {
 	return func(args *LcClient) {
-		args.apiKey = apiKey
+		args.ApiKey = apiKey
 	}
 }
 

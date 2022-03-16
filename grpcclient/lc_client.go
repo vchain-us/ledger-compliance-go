@@ -26,8 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/empty"
-
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/stream"
 
@@ -70,10 +68,10 @@ type LcClientIf interface {
 
 	ZScanExt(ctx context.Context, options *immuschema.ZScanRequest) (*schema.ZItemExtList, error)
 	HistoryExt(ctx context.Context, options *immuschema.HistoryRequest) (sl *schema.ItemExtList, err error)
-	Feats(ctx context.Context, in *empty.Empty) (*schema.Features, error)
+	Feats(ctx context.Context) (*schema.Features, error)
 
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
-	CurrentState(ctx context.Context, in *empty.Empty) (*immuschema.ImmutableState, error)
+	CurrentState(ctx context.Context) (*immuschema.ImmutableState, error)
 
 	VerifiedGetExt(ctx context.Context, key []byte) (*schema.VerifiableItemExt, error)
 	VerifiedGetExtSince(ctx context.Context, key []byte, tx uint64) (*schema.VerifiableItemExt, error)
@@ -108,7 +106,7 @@ type LcClient struct {
 	Dir                  string
 	Host                 string
 	Port                 int
-	apiKey               string
+	ApiKey               string
 	ApiKeyHash           string
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
@@ -132,7 +130,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Dir:              "",
 		Host:             "localhost",
 		Port:             3324,
-		apiKey:           "",
+		ApiKey:           "",
 		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 		// TODO OGG: StreamChunkSize needs to be made configurable
@@ -220,11 +218,11 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 func (c *LcClient) SetApiKey(apiKey string) {
 	c.akm.Lock()
 	defer c.akm.Unlock()
-	c.apiKey = apiKey
+	c.ApiKey = apiKey
 }
 
 func (c *LcClient) GetApiKey() string {
 	c.akm.RLock()
 	defer c.akm.RUnlock()
-	return c.apiKey
+	return c.ApiKey
 }
