@@ -174,7 +174,7 @@ service LcService {
 	rpc ZScanExt (immudb.schema.ZScanRequest) returns (ZItemExtList){};
 	rpc HistoryExt(immudb.schema.HistoryRequest) returns (ItemExtList){};
 	rpc Feats(google.protobuf.Empty) returns (Features){};
-	rpc GetConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
+	rpc ConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
 	// streams
 	rpc streamGet(immudb.schema.KeyRequest) returns (stream immudb.schema.Chunk) {};
 	rpc streamSet(stream immudb.schema.Chunk) returns (immudb.schema.TxHeader) {};

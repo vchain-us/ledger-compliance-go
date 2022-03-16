@@ -53,7 +53,7 @@ type LcServiceClient interface {
 	ZScanExt(ctx context.Context, in *schema.ZScanRequest, opts ...grpc.CallOption) (*ZItemExtList, error)
 	HistoryExt(ctx context.Context, in *schema.HistoryRequest, opts ...grpc.CallOption) (*ItemExtList, error)
 	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
-	GetConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error)
+	ConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error)
 	// streams
 	StreamGet(ctx context.Context, in *schema.KeyRequest, opts ...grpc.CallOption) (LcService_StreamGetClient, error)
 	StreamSet(ctx context.Context, opts ...grpc.CallOption) (LcService_StreamSetClient, error)
@@ -293,9 +293,9 @@ func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...gr
 	return out, nil
 }
 
-func (c *lcServiceClient) GetConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error) {
+func (c *lcServiceClient) ConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error) {
 	out := new(ConsistencyProofResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/GetConsistencyProof", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ConsistencyProof", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -597,7 +597,7 @@ type LcServiceServer interface {
 	ZScanExt(context.Context, *schema.ZScanRequest) (*ZItemExtList, error)
 	HistoryExt(context.Context, *schema.HistoryRequest) (*ItemExtList, error)
 	Feats(context.Context, *empty.Empty) (*Features, error)
-	GetConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error)
+	ConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error)
 	// streams
 	StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error
 	StreamSet(LcService_StreamSetServer) error
@@ -680,8 +680,8 @@ func (UnimplementedLcServiceServer) HistoryExt(context.Context, *schema.HistoryR
 func (UnimplementedLcServiceServer) Feats(context.Context, *empty.Empty) (*Features, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
 }
-func (UnimplementedLcServiceServer) GetConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConsistencyProof not implemented")
+func (UnimplementedLcServiceServer) ConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsistencyProof not implemented")
 }
 func (UnimplementedLcServiceServer) StreamGet(*schema.KeyRequest, LcService_StreamGetServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamGet not implemented")
@@ -1124,20 +1124,20 @@ func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_GetConsistencyProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LcService_ConsistencyProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ConsistencyProofRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LcServiceServer).GetConsistencyProof(ctx, in)
+		return srv.(LcServiceServer).ConsistencyProof(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lc.schema.LcService/GetConsistencyProof",
+		FullMethod: "/lc.schema.LcService/ConsistencyProof",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).GetConsistencyProof(ctx, req.(*ConsistencyProofRequest))
+		return srv.(LcServiceServer).ConsistencyProof(ctx, req.(*ConsistencyProofRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1417,8 +1417,8 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_Feats_Handler,
 		},
 		{
-			MethodName: "GetConsistencyProof",
-			Handler:    _LcService_GetConsistencyProof_Handler,
+			MethodName: "ConsistencyProof",
+			Handler:    _LcService_ConsistencyProof_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
