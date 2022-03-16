@@ -77,7 +77,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	start := time.Now()
 	defer c.Logger.Debugf("StreamVerifiedSet finished in %s", time.Since(start))
 
-	state, err := c.StateService.GetState(ctx, c.ApiKey)
+	state, err := c.StateService.GetState(ctx, c.GetApiKey())
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	}
 
 	newState := &schema.ImmutableState{
-		Db:        c.ApiKey,
+		Db:        c.GetApiKey(),
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: verifiableTx.Signature,
@@ -207,7 +207,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		}
 	}
 
-	err = c.StateService.SetState(c.ApiKey, newState)
+	err = c.StateService.SetState(c.GetApiKey(), newState)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *schema.Verifiable
 	}
 	defer c.StateService.CacheUnlock()
 
-	state, err := c.StateService.GetState(ctx, c.ApiKey)
+	state, err := c.StateService.GetState(ctx, c.GetApiKey())
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +304,7 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *schema.Verifiable
 	}
 
 	newState := &schema.ImmutableState{
-		Db:        c.ApiKey,
+		Db:        c.GetApiKey(),
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: vEntry.VerifiableTx.Signature,
@@ -320,7 +320,7 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *schema.Verifiable
 		}
 	}
 
-	err = c.StateService.SetState(c.ApiKey, newState)
+	err = c.StateService.SetState(c.GetApiKey(), newState)
 	if err != nil {
 		return nil, err
 	}

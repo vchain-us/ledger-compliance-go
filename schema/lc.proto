@@ -265,6 +265,15 @@ message VCNGetClientSignatureResponse{
   bytes signatureJSON = 1;
 }
 
+message ConsistencyProofRequest {
+  uint64 tx = 1;
+  uint64 proveSinceTx = 2;
+}
+
+message ConsistencyProofResponse {
+  Proof proof = 1;
+}
+
 service LcService {
   rpc VCNSetArtifacts (VCNArtifactsRequest) returns (VCNArtifactsResponse){};
   rpc VCNSearchArtifacts(VCNSearchRequest) returns (EntryList){};
@@ -274,6 +283,8 @@ service LcService {
   rpc VCNLabelsUpdate(VCNLabelsUpdateRequest) returns (VCNLabelsUpdateResponse){};
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc VCNGetClientSignature(VCNGetClientSignatureRequest) returns (VCNGetClientSignatureResponse){};
+
+  rpc GetConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
   // mixed
   rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
   rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
