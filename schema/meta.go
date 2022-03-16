@@ -5,4 +5,5 @@ const (
 	FeatAllowDownload           = "allowdownload"
 	FeatDeepContainerInspection = "dci"
 	FeatUseVCNSearchArtifact    = "useSearchArtifact"
+	FeatImmuProof               = "immuproof"
 )
