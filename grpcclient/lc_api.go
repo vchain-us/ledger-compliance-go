@@ -551,7 +551,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 	defer c.StateService.CacheUnlock()
 
 	start := time.Now()
-	defer c.Logger.Debugf("VerifiedSet finished in %s", time.Since(start))
+	defer c.Logger.Debugf("ConsistencyCheck finished in %s", time.Since(start))
 
 	untrustedState, err := c.ServiceClient.CurrentState(ctx, &empty.Empty{})
 	if err != nil {
