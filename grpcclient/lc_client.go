@@ -86,7 +86,7 @@ type LcClientIf interface {
 	Connect() (err error)
 	IsConnected() bool
 
-	ConsistencyCheck(ctx context.Context) error
+	ConsistencyCheck(ctx context.Context) (*ConsistencyCheckResponse, error)
 
 	// streams
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
