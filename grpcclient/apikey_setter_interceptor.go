@@ -25,21 +25,7 @@ import (
 
 func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, interface{}, interface{}, *grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		md, ok := metadata.FromOutgoingContext(ctx)
-		if ok {
-			authHeader, ok := md["lc-api-key"]
-			if ok && len(authHeader) > 0 && authHeader[0] != "" {
-				c.SetApiKey(authHeader[0])
-			}
-		}
-		if c.GetApiKey() != "" {
-			opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
-				ApiKey: c.GetApiKey(),
-			}))
-		}
-		if len(c.MetadataPairs) > 0 {
-			ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
-		}
+		ctx, opts = c.prepareGRPcReq(ctx, opts...)
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }
@@ -47,14 +33,7 @@ func (c *LcClient) ApiKeySetterInterceptor() func(context.Context, string, inter
 // ApiKeySetterInterceptorStream ...
 func (c *LcClient) ApiKeySetterInterceptorStream() func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, grpc.Streamer, ...grpc.CallOption) (grpc.ClientStream, error) {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-		if c.GetApiKey() != "" {
-			opts = append(opts, grpc.PerRPCCredentials(ApiKeyAuth{
-				ApiKey: c.GetApiKey(),
-			}))
-			if len(c.MetadataPairs) > 0 {
-				ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
-			}
-		}
+		ctx, opts = c.prepareGRPcReq(ctx, opts...)
 		return streamer(ctx, desc, cc, method, opts...)
 	}
 }
@@ -71,4 +50,29 @@ func (t ApiKeyAuth) GetRequestMetadata(ctx context.Context, in ...string) (map[s
 
 func (ApiKeyAuth) RequireTransportSecurity() bool {
 	return false
+}
+
+func (c *LcClient) prepareGRPcReq(ctx context.Context, opts ...grpc.CallOption) (context.Context, []grpc.CallOption) {
+	var akOpt grpc.CallOption = nil
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok {
+		authHeader, ok := md["lc-api-key"]
+		if ok && len(authHeader) > 0 && authHeader[0] != "" {
+			akOpt = grpc.PerRPCCredentials(ApiKeyAuth{
+				ApiKey: authHeader[0],
+			})
+		}
+	}
+	if akOpt == nil && c.ApiKey != "" {
+		akOpt = grpc.PerRPCCredentials(ApiKeyAuth{
+			ApiKey: c.ApiKey,
+		})
+	}
+	if len(c.MetadataPairs) > 0 {
+		ctx = metadata.AppendToOutgoingContext(ctx, c.MetadataPairs...)
+	}
+	if akOpt != nil {
+		opts = append(opts, akOpt)
+	}
+	return ctx, opts
 }
