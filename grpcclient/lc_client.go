@@ -104,6 +104,15 @@ type LcClientIf interface {
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
 	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error)
+
+	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
+	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
+
+	Connect() (err error)
+	IsConnected() bool
+
+	ConsistencyCheck(ctx context.Context) (*ConsistencyCheckResponse, error)
+
 	// streams
 	// Deprecated: use LcClient.VCNSetArtifacts instead
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)

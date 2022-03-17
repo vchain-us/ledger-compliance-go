@@ -710,3 +710,99 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 
 	return newState, nil
 }
+
+type ConsistencyCheckResponse struct {
+	PrevStateHash string
+	NewStateHash  string
+}
+
+func (c *LcClient) ConsistencyCheck(ctx context.Context) (*ConsistencyCheckResponse, error) {
+	err := c.StateService.CacheLock()
+	if err != nil {
+		return nil, err
+	}
+	defer c.StateService.CacheUnlock()
+
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	start := time.Now()
+	defer c.Logger.Debugf("ConsistencyCheck finished in %s", time.Since(start))
+
+	untrustedState, err := c.ServiceClient.CurrentState(ctx, &empty.Empty{})
+	if err != nil {
+		return nil, err
+	}
+
+	state, err := c.StateService.GetState(ctx, ak)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &schema.ConsistencyProofRequest{
+		Tx:           untrustedState.TxId,
+		ProveSinceTx: state.TxId,
+	}
+
+	resp, err := c.ServiceClient.ConsistencyProof(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	vTx := resp.Proof.VerifiableTx
+	dualProof := immuschema.DualProofFromProto(vTx.DualProof)
+
+	var sourceID, targetID uint64
+	var sourceAlh, targetAlh [sha256.Size]byte
+
+	if state.TxId <= vTx.Tx.Header.Id {
+		sourceID = state.TxId
+		sourceAlh = immuschema.DigestFromProto(state.TxHash)
+		targetID = vTx.Tx.Header.Id
+		targetAlh = dualProof.TargetTxHeader.Alh()
+	} else {
+		sourceID = vTx.Tx.Header.Id
+		sourceAlh = dualProof.SourceTxHeader.Alh()
+		targetID = state.TxId
+		targetAlh = immuschema.DigestFromProto(state.TxHash)
+	}
+
+	if state.TxId > 0 {
+		verifies := store.VerifyDualProof(
+			dualProof,
+			sourceID,
+			targetID,
+			sourceAlh,
+			targetAlh,
+		)
+		if !verifies {
+			return nil, store.ErrCorruptedData
+		}
+	}
+
+	newState := &immuschema.ImmutableState{
+		Db:        ak,
+		TxId:      targetID,
+		TxHash:    targetAlh[:],
+		Signature: vTx.Signature,
+	}
+
+	if c.serverSigningPubKey != nil {
+		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, store.ErrCorruptedData
+		}
+	}
+	err = c.StateService.SetState(ak, newState)
+	if err != nil {
+		return nil, err
+	}
+	return &ConsistencyCheckResponse{
+		PrevStateHash: hex.EncodeToString(state.TxHash),
+		NewStateHash:  hex.EncodeToString(newState.TxHash),
+	}, nil
+}
