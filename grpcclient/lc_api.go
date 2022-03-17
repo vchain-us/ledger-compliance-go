@@ -82,11 +82,15 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		return nil, err
 	}
 	defer c.StateService.CacheUnlock()
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	start := time.Now()
 	defer c.Logger.Debugf("VerifiedSet finished in %s", time.Since(start))
 
-	state, err := c.StateService.GetState(ctx, c.GetApiKey())
+	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +167,7 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	}
 
 	newState := &immuschema.ImmutableState{
-		Db:        c.GetApiKey(),
+		Db:        ak,
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: verifiableTx.Signature,
@@ -179,7 +183,7 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		}
 	}
 
-	err = c.StateService.SetState(c.GetApiKey(), newState)
+	err = c.StateService.SetState(ak, newState)
 	if err != nil {
 		return nil, err
 	}
@@ -322,8 +326,12 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 		return nil, err
 	}
 	defer c.StateService.CacheUnlock()
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	state, err := c.StateService.GetState(ctx, c.GetApiKey())
+	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
 		return nil, err
 	}
@@ -338,11 +346,11 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 		return nil, err
 	}
 
-	newState, err := verifyGet(state, vEntryExt.Item, kReq, c.ApiKeyHash)
+	newState, err := verifyGet(state, vEntryExt.Item, kReq, ak)
 	if err != nil {
 		return nil, err
 	}
-	err = c.StateService.SetState(c.GetApiKey(), newState)
+	err = c.StateService.SetState(ak, newState)
 	if err != nil {
 		return nil, err
 	}
@@ -371,7 +379,12 @@ func (c *LcClient) verifiedGetExtMulti(
 	}
 	defer c.StateService.CacheUnlock()
 
-	state, err := c.StateService.GetState(ctx, c.GetApiKey())
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -403,11 +416,11 @@ func (c *LcClient) verifiedGetExtMulti(
 		if errs[i] != "" {
 			continue
 		}
-		newState, err := verifyGet(state, itemExt.GetItem(), reqs[i], c.ApiKeyHash)
+		newState, err := verifyGet(state, itemExt.GetItem(), reqs[i], ak)
 		if err != nil {
 			return nil, nil, err
 		}
-		err = c.StateService.SetState(c.GetApiKey(), newState)
+		err = c.StateService.SetState(ak, newState)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -432,7 +445,12 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 	}
 	defer c.StateService.CacheUnlock()
 
-	state, err := c.StateService.GetState(ctx, c.GetApiKey())
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
 		return nil, err
 	}
@@ -447,12 +465,12 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 		return nil, err
 	}
 
-	newState, err := verifyGet(state, vEntry, kReq, c.ApiKeyHash)
+	newState, err := verifyGet(state, vEntry, kReq, ak)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.StateService.SetState(c.GetApiKey(), newState)
+	err = c.StateService.SetState(ak, newState)
 	if err != nil {
 		return nil, err
 	}
@@ -550,6 +568,11 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 	}
 	defer c.StateService.CacheUnlock()
 
+	ak, err := c.GetCurrentApiKey(ctx)
+	if err != nil {
+		return err
+	}
+
 	start := time.Now()
 	defer c.Logger.Debugf("ConsistencyCheck finished in %s", time.Since(start))
 
@@ -558,7 +581,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 		return err
 	}
 
-	state, err := c.StateService.GetState(ctx, c.GetApiKey())
+	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
 		return err
 	}
@@ -568,7 +591,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 		ProveSinceTx: state.TxId,
 	}
 
-	resp, err := c.ServiceClient.GetConsistencyProof(ctx, req)
+	resp, err := c.ServiceClient.ConsistencyProof(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -604,7 +627,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 	}
 
 	newState := &immuschema.ImmutableState{
-		Db:        c.GetApiKey(),
+		Db:        ak,
 		TxId:      targetID,
 		TxHash:    targetAlh[:],
 		Signature: vTx.Signature,
@@ -619,7 +642,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 			return store.ErrCorruptedData
 		}
 	}
-	err = c.StateService.SetState(c.GetApiKey(), newState)
+	err = c.StateService.SetState(ak, newState)
 	if err != nil {
 		return err
 	}

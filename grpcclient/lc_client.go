@@ -20,7 +20,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"google.golang.org/grpc/metadata"
 	"os"
 	"strings"
 	"sync"
@@ -86,9 +88,6 @@ type LcClientIf interface {
 
 	ConsistencyCheck(ctx context.Context) error
 
-	GetApiKey() string
-	SetApiKey(string)
-
 	// streams
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
 	StreamGet(ctx context.Context, k *immuschema.KeyRequest) (*immuschema.Entry, error)
@@ -107,7 +106,6 @@ type LcClient struct {
 	Host                 string
 	Port                 int
 	ApiKey               string
-	ApiKeyHash           string
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
 	Logger               logger.Logger
@@ -119,7 +117,6 @@ type LcClient struct {
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
 	sync.RWMutex
-	akm sync.RWMutex
 }
 
 func NewLcClient(setters ...LcClientOption) *LcClient {
@@ -170,13 +167,8 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 }
 
 func (c *LcClient) Connect() (err error) {
-	if c.GetApiKey() != "" {
-		apiKeyPieces := strings.Split(c.GetApiKey(), ApiKeySeparator)
-		if len(apiKeyPieces) >= 2 {
-			signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
-			hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
-			c.ApiKeyHash = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
-		}
+	if c.ApiKey == "" {
+		return errors.New("no api key set")
 	}
 
 	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
@@ -198,7 +190,7 @@ func (c *LcClient) Connect() (err error) {
 }
 
 func (c *LcClient) IsConnected() bool {
-	if c.ClientConn != nil && c.ServiceClient != nil && c.GetApiKey() != "" {
+	if c.ClientConn != nil && c.ServiceClient != nil && c.ApiKey != "" {
 		return true
 	}
 	return false
@@ -215,14 +207,27 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 	c.serverSigningPubKey = k
 }
 
-func (c *LcClient) SetApiKey(apiKey string) {
-	c.akm.Lock()
-	defer c.akm.Unlock()
-	c.ApiKey = apiKey
-}
-
-func (c *LcClient) GetApiKey() string {
-	c.akm.RLock()
-	defer c.akm.RUnlock()
-	return c.ApiKey
+func (c *LcClient) GetCurrentApiKey(ctx context.Context) (string, error) {
+	var ak string
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok && len(md["lc-api-key"]) > 0 {
+		authHeader, ok := md["lc-api-key"]
+		if ok && len(authHeader) > 0 && authHeader[0] != "" {
+			ak = authHeader[0]
+		}
+	}
+	// if no api key in context get it from the client
+	if ak == "" {
+		ak = c.ApiKey
+	}
+	apiKeyPieces := strings.Split(ak, ApiKeySeparator)
+	if len(apiKeyPieces) >= 2 {
+		signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
+		hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
+		ak = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
+	}
+	if ak != "" {
+		return ak, nil
+	}
+	return "", ErrNoApiKeyFound
 }
