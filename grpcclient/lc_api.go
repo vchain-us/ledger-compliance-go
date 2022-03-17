@@ -19,6 +19,7 @@ package grpcclient
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -561,16 +562,21 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 	return newState, nil
 }
 
-func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
+type ConsistencyCheckResponse struct {
+	PrevStateHash string
+	NewStateHash  string
+}
+
+func (c *LcClient) ConsistencyCheck(ctx context.Context) (*ConsistencyCheckResponse, error) {
 	err := c.StateService.CacheLock()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer c.StateService.CacheUnlock()
 
 	ak, err := c.GetCurrentApiKey(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	start := time.Now()
@@ -578,12 +584,12 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 
 	untrustedState, err := c.ServiceClient.CurrentState(ctx, &empty.Empty{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	state, err := c.StateService.GetState(ctx, ak)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req := &schema.ConsistencyProofRequest{
@@ -593,7 +599,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 
 	resp, err := c.ServiceClient.ConsistencyProof(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	vTx := resp.Proof.VerifiableTx
 	dualProof := immuschema.DualProofFromProto(vTx.DualProof)
@@ -622,7 +628,7 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 			targetAlh,
 		)
 		if !verifies {
-			return store.ErrCorruptedData
+			return nil, store.ErrCorruptedData
 		}
 	}
 
@@ -636,15 +642,18 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) error {
 	if c.serverSigningPubKey != nil {
 		ok, err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !ok {
-			return store.ErrCorruptedData
+			return nil, store.ErrCorruptedData
 		}
 	}
 	err = c.StateService.SetState(ak, newState)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &ConsistencyCheckResponse{
+		PrevStateHash: hex.EncodeToString(state.TxHash),
+		NewStateHash:  hex.EncodeToString(newState.TxHash),
+	}, nil
 }
