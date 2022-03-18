@@ -712,7 +712,9 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 }
 
 type ConsistencyCheckResponse struct {
+	PrevTxID      uint64
 	PrevStateHash string
+	NewTxID       uint64
 	NewStateHash  string
 }
 
@@ -802,7 +804,9 @@ func (c *LcClient) ConsistencyCheck(ctx context.Context) (*ConsistencyCheckRespo
 		return nil, err
 	}
 	return &ConsistencyCheckResponse{
+		PrevTxID:      state.TxId,
 		PrevStateHash: hex.EncodeToString(state.TxHash),
+		NewTxID:       newState.TxId,
 		NewStateHash:  hex.EncodeToString(newState.TxHash),
 	}, nil
 }
