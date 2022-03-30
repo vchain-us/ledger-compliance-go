@@ -28,13 +28,13 @@ type LcServiceClient interface {
 	VCNLabelsUpdate(ctx context.Context, in *VCNLabelsUpdateRequest, opts ...grpc.CallOption) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(ctx context.Context, in *VCNGetAttachmentRequest, opts ...grpc.CallOption) (*VCNGetAttachmentResponse, error)
 	VCNGetClientSignature(ctx context.Context, in *VCNGetClientSignatureRequest, opts ...grpc.CallOption) (*VCNGetClientSignatureResponse, error)
-	GetConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error)
 	// mixed
 	CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error)
 	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(ctx context.Context, in *ReportOptions, opts ...grpc.CallOption) (*empty.Empty, error)
 	Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error)
+	ConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error)
 	// Deprecated: Do not use.
 	// immudb primitives
 	// setters and getters
@@ -174,15 +174,6 @@ func (c *lcServiceClient) VCNGetClientSignature(ctx context.Context, in *VCNGetC
 	return out, nil
 }
 
-func (c *lcServiceClient) GetConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error) {
-	out := new(ConsistencyProofResponse)
-	err := c.cc.Invoke(ctx, "/lc.schema.LcService/GetConsistencyProof", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *lcServiceClient) CurrentState(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*schema.ImmutableState, error) {
 	out := new(schema.ImmutableState)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/CurrentState", in, out, opts...)
@@ -213,6 +204,15 @@ func (c *lcServiceClient) ReportTamper(ctx context.Context, in *ReportOptions, o
 func (c *lcServiceClient) Feats(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Features, error) {
 	out := new(Features)
 	err := c.cc.Invoke(ctx, "/lc.schema.LcService/Feats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *lcServiceClient) ConsistencyProof(ctx context.Context, in *ConsistencyProofRequest, opts ...grpc.CallOption) (*ConsistencyProofResponse, error) {
+	out := new(ConsistencyProofResponse)
+	err := c.cc.Invoke(ctx, "/lc.schema.LcService/ConsistencyProof", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -693,13 +693,13 @@ type LcServiceServer interface {
 	VCNLabelsUpdate(context.Context, *VCNLabelsUpdateRequest) (*VCNLabelsUpdateResponse, error)
 	VCNGetAttachment(context.Context, *VCNGetAttachmentRequest) (*VCNGetAttachmentResponse, error)
 	VCNGetClientSignature(context.Context, *VCNGetClientSignatureRequest) (*VCNGetClientSignatureResponse, error)
-	GetConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error)
 	// mixed
 	CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error)
 	Health(context.Context, *empty.Empty) (*schema.HealthResponse, error)
 	// ledger compliance extensions
 	ReportTamper(context.Context, *ReportOptions) (*empty.Empty, error)
 	Feats(context.Context, *empty.Empty) (*Features, error)
+	ConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error)
 	// Deprecated: Do not use.
 	// immudb primitives
 	// setters and getters
@@ -788,9 +788,6 @@ func (UnimplementedLcServiceServer) VCNGetAttachment(context.Context, *VCNGetAtt
 func (UnimplementedLcServiceServer) VCNGetClientSignature(context.Context, *VCNGetClientSignatureRequest) (*VCNGetClientSignatureResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VCNGetClientSignature not implemented")
 }
-func (UnimplementedLcServiceServer) GetConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConsistencyProof not implemented")
-}
 func (UnimplementedLcServiceServer) CurrentState(context.Context, *empty.Empty) (*schema.ImmutableState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentState not implemented")
 }
@@ -802,6 +799,9 @@ func (UnimplementedLcServiceServer) ReportTamper(context.Context, *ReportOptions
 }
 func (UnimplementedLcServiceServer) Feats(context.Context, *empty.Empty) (*Features, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Feats not implemented")
+}
+func (UnimplementedLcServiceServer) ConsistencyProof(context.Context, *ConsistencyProofRequest) (*ConsistencyProofResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsistencyProof not implemented")
 }
 func (UnimplementedLcServiceServer) Set(context.Context, *schema.SetRequest) (*schema.TxHeader, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
@@ -1035,24 +1035,6 @@ func _LcService_VCNGetClientSignature_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LcService_GetConsistencyProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConsistencyProofRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LcServiceServer).GetConsistencyProof(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/lc.schema.LcService/GetConsistencyProof",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LcServiceServer).GetConsistencyProof(ctx, req.(*ConsistencyProofRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _LcService_CurrentState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
@@ -1121,6 +1103,24 @@ func _LcService_Feats_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LcServiceServer).Feats(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LcService_ConsistencyProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConsistencyProofRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LcServiceServer).ConsistencyProof(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lc.schema.LcService/ConsistencyProof",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LcServiceServer).ConsistencyProof(ctx, req.(*ConsistencyProofRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1662,10 +1662,6 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LcService_VCNGetClientSignature_Handler,
 		},
 		{
-			MethodName: "GetConsistencyProof",
-			Handler:    _LcService_GetConsistencyProof_Handler,
-		},
-		{
 			MethodName: "CurrentState",
 			Handler:    _LcService_CurrentState_Handler,
 		},
@@ -1680,6 +1676,10 @@ var LcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Feats",
 			Handler:    _LcService_Feats_Handler,
+		},
+		{
+			MethodName: "ConsistencyProof",
+			Handler:    _LcService_ConsistencyProof_Handler,
 		},
 		{
 			MethodName: "Set",

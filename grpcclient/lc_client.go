@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"google.golang.org/grpc/metadata"
 	"os"
 	"strings"
 	"sync"
@@ -53,13 +54,8 @@ type LcClientIf interface {
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
 	CurrentState(ctx context.Context) (*immuschema.ImmutableState, error)
 	Feats(ctx context.Context) (*schema.Features, error)
-	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
-	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
-	Connect() (err error)
-	IsConnected() bool
 
 	SetServerSigningPubKey(*ecdsa.PublicKey)
-	ConsistencyCheck(ctx context.Context) error
 
 	GetApiKey() string
 	SetApiKey(string)
@@ -255,4 +251,29 @@ func (c *LcClient) GetApiKey() string {
 	c.akm.RLock()
 	defer c.akm.RUnlock()
 	return c.ApiKey
+}
+
+func (c *LcClient) GetCurrentApiKey(ctx context.Context) (string, error) {
+	var ak string
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok && len(md["lc-api-key"]) > 0 {
+		authHeader, ok := md["lc-api-key"]
+		if ok && len(authHeader) > 0 && authHeader[0] != "" {
+			ak = authHeader[0]
+		}
+	}
+	// if no api key in context get it from the client
+	if ak == "" {
+		ak = c.ApiKey
+	}
+	apiKeyPieces := strings.Split(ak, ApiKeySeparator)
+	if len(apiKeyPieces) >= 2 {
+		signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
+		hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
+		ak = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
+	}
+	if ak != "" {
+		return ak, nil
+	}
+	return "", ErrNoApiKeyFound
 }

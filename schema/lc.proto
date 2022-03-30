@@ -284,13 +284,13 @@ service LcService {
   rpc VCNGetAttachment(VCNGetAttachmentRequest) returns (VCNGetAttachmentResponse){};
   rpc VCNGetClientSignature(VCNGetClientSignatureRequest) returns (VCNGetClientSignatureResponse){};
 
-  rpc GetConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
   // mixed
   rpc CurrentState (google.protobuf.Empty) returns (immudb.schema.ImmutableState){};
   rpc Health (google.protobuf.Empty) returns (immudb.schema.HealthResponse){};
   // ledger compliance extensions
   rpc ReportTamper(ReportOptions) returns (google.protobuf.Empty){};
   rpc Feats(google.protobuf.Empty) returns (Features){};
+  rpc ConsistencyProof(ConsistencyProofRequest) returns (ConsistencyProofResponse){};
 
   // immudb primitives
   // setters and getters
