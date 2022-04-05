@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-func (r *VCNArtifactsGetRequest) GetKey(prefix ...string) string {
+func (r *VCNArtifactsGetRequest) GetKey(prefix ...string) (string, error) {
 	pieces := make([]string, len(r.Hashes))
 	copy(pieces, r.Hashes)
 	pieces = append(pieces, prefix...)
 	sort.Strings(pieces)
 	pieces = append(pieces, fmt.Sprintf("%d", r.GetProveSinceTx()))
 	fullKey := strings.Join(pieces, "")
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey)))
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
 
-func (r *VCNSearchRequest) GetKey(prefix ...string) string {
+func (r *VCNSearchRequest) GetKey(prefix ...string) (string, error) {
 	pieces := make([]string, 0)
 	pieces = append(pieces, prefix...)
 	pieces = append(pieces, r.Hash)
@@ -33,5 +33,16 @@ func (r *VCNSearchRequest) GetKey(prefix ...string) string {
 	pieces = append(pieces, r.UID)
 	sort.Strings(pieces)
 	fullKey := strings.Join(pieces, "")
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey)))
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
+}
+
+func (r *VCNLabelsGetRequest) GetKey(prefix ...string) (string, error) {
+	pieces := make([]string, len(r.Request))
+	for _, v := range r.Request {
+		pieces = append(pieces, v.Hash)
+	}
+	pieces = append(pieces, prefix...)
+	sort.Strings(pieces)
+	fullKey := strings.Join(pieces, "")
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
