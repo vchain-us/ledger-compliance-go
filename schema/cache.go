@@ -3,7 +3,6 @@ package schema
 import (
 	"crypto/sha256"
 	"fmt"
-	"sort"
 	"strings"
 )
 
@@ -11,9 +10,8 @@ func (r *VCNArtifactsGetRequest) GetKey(prefix ...string) (string, error) {
 	pieces := make([]string, len(r.Hashes))
 	copy(pieces, r.Hashes)
 	pieces = append(pieces, prefix...)
-	sort.Strings(pieces)
 	pieces = append(pieces, fmt.Sprintf("%d", r.GetProveSinceTx()))
-	fullKey := strings.Join(pieces, "")
+	fullKey := strings.Join(pieces, "\n")
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
 
@@ -31,8 +29,7 @@ func (r *VCNSearchRequest) GetKey(prefix ...string) (string, error) {
 	pieces = append(pieces, r.AttachName)
 	pieces = append(pieces, r.ArtifactName)
 	pieces = append(pieces, r.UID)
-	sort.Strings(pieces)
-	fullKey := strings.Join(pieces, "")
+	fullKey := strings.Join(pieces, "\n")
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
 
@@ -42,7 +39,6 @@ func (r *VCNLabelsGetRequest) GetKey(prefix ...string) (string, error) {
 		pieces = append(pieces, v.Hash)
 	}
 	pieces = append(pieces, prefix...)
-	sort.Strings(pieces)
-	fullKey := strings.Join(pieces, "")
+	fullKey := strings.Join(pieces, "\n")
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
