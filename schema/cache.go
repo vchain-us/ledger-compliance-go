@@ -34,11 +34,11 @@ func (r *VCNSearchRequest) GetKey(prefix ...string) (string, error) {
 }
 
 func (r *VCNLabelsGetRequest) GetKey(prefix ...string) (string, error) {
-	pieces := make([]string, len(r.Request))
+	pieces := make([]string, 0)
+	pieces = append(pieces, prefix...)
 	for _, v := range r.Request {
 		pieces = append(pieces, v.Hash)
 	}
-	pieces = append(pieces, prefix...)
 	fullKey := strings.Join(pieces, "\n")
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(fullKey))), nil
 }
