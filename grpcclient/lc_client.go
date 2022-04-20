@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"google.golang.org/grpc/metadata"
 	"os"
 	"strings"
 	"sync"
@@ -53,10 +54,11 @@ type LcClientIf interface {
 	Health(ctx context.Context) (*immuschema.HealthResponse, error)
 	CurrentState(ctx context.Context) (*immuschema.ImmutableState, error)
 	Feats(ctx context.Context) (*schema.Features, error)
-	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
-	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
-	Connect() (err error)
+
 	SetServerSigningPubKey(*ecdsa.PublicKey)
+
+	GetApiKey() string
+	SetApiKey(string)
 
 	// Deprecated: use LcClient.VCNGetArtifacts instead
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
@@ -98,6 +100,15 @@ type LcClientIf interface {
 	VerifiedGetExtAt(ctx context.Context, key []byte, tx uint64) (itemExt *schema.VerifiableItemExt, err error)
 	// Deprecated: use LcClient.VCNGetArtifacts instead
 	VerifiedGetExtAtMulti(ctx context.Context, keys [][]byte, txs []uint64) (itemsExt []*schema.VerifiableItemExt, errs []string, err error)
+
+	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
+	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
+
+	Connect() (err error)
+	IsConnected() bool
+
+	ConsistencyCheck(ctx context.Context) (*ConsistencyCheckResponse, error)
+
 	// streams
 	// Deprecated: use LcClient.VCNSetArtifacts instead
 	StreamSet(ctx context.Context, kvs []*stream.KeyValue) (*immuschema.TxHeader, error)
@@ -134,6 +145,7 @@ type LcClient struct {
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
 	sync.RWMutex
+	akm sync.RWMutex
 }
 
 func NewLcClient(setters ...LcClientOption) *LcClient {
@@ -184,8 +196,8 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 }
 
 func (c *LcClient) Connect() (err error) {
-	if c.ApiKey != "" {
-		apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
+	if c.GetApiKey() != "" {
+		apiKeyPieces := strings.Split(c.GetApiKey(), ApiKeySeparator)
 		if len(apiKeyPieces) >= 2 {
 			signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
 			hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
@@ -211,6 +223,13 @@ func (c *LcClient) Connect() (err error) {
 	return nil
 }
 
+func (c *LcClient) IsConnected() bool {
+	if c.ClientConn != nil && c.ServiceClient != nil && c.GetApiKey() != "" {
+		return true
+	}
+	return false
+}
+
 func (c *LcClient) Disconnect() (err error) {
 	c.ServiceClient = nil
 	return c.ClientConn.Close()
@@ -220,4 +239,41 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 	c.Lock()
 	defer c.Unlock()
 	c.serverSigningPubKey = k
+}
+
+func (c *LcClient) SetApiKey(apiKey string) {
+	c.akm.Lock()
+	defer c.akm.Unlock()
+	c.ApiKey = apiKey
+}
+
+func (c *LcClient) GetApiKey() string {
+	c.akm.RLock()
+	defer c.akm.RUnlock()
+	return c.ApiKey
+}
+
+func (c *LcClient) GetCurrentApiKey(ctx context.Context) (string, error) {
+	var ak string
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok && len(md["lc-api-key"]) > 0 {
+		authHeader, ok := md["lc-api-key"]
+		if ok && len(authHeader) > 0 && authHeader[0] != "" {
+			ak = authHeader[0]
+		}
+	}
+	// if no api key in context get it from the client
+	if ak == "" {
+		ak = c.ApiKey
+	}
+	apiKeyPieces := strings.Split(ak, ApiKeySeparator)
+	if len(apiKeyPieces) >= 2 {
+		signerID := strings.Join(apiKeyPieces[:len(apiKeyPieces)-1], ApiKeySeparator)
+		hashed := sha256.Sum256([]byte(apiKeyPieces[len(apiKeyPieces)-1]))
+		ak = signerID + ApiKeySeparator + base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(hashed[:])
+	}
+	if ak != "" {
+		return ak, nil
+	}
+	return "", ErrNoApiKeyFound
 }
