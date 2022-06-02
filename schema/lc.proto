@@ -177,6 +177,7 @@ message VCNSearchRequest {
   string attachName = 10;
   string artifactName = 11;
   string UID = 12;
+  bytes continuationToken = 13;
 }
 
 message Entry {
@@ -193,6 +194,7 @@ message Entry {
 
 message EntryList {
   repeated Entry entries = 1;
+  bytes continuationToken = 2;
 }
 
 message VCNLabelsUpdateRequest {
