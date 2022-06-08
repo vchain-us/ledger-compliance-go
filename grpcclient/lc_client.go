@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"google.golang.org/grpc/codes"
 	"os"
 	"strings"
 	"sync"
@@ -33,15 +34,15 @@ import (
 	"context"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc/keepalive"
 
+	immuschema "github.com/codenotary/immudb/pkg/api/schema"
+	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/timestamp"
 	"github.com/codenotary/immudb/pkg/logger"
 	"google.golang.org/grpc"
-
-	immuschema "github.com/codenotary/immudb/pkg/api/schema"
-	immuclient "github.com/codenotary/immudb/pkg/client"
 )
 
 // LcClientIf ...
@@ -166,14 +167,20 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		setter(cli)
 	}
 
+	retryOpts := []grpc_retry.CallOption{
+		grpc_retry.WithMax(3),
+		grpc_retry.WithBackoff(grpc_retry.BackoffExponential(500 * time.Millisecond)),
+		grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
+	}
+
 	var uic []grpc.UnaryClientInterceptor
 	if cli.serverSigningPubKey != nil {
 		uic = append(uic, cli.SignatureVerifierInterceptor)
 	}
-	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor())
+	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor(), grpc_retry.UnaryClientInterceptor(retryOpts...))
 
 	var sic []grpc.StreamClientInterceptor
-	sic = append(sic, cli.ApiKeySetterInterceptorStream())
+	sic = append(sic, cli.ApiKeySetterInterceptorStream(), grpc_retry.StreamClientInterceptor(retryOpts...))
 
 	cli.DialOptions = append(
 		cli.DialOptions,
