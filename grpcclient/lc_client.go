@@ -169,7 +169,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 
 	retryOpts := []grpc_retry.CallOption{
 		grpc_retry.WithMax(3),
-		grpc_retry.WithBackoff(grpc_retry.BackoffExponential(500 * time.Millisecond)),
+		grpc_retry.WithBackoff(grpc_retry.BackoffExponential(1500 * time.Millisecond)),
 		grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
 	}
 
