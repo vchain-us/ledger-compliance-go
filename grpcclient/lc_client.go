@@ -134,6 +134,7 @@ type LcClient struct {
 	StreamChunkSize      int
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
+	RetryOptions         []grpc_retry.CallOption
 	sync.RWMutex
 }
 
@@ -151,6 +152,11 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		// TODO OGG: StreamChunkSize needs to be made configurable
 		StreamChunkSize:      immuclient.DefaultOptions().StreamChunkSize,
 		StreamServiceFactory: stream.NewStreamServiceFactory(immuclient.DefaultOptions().StreamChunkSize),
+		RetryOptions: []grpc_retry.CallOption{
+			grpc_retry.WithMax(3),
+			grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
+			grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
+		},
 	}
 
 	cli.DialOptions = []grpc.DialOption{
@@ -167,20 +173,14 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		setter(cli)
 	}
 
-	retryOpts := []grpc_retry.CallOption{
-		grpc_retry.WithMax(3),
-		grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
-		grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
-	}
-
 	var uic []grpc.UnaryClientInterceptor
 	if cli.serverSigningPubKey != nil {
 		uic = append(uic, cli.SignatureVerifierInterceptor)
 	}
-	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor(), grpc_retry.UnaryClientInterceptor(retryOpts...))
+	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor(), grpc_retry.UnaryClientInterceptor(cli.RetryOptions...))
 
 	var sic []grpc.StreamClientInterceptor
-	sic = append(sic, cli.ApiKeySetterInterceptorStream(), grpc_retry.StreamClientInterceptor(retryOpts...))
+	sic = append(sic, cli.ApiKeySetterInterceptorStream(), grpc_retry.StreamClientInterceptor(cli.RetryOptions...))
 
 	cli.DialOptions = append(
 		cli.DialOptions,
