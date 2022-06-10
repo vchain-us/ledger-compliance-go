@@ -18,10 +18,10 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
-
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/logger"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
 )
@@ -61,6 +61,12 @@ func MetadataPairs(metadataPairs []string) LcClientOption {
 func DialOptions(dopts []grpc.DialOption) LcClientOption {
 	return func(args *LcClient) {
 		args.DialOptions = dopts
+	}
+}
+
+func RetryOptions(opts ...grpc_retry.CallOption) LcClientOption {
+	return func(args *LcClient) {
+		args.RetryOptions = opts
 	}
 }
 

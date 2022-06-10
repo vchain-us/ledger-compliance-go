@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"google.golang.org/grpc/codes"
 	"os"
 	"strings"
 	"sync"
@@ -33,15 +34,15 @@ import (
 	"context"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc/keepalive"
 
+	immuschema "github.com/codenotary/immudb/pkg/api/schema"
+	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/timestamp"
 	"github.com/codenotary/immudb/pkg/logger"
 	"google.golang.org/grpc"
-
-	immuschema "github.com/codenotary/immudb/pkg/api/schema"
-	immuclient "github.com/codenotary/immudb/pkg/client"
 )
 
 // LcClientIf ...
@@ -133,6 +134,7 @@ type LcClient struct {
 	StreamChunkSize      int
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
+	RetryOptions         []grpc_retry.CallOption
 	sync.RWMutex
 }
 
@@ -150,6 +152,11 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		// TODO OGG: StreamChunkSize needs to be made configurable
 		StreamChunkSize:      immuclient.DefaultOptions().StreamChunkSize,
 		StreamServiceFactory: stream.NewStreamServiceFactory(immuclient.DefaultOptions().StreamChunkSize),
+		RetryOptions: []grpc_retry.CallOption{
+			grpc_retry.WithMax(3),
+			grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
+			grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
+		},
 	}
 
 	cli.DialOptions = []grpc.DialOption{
@@ -170,10 +177,10 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	if cli.serverSigningPubKey != nil {
 		uic = append(uic, cli.SignatureVerifierInterceptor)
 	}
-	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor())
+	uic = append(uic, cli.ConnectionCheckerInterceptor(), cli.ApiKeySetterInterceptor(), grpc_retry.UnaryClientInterceptor(cli.RetryOptions...))
 
 	var sic []grpc.StreamClientInterceptor
-	sic = append(sic, cli.ApiKeySetterInterceptorStream())
+	sic = append(sic, cli.ApiKeySetterInterceptorStream(), grpc_retry.StreamClientInterceptor(cli.RetryOptions...))
 
 	cli.DialOptions = append(
 		cli.DialOptions,
