@@ -627,3 +627,26 @@ func verifyGet(state *immuschema.ImmutableState, vEntry *immuschema.VerifiableEn
 
 	return newState, nil
 }
+
+func (c *LcClient) VCNLabelsSet(ctx context.Context, req []*schema.LabelsSetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsSetResponse, error) {
+	return c.ServiceClient.VCNLabelsSet(ctx, &schema.VCNLabelsSetRequest{Request: req}, opts...)
+}
+
+func (c *LcClient) VCNLabelsUpdate(ctx context.Context, hash string, ops []*schema.VCNLabelsUpdateRequest_VCNLabelsOp, opts ...grpc.CallOption) (*schema.VCNLabelsUpdateResponse, error) {
+	return c.ServiceClient.VCNLabelsUpdate(ctx, &schema.VCNLabelsUpdateRequest{
+		Hash: hash,
+		Ops:  ops},
+		opts...)
+}
+
+func (c *LcClient) VCNLabelsGet(ctx context.Context, req []*schema.LabelsGetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsGetResponse, error) {
+	return c.ServiceClient.VCNLabelsGet(ctx, &schema.VCNLabelsGetRequest{Request: req}, opts...)
+}
+
+func (c *LcClient) VCNGetAttachment(ctx context.Context, signerID, artifactHash, attachHash string) (*schema.VCNGetAttachmentResponse, error) {
+	return c.ServiceClient.VCNGetAttachment(ctx, &schema.VCNGetAttachmentRequest{
+		SignerID:       signerID,
+		ArtifactHash:   artifactHash,
+		AttachmentHash: attachHash,
+	})
+}

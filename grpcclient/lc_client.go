@@ -21,11 +21,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"google.golang.org/grpc/codes"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc/codes"
 
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -57,7 +58,14 @@ type LcClientIf interface {
 	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
 	Connect() (err error)
+	Disconnect() (err error)
 	SetServerSigningPubKey(*ecdsa.PublicKey)
+	GetApiKey() string
+	GetLogger() logger.Logger
+	VCNLabelsSet(ctx context.Context, req []*schema.LabelsSetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsSetResponse, error)
+	VCNLabelsUpdate(ctx context.Context, hash string, ops []*schema.VCNLabelsUpdateRequest_VCNLabelsOp, opts ...grpc.CallOption) (*schema.VCNLabelsUpdateResponse, error)
+	VCNLabelsGet(ctx context.Context, req []*schema.LabelsGetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsGetResponse, error)
+	VCNGetAttachment(ctx context.Context, signerID, artifactHash, attachHash string) (*schema.VCNGetAttachmentResponse, error)
 
 	// Deprecated: use LcClient.VCNGetArtifacts instead
 	Set(ctx context.Context, key []byte, value []byte) (*immuschema.TxHeader, error)
@@ -227,4 +235,12 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 	c.Lock()
 	defer c.Unlock()
 	c.serverSigningPubKey = k
+}
+
+func (c *LcClient) GetApiKey() string {
+	return c.ApiKey
+}
+
+func (c *LcClient) GetLogger() logger.Logger {
+	return c.Logger
 }
