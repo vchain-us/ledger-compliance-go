@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/codes"	
 
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -161,7 +161,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		StreamChunkSize:      immuclient.DefaultOptions().StreamChunkSize,
 		StreamServiceFactory: stream.NewStreamServiceFactory(immuclient.DefaultOptions().StreamChunkSize),
 		RetryOptions: []grpc_retry.CallOption{
-			grpc_retry.WithMax(3),
+			grpc_retry.WithMax(0),
 			grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
 			grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
 		},
