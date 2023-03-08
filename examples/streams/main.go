@@ -34,7 +34,7 @@ func main() {
 		sdk.ApiKey("APIKey1.JPOzsgjjXOQxNqTbTpvtoFXfmoHPzNuzqRvX"),
 		sdk.Host("localhost"),
 		sdk.Port(3324))
-	err := client.Connect()
+	err := client.Connect(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}

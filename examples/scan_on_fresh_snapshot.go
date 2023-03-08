@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 /*
@@ -21,14 +22,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
-	"log"
 )
 
 func main() {
 	client := sdk.NewLcClient(sdk.ApiKey("vipicevtthnqiveufonnkhnoshkoyrbvpeyj"), sdk.Host("localhost"), sdk.Port(3324))
-	err := client.Connect()
+	err := client.Connect(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}

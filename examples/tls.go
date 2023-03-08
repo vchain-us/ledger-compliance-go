@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 /*
@@ -23,13 +24,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"time"
+
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
-	"io/ioutil"
-	"log"
-	"time"
 )
 
 func main() {
@@ -51,7 +53,7 @@ func main() {
 
 	client := sdk.NewLcClient(sdk.ApiKey("jxnqdxcicasvajpfxldqdanquhabiqcjrwdb"), sdk.Host("localhost"), sdk.Port(3324), sdk.DialOptions(dialOptions))
 
-	if err := client.Connect(); err != nil {
+	if err := client.Connect(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 

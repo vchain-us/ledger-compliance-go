@@ -17,6 +17,7 @@ limitations under the License.
 package grpcclient
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
@@ -26,13 +27,11 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc/codes"	
+	"google.golang.org/grpc/codes"
 
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
 	"github.com/codenotary/immudb/pkg/stream"
-
-	"context"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
@@ -57,7 +56,7 @@ type LcClientIf interface {
 	Feats(ctx context.Context) (*schema.Features, error)
 	SetFile(ctx context.Context, key []byte, filePath string) (*immuschema.TxHeader, error)
 	GetFile(ctx context.Context, key []byte, filePath string) (*immuschema.Entry, error)
-	Connect() (err error)
+	Connect(ctx context.Context) (err error)
 	Disconnect() (err error)
 	SetServerSigningPubKey(*ecdsa.PublicKey)
 	GetApiKey() string
@@ -198,7 +197,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 	return cli
 }
 
-func (c *LcClient) Connect() (err error) {
+func (c *LcClient) Connect(ctx context.Context) (err error) {
 	if c.ApiKey != "" {
 		apiKeyPieces := strings.Split(c.ApiKey, ApiKeySeparator)
 		if len(apiKeyPieces) >= 2 {
@@ -208,7 +207,7 @@ func (c *LcClient) Connect() (err error) {
 		}
 	}
 
-	c.ClientConn, err = grpc.Dial(fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
+	c.ClientConn, err = grpc.DialContext(ctx, fmt.Sprintf("%s:%d", c.Host, c.Port), c.DialOptions...)
 	if err != nil {
 		return err
 	}
