@@ -46,6 +46,10 @@ func (r *lcStateService) CacheUnlock() error {
 	return r.ss.CacheUnlock()
 }
 
+func (r *lcStateService) SetServerIdentity(identity string) {
+	r.ss.SetServerIdentity(identity)
+}
+
 func obfuscateApiKey(apiKey string) string {
 	sha := sha256.Sum256([]byte(apiKey))
 	return base64.StdEncoding.EncodeToString(sha[:])
