@@ -194,12 +194,9 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 
@@ -307,12 +304,9 @@ func (c *LcClient) StreamVerifiedGet(ctx context.Context, req *schema.Verifiable
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 
