@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2019-2023 vChain, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/codenotary/immudb/embedded/store"
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
@@ -171,9 +170,6 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 		return nil, err
 	}
 	defer c.StateService.CacheUnlock()
-
-	start := time.Now()
-	defer c.Logger.Debugf("VerifiedSet finished in %s", time.Since(start))
 
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {

@@ -1,7 +1,8 @@
+//go:build ignore
 // +build ignore
 
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2019-2023 vChain, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,9 +22,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
-	"log"
 )
 
 func main() {

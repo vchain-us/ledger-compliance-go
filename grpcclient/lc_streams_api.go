@@ -7,7 +7,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
-	"time"
 
 	"github.com/codenotary/immudb/embedded/store"
 	"github.com/codenotary/immudb/pkg/api/schema"
@@ -73,9 +72,6 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 		return nil, err
 	}
 	defer c.StateService.CacheUnlock()
-
-	start := time.Now()
-	defer c.Logger.Debugf("StreamVerifiedSet finished in %s", time.Since(start))
 
 	state, err := c.StateService.GetState(ctx, c.ApiKey)
 	if err != nil {

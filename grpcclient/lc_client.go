@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2019-2023 vChain, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,12 +21,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
-	"google.golang.org/grpc/codes"	
+	"google.golang.org/grpc/codes"
 
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -42,7 +41,6 @@ import (
 	immuschema "github.com/codenotary/immudb/pkg/api/schema"
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/timestamp"
-	"github.com/codenotary/immudb/pkg/logger"
 	"google.golang.org/grpc"
 )
 
@@ -61,7 +59,6 @@ type LcClientIf interface {
 	Disconnect() (err error)
 	SetServerSigningPubKey(*ecdsa.PublicKey)
 	GetApiKey() string
-	GetLogger() logger.Logger
 	VCNLabelsSet(ctx context.Context, req []*schema.LabelsSetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, hash string, ops []*schema.VCNLabelsUpdateRequest_VCNLabelsOp, opts ...grpc.CallOption) (*schema.VCNLabelsUpdateResponse, error)
 	VCNLabelsGet(ctx context.Context, req []*schema.LabelsGetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsGetResponse, error)
@@ -134,7 +131,6 @@ type LcClient struct {
 	ApiKeyHash           string
 	MetadataPairs        []string
 	DialOptions          []grpc.DialOption
-	Logger               logger.Logger
 	ClientConn           *grpc.ClientConn
 	ServiceClient        schema.LcServiceClient
 	StateService         state.StateService
@@ -143,6 +139,7 @@ type LcClient struct {
 	StreamServiceFactory stream.ServiceFactory
 	serverSigningPubKey  *ecdsa.PublicKey
 	RetryOptions         []grpc_retry.CallOption
+	logger               LcLogger
 	sync.RWMutex
 }
 
@@ -155,7 +152,6 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 		Host:             "localhost",
 		Port:             3324,
 		ApiKey:           "",
-		Logger:           logger.NewSimpleLogger("immuclient", os.Stderr),
 		TimestampService: immuclient.NewTimestampService(dt),
 		// TODO OGG: StreamChunkSize needs to be made configurable
 		StreamChunkSize:      immuclient.DefaultOptions().StreamChunkSize,
@@ -165,6 +161,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 			grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
 			grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
 		},
+		logger: defaultLogger{},
 	}
 
 	cli.DialOptions = []grpc.DialOption{
@@ -218,7 +215,7 @@ func (c *LcClient) Connect() (err error) {
 	uuidPrv := NewLcUUIDProvider(c.ServiceClient)
 	stateProvider := NewLcStateProvider(c.ServiceClient)
 
-	c.StateService, err = NewLcStateService(cache.NewFileCache(c.Dir), c.Logger, stateProvider, uuidPrv)
+	c.StateService, err = NewLcStateService(cache.NewFileCache(c.Dir), c.logger, stateProvider, uuidPrv)
 	if err != nil {
 		return err
 	}
@@ -239,8 +236,4 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 
 func (c *LcClient) GetApiKey() string {
 	return c.ApiKey
-}
-
-func (c *LcClient) GetLogger() logger.Logger {
-	return c.Logger
 }
