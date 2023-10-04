@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc/codes"	
+	"google.golang.org/grpc/codes"
 
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
@@ -61,7 +61,6 @@ type LcClientIf interface {
 	Disconnect() (err error)
 	SetServerSigningPubKey(*ecdsa.PublicKey)
 	GetApiKey() string
-	GetLogger() logger.Logger
 	VCNLabelsSet(ctx context.Context, req []*schema.LabelsSetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsSetResponse, error)
 	VCNLabelsUpdate(ctx context.Context, hash string, ops []*schema.VCNLabelsUpdateRequest_VCNLabelsOp, opts ...grpc.CallOption) (*schema.VCNLabelsUpdateResponse, error)
 	VCNLabelsGet(ctx context.Context, req []*schema.LabelsGetRequest, opts ...grpc.CallOption) (*schema.VCNLabelsGetResponse, error)
@@ -239,8 +238,4 @@ func (c *LcClient) SetServerSigningPubKey(k *ecdsa.PublicKey) {
 
 func (c *LcClient) GetApiKey() string {
 	return c.ApiKey
-}
-
-func (c *LcClient) GetLogger() logger.Logger {
-	return c.Logger
 }
