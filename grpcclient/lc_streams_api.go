@@ -51,7 +51,7 @@ func (c *LcClient) StreamGet(ctx context.Context, k *schema.KeyRequest) (*schema
 	value, err := stream.ReadValue(vr, c.StreamChunkSize)
 	if err != nil {
 		if err == io.EOF {
-			return nil, errors.New(stream.ErrMissingExpectedData)
+			return nil, errors.New("expected data on stream is missing")
 		}
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (c *LcClient) StreamVerifiedSet(ctx context.Context, kvs []*stream.KeyValue
 	ss := c.StreamServiceFactory.NewMsgSender(s)
 	kvss := c.StreamServiceFactory.NewKvStreamSender(ss)
 
-	err = ss.Send(bytes.NewBuffer(stateTxID), len(stateTxID))
+	err = ss.Send(bytes.NewBuffer(stateTxID), len(stateTxID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (c *LcClient) StreamScan(ctx context.Context, req *schema.ScanRequest) (*sc
 		value, err := stream.ReadValue(vr, c.StreamChunkSize)
 		if err != nil {
 			if err == io.EOF {
-				return nil, errors.New(stream.ErrMissingExpectedData)
+				return nil, errors.New("expected data on stream is missing")
 			}
 			return nil, err
 		}
@@ -406,7 +406,7 @@ func (c *LcClient) StreamHistory(ctx context.Context, req *schema.HistoryRequest
 		value, err := stream.ReadValue(vr, c.StreamChunkSize)
 		if err != nil {
 			if err == io.EOF {
-				return nil, errors.New(stream.ErrMissingExpectedData)
+				return nil, errors.New("expected data on stream is missing")
 			}
 			return nil, err
 		}
