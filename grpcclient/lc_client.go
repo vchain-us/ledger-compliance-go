@@ -161,7 +161,7 @@ func NewLcClient(setters ...LcClientOption) *LcClient {
 			grpc_retry.WithBackoff(grpc_retry.BackoffExponentialWithJitter(1500*time.Millisecond, 0.1)),
 			grpc_retry.WithCodes(codes.Aborted, codes.Unavailable, codes.Unknown),
 		},
-		logger: simpleLogger{},
+		logger: defaultLogger{},
 	}
 
 	cli.DialOptions = []grpc.DialOption{

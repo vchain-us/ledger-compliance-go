@@ -27,18 +27,13 @@ type LcLogger interface {
 	Close() error
 }
 
-type simpleLogger struct{}
+// defaultLogger prints only error messages using standard golang logger
+type defaultLogger struct{}
 
-func (simpleLogger) Errorf(f string, args ...interface{}) {
+func (defaultLogger) Errorf(f string, args ...interface{}) {
 	log.Printf("ERROR: "+f, args)
 }
-func (simpleLogger) Warningf(f string, args ...interface{}) {
-	log.Printf("WARN: "+f, args)
-}
-func (simpleLogger) Infof(f string, args ...interface{}) {
-	log.Printf("INFO: "+f, args)
-}
-func (simpleLogger) Debugf(f string, args ...interface{}) {
-	log.Printf("DEBUG: "+f, args)
-}
-func (simpleLogger) Close() error { return nil }
+func (defaultLogger) Warningf(f string, args ...interface{}) {}
+func (defaultLogger) Infof(f string, args ...interface{})    {}
+func (defaultLogger) Debugf(f string, args ...interface{})   {}
+func (defaultLogger) Close() error                           { return nil }
