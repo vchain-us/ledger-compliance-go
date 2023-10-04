@@ -1,7 +1,8 @@
+//go:build ignore
 // +build ignore
 
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2019-2023 vChain, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,13 +24,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"time"
+
 	sdk "github.com/vchain-us/ledger-compliance-go/grpcclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
-	"io/ioutil"
-	"log"
-	"time"
 )
 
 func main() {

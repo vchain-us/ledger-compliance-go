@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2020 vChain, Inc.
+Copyright 2019-2023 vChain, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package grpcclient
 
 import (
 	"crypto/ecdsa"
+
 	immuclient "github.com/codenotary/immudb/pkg/client"
 	"github.com/codenotary/immudb/pkg/client/state"
-	"github.com/codenotary/immudb/pkg/logger"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/vchain-us/ledger-compliance-go/schema"
 	"google.golang.org/grpc"
@@ -70,12 +70,6 @@ func RetryOptions(opts ...grpc_retry.CallOption) LcClientOption {
 	}
 }
 
-func Logger(logger logger.Logger) LcClientOption {
-	return func(args *LcClient) {
-		args.Logger = logger
-	}
-}
-
 func ClientConn(clientConn *grpc.ClientConn) LcClientOption {
 	return func(args *LcClient) {
 		args.ClientConn = clientConn
@@ -103,5 +97,11 @@ func TimestampService(timestampService immuclient.TimestampService) LcClientOpti
 func ServerSigningPubKey(serverSigningPubKey *ecdsa.PublicKey) LcClientOption {
 	return func(args *LcClient) {
 		args.serverSigningPubKey = serverSigningPubKey
+	}
+}
+
+func Logger(logger LcLogger) LcClientOption {
+	return func(args *LcClient) {
+		args.logger = logger
 	}
 }

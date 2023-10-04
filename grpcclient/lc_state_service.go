@@ -8,7 +8,6 @@ import (
 	"github.com/codenotary/immudb/pkg/api/schema"
 	"github.com/codenotary/immudb/pkg/client/cache"
 	"github.com/codenotary/immudb/pkg/client/state"
-	"github.com/codenotary/immudb/pkg/logger"
 )
 
 type lcStateService struct {
@@ -17,7 +16,7 @@ type lcStateService struct {
 
 // NewLcStateService ...
 func NewLcStateService(cache cache.Cache,
-	logger logger.Logger,
+	logger LcLogger,
 	stateProvider state.StateProvider,
 	uuidProvider state.UUIDProvider) (state.StateService, error) {
 
