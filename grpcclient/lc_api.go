@@ -148,12 +148,9 @@ func (c *LcClient) VCNGetArtifacts(ctx context.Context, req *schema.VCNArtifacts
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 	return resp, nil
@@ -255,12 +252,9 @@ func (c *LcClient) VerifiedSet(ctx context.Context, key []byte, value []byte) (*
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 
@@ -429,12 +423,9 @@ func (c *LcClient) verifiedGetExt(ctx context.Context, kReq *immuschema.KeyReque
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 
@@ -493,12 +484,9 @@ func (c *LcClient) verifiedGetExtMulti(
 			return nil, nil, err
 		}
 		if c.serverSigningPubKey != nil {
-			ok, err := newState.CheckSignature(c.serverSigningPubKey)
+			err := newState.CheckSignature(c.serverSigningPubKey)
 			if err != nil {
 				return nil, nil, err
-			}
-			if !ok {
-				return nil, nil, store.ErrCorruptedData
 			}
 		}
 	}
@@ -539,12 +527,9 @@ func (c *LcClient) verifiedGet(ctx context.Context, kReq *immuschema.KeyRequest)
 	}
 
 	if c.serverSigningPubKey != nil {
-		ok, err := newState.CheckSignature(c.serverSigningPubKey)
+		err := newState.CheckSignature(c.serverSigningPubKey)
 		if err != nil {
 			return nil, err
-		}
-		if !ok {
-			return nil, store.ErrCorruptedData
 		}
 	}
 
